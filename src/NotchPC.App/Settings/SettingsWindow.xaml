@@ -167,7 +167,24 @@
                             <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Settings.Position.Hint}" />
                         </StackPanel>
                     </ui:CardControl.Header>
-                    <ui:Button Content="{loc:Tr Settings.Position.Center}" IsEnabled="{Binding NotchMoved}" Click="OnCenterNotch" />
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton GroupName="NotchPosition" Content="{loc:Tr Settings.Position.Left}" IsChecked="{Binding PositionLeft}" Margin="0,0,16,0" />
+                        <RadioButton GroupName="NotchPosition" Content="{loc:Tr Settings.Position.Center}" IsChecked="{Binding PositionCenter}" Margin="0,0,16,0" />
+                        <RadioButton GroupName="NotchPosition" Content="{loc:Tr Settings.Position.Right}" IsChecked="{Binding PositionRight}" />
+                    </StackPanel>
+                </ui:CardControl>
+                <ui:CardControl Margin="0,0,0,4">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Position.Exact}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Settings.Position.Exact.Hint}" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding OffsetText}" VerticalAlignment="Center" MinWidth="70" TextAlignment="Right" Margin="0,0,10,0" />
+                        <Slider Width="240" Minimum="{Binding OffsetMin}" Maximum="{Binding OffsetMax}" SmallChange="10" LargeChange="50"
+                                IsSnapToTickEnabled="True" TickFrequency="10" Value="{Binding Offset}" VerticalAlignment="Center" />
+                    </StackPanel>
                 </ui:CardControl>
                 <ui:CardControl Margin="0,0,0,4">
                     <ui:CardControl.Header>
@@ -789,6 +806,16 @@
                         </StackPanel>
                     </ui:CardControl.Header>
                     <ui:Button Content="{loc:Tr Settings.OpenFolder}" Click="OnOpenFolder" />
+                </ui:CardControl>
+                <ui:CardControl Margin="0,4,0,0">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Uninstall}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{Binding UninstallHint}" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:Button Content="{loc:Tr Settings.Uninstall.Button}" Appearance="Danger" Click="OnUninstall"
+                               Visibility="{Binding CanUninstall, Converter={StaticResource BoolToVis}}" />
                 </ui:CardControl>
                 </StackPanel>
                 </Grid>

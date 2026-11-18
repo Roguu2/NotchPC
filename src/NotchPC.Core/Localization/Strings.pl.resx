@@ -422,8 +422,8 @@
   <data name="Settings.Group.Position" xml:space="preserve"><value>Położenie</value></data>
   <data name="Settings.Group.Behaviour" xml:space="preserve"><value>Zachowanie</value></data>
   <data name="Settings.Position" xml:space="preserve"><value>Położenie na ekranie</value></data>
-  <data name="Settings.Position.Hint" xml:space="preserve"><value>Przeciągnij notch w lewo albo w prawo za pasek zakładek (gdy jest otwarty) albo za pigułkę (gdy jest zamknięty) – także na inny monitor.</value></data>
-  <data name="Settings.Position.Center" xml:space="preserve"><value>Wyśrodkuj</value></data>
+  <data name="Settings.Position.Hint" xml:space="preserve"><value>Wybierz stronę albo otwórz notch i przeciągnij uchwyt w jego lewym górnym rogu.</value></data>
+  <data name="Settings.Position.Center" xml:space="preserve"><value>Środek</value></data>
   <data name="Settings.TopOffset" xml:space="preserve"><value>Odstęp od górnej krawędzi</value></data>
   <data name="Settings.TopOffset.Hint" xml:space="preserve"><value>0 = przy samej krawędzi ekranu.</value></data>
   <data name="Updates.Current" xml:space="preserve"><value>NotchPC {0}</value></data>
@@ -446,4 +446,15 @@
   <data name="Updates.Ready.Body" xml:space="preserve"><value>Kliknij, aby uruchomić ponownie i zaktualizować teraz, albo zainstaluje się przy zamknięciu NotchPC.</value></data>
   <data name="Updates.Available.Title" xml:space="preserve"><value>Jest NotchPC {0}</value></data>
   <data name="Updates.Available.Body" xml:space="preserve"><value>Kliknij, aby otworzyć stronę pobierania.</value></data>
+  <data name="Notch.MoveGrip" xml:space="preserve"><value>Przeciągnij, aby przesunąć notch (także na inny monitor)</value></data>
+  <data name="Settings.Position.Left" xml:space="preserve"><value>Lewo</value></data>
+  <data name="Settings.Position.Right" xml:space="preserve"><value>Prawo</value></data>
+  <data name="Settings.Position.Exact" xml:space="preserve"><value>Dokładne położenie</value></data>
+  <data name="Settings.Position.Exact.Hint" xml:space="preserve"><value>Odległość od środka ekranu.</value></data>
+  <data name="Settings.Position.LeftBy" xml:space="preserve"><value>{0} px w lewo</value></data>
+  <data name="Settings.Position.RightBy" xml:space="preserve"><value>{0} px w prawo</value></data>
+  <data name="Settings.Uninstall" xml:space="preserve"><value>Odinstaluj NotchPC</value></data>
+  <data name="Settings.Uninstall.Button" xml:space="preserve"><value>Odinstaluj…</value></data>
+  <data name="Settings.Uninstall.Hint" xml:space="preserve"><value>Usuwa NotchPC z tego komputera. Najpierw zapyta o potwierdzenie i o to, czy zachować Twoje ustawienia.</value></data>
+  <data name="Settings.Uninstall.Portable" xml:space="preserve"><value>Ta kopia nie jest zainstalowana instalatorem: żeby ją usunąć, zamknij NotchPC i skasuj jej folder.</value></data>
 </root>

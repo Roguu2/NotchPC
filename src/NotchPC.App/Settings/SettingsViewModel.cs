@@ -176,8 +176,71 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>The notch was dragged away from the centre (or onto another monitor than the primary).</summary>
-    public bool NotchMoved => Math.Abs(_settings.Current.Notch.HorizontalOffset) > 0.5;
+    /// <summary>How far the notch can move on its monitor (DIPs from the centre).</summary>
+    public double OffsetMax =>
+        Core.Layout.NotchLayout.SelectMonitor(Platform.Monitors.MonitorService.GetMonitors(), _settings.Current.Notch.Monitor) is { } m
+            ? Math.Floor(Core.Layout.NotchLayout.MaxOffset(m))
+            : 0;
+
+    public double OffsetMin => -OffsetMax;
+
+    /// <summary>Exact position: DIPs from the centre (negative = left), kept on the screen.</summary>
+    public double Offset
+    {
+        get => Math.Clamp(_settings.Current.Notch.HorizontalOffset, OffsetMin, OffsetMax);
+        set => SetOffset(Math.Round(value));
+    }
+
+    public string OffsetText => Math.Abs(Offset) < 0.5
+        ? Loc.Get("Settings.Position.Center")
+        : Loc.Format(Offset < 0 ? "Settings.Position.LeftBy" : "Settings.Position.RightBy", Math.Abs(Offset));
+
+    public bool PositionLeft
+    {
+        get => OffsetMax > 0 && Offset <= OffsetMin + 0.5;
+        set
+        {
+            if (value)
+            {
+                SetOffset(OffsetMin);
+            }
+        }
+    }
+
+    public bool PositionCenter
+    {
+        get => Math.Abs(Offset) < 0.5;
+        set
+        {
+            if (value)
+            {
+                SetOffset(0);
+            }
+        }
+    }
+
+    public bool PositionRight
+    {
+        get => OffsetMax > 0 && Offset >= OffsetMax - 0.5;
+        set
+        {
+            if (value)
+            {
+                SetOffset(OffsetMax);
+            }
+        }
+    }
+
+    private void SetOffset(double offset)
+    {
+        if (Math.Abs(offset - _settings.Current.Notch.HorizontalOffset) < 0.5)
+        {
+            return;
+        }
+
+        _settings.Update(s => s.Notch.HorizontalOffset = offset);
+        RefreshNotchPosition();
+    }
 
     public double TopOffset
     {
@@ -200,11 +263,44 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
 
     internal SettingsService Settings => _settings;
 
-    public void CenterNotch() => _settings.Update(s => s.Notch.HorizontalOffset = 0);
+    /// <summary>Installed with the installer: the uninstaller sits next to NotchPC.exe.</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822", Justification = "Bound from XAML.")]
+    public bool CanUninstall => global::NotchPC.App.Updates.UpdateService.IsInstalled;
+
+    public string UninstallHint => CanUninstall
+        ? Loc.Get("Settings.Uninstall.Hint")
+        : Loc.Get("Settings.Uninstall.Portable");
+
+    /// <summary>
+    /// Starts the same uninstaller as Windows Settings → Apps. It asks first (and whether to keep the settings),
+    /// then closes NotchPC itself; saying "No" leaves everything as it is.
+    /// </summary>
+    public void Uninstall()
+    {
+        if (!CanUninstall)
+        {
+            return;
+        }
+
+        _settings.Flush();
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(
+                System.IO.Path.Combine(AppContext.BaseDirectory, "Uninstall.exe"), "--uninstall") { UseShellExecute = false })?.Dispose();
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            AppLog.Error("Starting the uninstaller failed", ex);
+        }
+    }
 
     public void RefreshNotchPosition()
     {
-        OnPropertyChanged(nameof(NotchMoved));
+        foreach (var name in new[] { nameof(OffsetMax), nameof(OffsetMin), nameof(Offset), nameof(OffsetText), nameof(PositionLeft), nameof(PositionCenter), nameof(PositionRight) })
+        {
+            OnPropertyChanged(name);
+        }
+
         OnPropertyChanged(nameof(TopOffset));
         OnPropertyChanged(nameof(TopOffsetText));
     }

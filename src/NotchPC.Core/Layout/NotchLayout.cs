@@ -51,6 +51,16 @@ public static class NotchLayout
         return ScreenRect.FromSize(left, monitor.Bounds.Top, w, h);
     }
 
+    /// <summary>Width of the notch's expanded window (DIPs): the notch can move until this touches a screen edge.</summary>
+    public const double MovableWidthDip = 560;
+
+    /// <summary>How far (DIPs) the notch can move left or right from the centre of this monitor.</summary>
+    public static double MaxOffset(MonitorDescriptor monitor)
+    {
+        ArgumentNullException.ThrowIfNull(monitor);
+        return Math.Max(0, ((monitor.Bounds.Width / monitor.Scale) - MovableWidthDip) / 2);
+    }
+
     /// <summary>
     /// Keeps a moved notch on its monitor: the widest window it uses (the expanded canvas) must fit, so the notch
     /// looks the same open and closed.

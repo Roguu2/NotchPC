@@ -422,8 +422,8 @@
   <data name="Settings.Group.Position" xml:space="preserve"><value>Position</value></data>
   <data name="Settings.Group.Behaviour" xml:space="preserve"><value>Behaviour</value></data>
   <data name="Settings.Position" xml:space="preserve"><value>Position on the screen</value></data>
-  <data name="Settings.Position.Hint" xml:space="preserve"><value>Drag the notch left or right by its tab bar (when open) or by the pill (when closed) – also onto another monitor.</value></data>
-  <data name="Settings.Position.Center" xml:space="preserve"><value>Centre it</value></data>
+  <data name="Settings.Position.Hint" xml:space="preserve"><value>Pick a side, or open the notch and drag the grip in its top-left corner.</value></data>
+  <data name="Settings.Position.Center" xml:space="preserve"><value>Centre</value></data>
   <data name="Settings.TopOffset" xml:space="preserve"><value>Gap from the top edge</value></data>
   <data name="Settings.TopOffset.Hint" xml:space="preserve"><value>0 = touching the edge of the screen.</value></data>
   <data name="Updates.Current" xml:space="preserve"><value>NotchPC {0}</value></data>
@@ -446,4 +446,15 @@
   <data name="Updates.Ready.Body" xml:space="preserve"><value>Click to restart and update now, or it installs when you close NotchPC.</value></data>
   <data name="Updates.Available.Title" xml:space="preserve"><value>NotchPC {0} is available</value></data>
   <data name="Updates.Available.Body" xml:space="preserve"><value>Click to open the download page.</value></data>
+  <data name="Notch.MoveGrip" xml:space="preserve"><value>Drag to move the notch (also onto another monitor)</value></data>
+  <data name="Settings.Position.Left" xml:space="preserve"><value>Left</value></data>
+  <data name="Settings.Position.Right" xml:space="preserve"><value>Right</value></data>
+  <data name="Settings.Position.Exact" xml:space="preserve"><value>Exact position</value></data>
+  <data name="Settings.Position.Exact.Hint" xml:space="preserve"><value>Distance from the centre of the screen.</value></data>
+  <data name="Settings.Position.LeftBy" xml:space="preserve"><value>{0} px left</value></data>
+  <data name="Settings.Position.RightBy" xml:space="preserve"><value>{0} px right</value></data>
+  <data name="Settings.Uninstall" xml:space="preserve"><value>Uninstall NotchPC</value></data>
+  <data name="Settings.Uninstall.Button" xml:space="preserve"><value>Uninstall…</value></data>
+  <data name="Settings.Uninstall.Hint" xml:space="preserve"><value>Removes NotchPC from this PC. You will be asked to confirm and whether to keep your settings.</value></data>
+  <data name="Settings.Uninstall.Portable" xml:space="preserve"><value>This copy was not installed with the installer: to remove it, close NotchPC and delete its folder.</value></data>
 </root>

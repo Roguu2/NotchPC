@@ -13,6 +13,7 @@
         xmlns:audio="clr-namespace:NotchPC.App.Audio"
         xmlns:web="clr-namespace:NotchPC.App.Web"
         xmlns:controls="clr-namespace:NotchPC.App.Controls"
+        xmlns:loc="clr-namespace:NotchPC.App.Localization"
         Title="NotchPC"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -159,6 +160,22 @@
 
                 <Grid x:Name="ExpandedContent" HorizontalAlignment="Center" VerticalAlignment="Top"
                       Opacity="0" Visibility="Collapsed">
+                    <!-- Grip: drag it to move the notch along the top edge (also onto another monitor). -->
+                    <Border x:Name="MoveGrip" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,9,0,0"
+                            Width="26" Height="26" CornerRadius="8" Background="Transparent" Cursor="SizeWE"
+                            ToolTip="{loc:Tr Notch.MoveGrip}" Panel.ZIndex="1">
+                        <TextBlock Text="&#xE76F;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource IslandForegroundDim}" />
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource IslandHover}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                    </Border>
                     <DockPanel Margin="16,8,16,14">
                         <ItemsControl x:Name="TabBar" DockPanel.Dock="Top" HorizontalAlignment="Center"
                                       ItemTemplate="{StaticResource TabTemplate}" Focusable="False">

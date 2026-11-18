@@ -44,7 +44,6 @@ public partial class SettingsWindow : FluentWindow
         PageScroll?.ScrollToTop();
     }
 
-    private void OnCenterNotch(object sender, RoutedEventArgs e) => _viewModel.CenterNotch();
 
     private async void OnCheckUpdates(object sender, RoutedEventArgs e) => await _viewModel.Updates.CheckAsync();
 
@@ -186,6 +185,8 @@ public partial class SettingsWindow : FluentWindow
 
     private void OnOpenDeveloperSettings(object sender, RoutedEventArgs e) =>
         Process.Start(new ProcessStartInfo("ms-settings:developers") { UseShellExecute = true })?.Dispose();
+
+    private void OnUninstall(object sender, RoutedEventArgs e) => _viewModel.Uninstall();
 
     private void OnOpenFolder(object sender, RoutedEventArgs e)
     {

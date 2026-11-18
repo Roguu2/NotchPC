@@ -148,7 +148,10 @@ public partial class NotchWindow : Window
         _collapseTimer.Tick += (_, _) =>
         {
             _collapseTimer.Stop();
-            Collapse();
+            if (!_moving)
+            {
+                Collapse(); // never while the notch is being dragged
+            }
         };
         // Players briefly report "paused" between tracks: wait before shrinking the pill.
         _miniOffTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
@@ -326,10 +329,13 @@ public partial class NotchWindow : Window
             return;
         }
 
-        if (_expanded && !IsInside(source, TabBar))
+        // Only the grip moves the notch: clicks anywhere else keep working as before.
+        if (!_expanded || !IsInside(source, MoveGrip))
         {
             return;
         }
+
+        e.Handled = true; // the press belongs to the grip
 
         var cursor = WindowHelper.CursorPosition();
         _moveStart = cursor;
@@ -346,8 +352,7 @@ public partial class NotchWindow : Window
         var cursor = WindowHelper.CursorPosition();
         if (!_moving)
         {
-            var threshold = 8 * (_monitor?.Scale ?? 1);
-            if (Math.Abs(cursor.X - start.X) < threshold || Math.Abs(cursor.X - start.X) < Math.Abs(cursor.Y - start.Y))
+            if (Math.Abs(cursor.X - start.X) + Math.Abs(cursor.Y - start.Y) < 3)
             {
                 return;
             }
@@ -407,6 +412,11 @@ public partial class NotchWindow : Window
             s.Notch.Monitor = device;
         });
         AppLog.Info($"Notch moved: offset {offset} DIP");
+        if (!IsMouseOver)
+        {
+            _collapseTimer.Interval = TimeSpan.FromMilliseconds(Math.Max(1, _settings.Current.Notch.CollapseDelayMs));
+            _collapseTimer.Start();
+        }
     }
 
     private static bool IsInside<T>(DependencyObject node)
@@ -483,6 +493,11 @@ public partial class NotchWindow : Window
 
     private void OnPointerLeave(object sender, MouseEventArgs e)
     {
+        if (_moving || _moveStart is not null)
+        {
+            return; // the window moves under the pointer while it is dragged
+        }
+
         _expandTimer.Stop();
         if (!_expanded || _keyboard)
         {
