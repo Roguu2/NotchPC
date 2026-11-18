@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using Wpf.Ui.Controls;
 
@@ -16,7 +17,40 @@ public partial class SettingsWindow : FluentWindow
         _viewModel = viewModel;
         DataContext = viewModel;
         InitializeComponent();
+        Nav.SelectedIndex = 0;
+        _viewModel.Settings.Changed += (_, _) => Dispatcher.BeginInvoke(_viewModel.RefreshNotchPosition);
     }
+
+    /// <summary>Opens a category (e.g. from the tray or a notification: "Notify", "Overlay"…).</summary>
+    internal void ShowPage(string name)
+    {
+        foreach (var item in Nav.Items.OfType<System.Windows.Controls.ListBoxItem>())
+        {
+            if ((string)item.Tag == name)
+            {
+                Nav.SelectedItem = item;
+            }
+        }
+    }
+
+    private void OnNavChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        var name = (Nav.SelectedItem as System.Windows.Controls.ListBoxItem)?.Tag as string ?? "General";
+        foreach (var page in new FrameworkElement[] { PageGeneral, PageNotch, PageMusic, PageWidgets, PageCapture, PageNotify, PageOverlay, PagePhone, PageAbout })
+        {
+            page.Visibility = page.Name == "Page" + name ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        PageScroll?.ScrollToTop();
+    }
+
+    private void OnCenterNotch(object sender, RoutedEventArgs e) => _viewModel.CenterNotch();
+
+    private async void OnCheckUpdates(object sender, RoutedEventArgs e) => await _viewModel.Updates.CheckAsync();
+
+    private void OnInstallUpdate(object sender, RoutedEventArgs e) => _viewModel.Updates.InstallNow();
+
+    private void OnOpenRelease(object sender, RoutedEventArgs e) => _viewModel.Updates.OpenReleasePage();
 
     public bool AllowClose { get; set; }
 

@@ -32,6 +32,8 @@ public sealed class AppSettings
 
     public WebSettings Web { get; set; } = new();
 
+    public UpdateSettings Updates { get; set; } = new();
+
     /// <summary>Tabs in display order. Unknown ids are dropped and missing ones appended on load.</summary>
     public List<TabSetting> Tabs { get; set; } = TabIds.DefaultOrder.Select(id => new TabSetting(id, true)).ToList();
 }
@@ -54,6 +56,9 @@ public sealed class NotchSettings
 
     /// <summary>Gap between the top edge of the screen and the pill, in DIPs.</summary>
     public int TopOffset { get; set; } = 6;
+
+    /// <summary>Where the notch sits along the top edge: DIPs from the monitor's centre (negative = left). 0 = centred.</summary>
+    public double HorizontalOffset { get; set; }
 }
 
 public sealed class MusicSettings
@@ -198,6 +203,14 @@ public sealed class NotificationSettings
 
     /// <summary>Glow colour: "accent" (Windows accent colour) or #RRGGBB.</summary>
     public string GlowColor { get; set; } = "accent";
+}
+
+/// <summary>Automatic updates from the GitHub releases.</summary>
+public sealed class UpdateSettings
+{
+    public bool Auto { get; set; } = true;
+
+    public DateTimeOffset? LastCheck { get; set; }
 }
 
 /// <summary>Web panel (stage 9).</summary>

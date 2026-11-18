@@ -40,6 +40,7 @@ public partial class App : Application
     private NotchPC.App.Audio.AudioMixerViewModel? _mixer;
     private NotchPC.App.Web.WebViewModel? _web;
     private TaskbarPill? _taskbarPill;
+    private NotchPC.App.Updates.UpdateService? _updates;
     private WidgetManager? _widgets;
     private ClipboardService? _clipboard;
     private CaptureService? _capture;
@@ -94,18 +95,24 @@ public partial class App : Application
         _tray = new TrayIcon(() => _notch.IsUserHidden);
         _tray.SettingsRequested += (_, _) => ShowSettings();
         _tray.ToggleNotchRequested += (_, _) => _notch.IsUserHidden = !_notch.IsUserHidden;
-        _tray.ExitRequested += (_, _) => Shutdown();
+        _tray.ExitRequested += (_, _) =>
+        {
+            _updates?.InstallOnExit(); // a downloaded update installs when NotchPC is closed (like SpotiTube)
+            Shutdown();
+        };
         Loc.CultureChanged += (_, _) => _tray.RefreshTexts();
 
         _sensors = new SensorsClient();
         _widgets = new WidgetManager(_settings, _http, _sensors);
         _widgets.Start();
+        _updates = new NotchPC.App.Updates.UpdateService(_settings, _hub);
+        _updates.Start();
         _overlay = new GameOverlayController(_settings, _sensors, _notch.Fullscreen);
         _remote = new RemoteServer(_settings, _music, _overlay, _hub);
         _notch.AttachPhone(new PhoneViewModel(_settings, _remote));
         _notch.AttachAudio(_mixer = new NotchPC.App.Audio.AudioMixerViewModel());
         _notch.AttachWeb(_web = new NotchPC.App.Web.WebViewModel(_settings));
-        _taskbarPill = new TaskbarPill(_settings, _music, _notch.Fullscreen, () => _notch.OpenTab(NotchPC.Core.Settings.TabIds.Music));
+        _taskbarPill = new TaskbarPill(_settings, _music, _notch.Fullscreen, () => _notch.OpenTabFromOutside(NotchPC.Core.Settings.TabIds.Music));
 
         _singleInstance.OnActivationRequested(() => Dispatcher.BeginInvoke(ShowSettings));
     }
@@ -129,6 +136,7 @@ public partial class App : Application
         _mixer?.Dispose();
         _web?.Dispose();
         _taskbarPill?.Dispose();
+        _updates?.Dispose();
         _overlay?.Dispose();
         _sensors?.Dispose();
         _music?.Dispose();
@@ -180,7 +188,7 @@ public partial class App : Application
             return;
         }
 
-        _settingsWindow ??= new SettingsWindow(new SettingsViewModel(_settings, _http!, _sensors!, _clipboard!, _capture!, _hub!, _overlay!, _remote!));
+        _settingsWindow ??= new SettingsWindow(new SettingsViewModel(_settings, _http!, _sensors!, _clipboard!, _capture!, _hub!, _overlay!, _remote!, _updates!));
         _settingsWindow.ShowAndActivate();
     }
 

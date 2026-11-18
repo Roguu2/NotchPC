@@ -166,6 +166,10 @@ public partial class NotchWindow : Window
         MouseEnter += OnPointerEnter;
         MouseLeave += OnPointerLeave;
         PreviewMouseLeftButtonDown += OnPreviewMouseDown;
+        Island.PreviewMouseLeftButtonDown += OnMoveStart;
+        Island.PreviewMouseMove += OnMoveDrag;
+        Island.PreviewMouseLeftButtonUp += OnMoveEnd;
+        Island.LostMouseCapture += (_, _) => FinishMove();
         AllowDrop = true;
         DragEnter += OnFileDragEnter;
         DragOver += OnFileDragOver;
@@ -275,16 +279,17 @@ public partial class NotchWindow : Window
             return;
         }
 
-        var monitor = NotchLayout.SelectMonitor(MonitorService.GetMonitors(), _settings.Current.Notch.Monitor);
+        var monitor = _moving ? _moveMonitor : NotchLayout.SelectMonitor(MonitorService.GetMonitors(), _settings.Current.Notch.Monitor);
         if (monitor is null)
         {
             return;
         }
 
         _monitor = monitor;
+        var offset = NotchOffset;
         var rect = _largeCanvas
-            ? NotchLayout.TopCenter(monitor, CanvasWidth, CanvasHeight)
-            : NotchLayout.TopCenter(monitor, CollapsedCanvasWidth, _settings.Current.Notch.TopOffset + CollapsedCanvasExtraHeight);
+            ? NotchLayout.TopCenter(monitor, CanvasWidth, CanvasHeight, offset)
+            : NotchLayout.TopCenter(monitor, CollapsedCanvasWidth, _settings.Current.Notch.TopOffset + CollapsedCanvasExtraHeight, offset);
         if (WindowHelper.GetBounds(_hwnd) != rect)
         {
             WindowHelper.PlaceTopmost(_hwnd, rect);
@@ -295,6 +300,141 @@ public partial class NotchWindow : Window
     }
 
     private double LyricsTop => _settings.Current.Notch.TopOffset + ExpandedHeight + LyricsGap;
+
+    /// <summary>The notch's distance from the monitor's centre (DIPs): live while dragging, else the saved one.</summary>
+    private double NotchOffset => _moving
+        ? _moveOffset
+        : _monitor is null ? 0 : NotchLayout.ClampOffset(_monitor, _settings.Current.Notch.HorizontalOffset, CanvasWidth);
+
+    // ---------------------------------------------------------------- moving the notch
+
+    private (int X, int Y)? _moveStart;
+    private double _moveGrab;
+    private bool _moving;
+    private double _moveOffset;
+    private MonitorDescriptor? _moveMonitor;
+
+    /// <summary>
+    /// The notch is dragged by its tab bar (open) or by the pill (closed). A short press stays a click; only a
+    /// sideways move of a few pixels turns into moving the notch.
+    /// </summary>
+    private void OnMoveStart(object sender, MouseButtonEventArgs e)
+    {
+        _moveStart = null;
+        if (_monitor is null || e.OriginalSource is not DependencyObject source || IsInside<System.Windows.Controls.Primitives.TextBoxBase>(source))
+        {
+            return;
+        }
+
+        if (_expanded && !IsInside(source, TabBar))
+        {
+            return;
+        }
+
+        var cursor = WindowHelper.CursorPosition();
+        _moveStart = cursor;
+        _moveGrab = (cursor.X - NotchLayout.CenterX(_monitor, NotchOffset)) / _monitor.Scale;
+    }
+
+    private void OnMoveDrag(object sender, MouseEventArgs e)
+    {
+        if (_moveStart is not { } start || e.LeftButton != MouseButtonState.Pressed)
+        {
+            return;
+        }
+
+        var cursor = WindowHelper.CursorPosition();
+        if (!_moving)
+        {
+            var threshold = 8 * (_monitor?.Scale ?? 1);
+            if (Math.Abs(cursor.X - start.X) < threshold || Math.Abs(cursor.X - start.X) < Math.Abs(cursor.Y - start.Y))
+            {
+                return;
+            }
+
+            _moving = true;
+            _moveMonitor = _monitor;
+            _moveOffset = NotchOffset;
+            _expandTimer.Stop();
+            _collapseTimer.Stop();
+            Island.CaptureMouse(); // the tab button under the cursor will not get a click
+            Island.Cursor = Cursors.SizeWE;
+        }
+
+        // The notch follows the cursor, also onto another monitor.
+        var monitors = MonitorService.GetMonitors();
+        var under = monitors.FirstOrDefault(m => cursor.X >= m.Bounds.Left && cursor.X < m.Bounds.Right && cursor.Y >= m.Bounds.Top && cursor.Y < m.Bounds.Bottom)
+                    ?? _moveMonitor;
+        if (under is null)
+        {
+            return;
+        }
+
+        _moveMonitor = under;
+        var centre = under.Bounds.Left + (under.Bounds.Width / 2);
+        _moveOffset = NotchLayout.ClampOffset(under, ((cursor.X - centre) / under.Scale) - _moveGrab, CanvasWidth);
+        Reposition();
+        e.Handled = true;
+    }
+
+    private void OnMoveEnd(object sender, MouseButtonEventArgs e)
+    {
+        if (_moving)
+        {
+            e.Handled = true; // a drag is not a click
+            Island.ReleaseMouseCapture();
+        }
+
+        _moveStart = null;
+    }
+
+    /// <summary>Saves where the notch was dropped (snaps to the centre when dropped close to it).</summary>
+    private void FinishMove()
+    {
+        if (!_moving)
+        {
+            return;
+        }
+
+        _moving = false;
+        _moveStart = null;
+        Island.Cursor = null;
+        var offset = Math.Abs(_moveOffset) < 12 ? 0 : Math.Round(_moveOffset);
+        var device = _moveMonitor?.DeviceName ?? _settings.Current.Notch.Monitor;
+        _settings.Update(s =>
+        {
+            s.Notch.HorizontalOffset = offset;
+            s.Notch.Monitor = device;
+        });
+        AppLog.Info($"Notch moved: offset {offset} DIP");
+    }
+
+    private static bool IsInside<T>(DependencyObject node)
+        where T : DependencyObject
+    {
+        for (DependencyObject? n = node; n is not null; n = System.Windows.Media.VisualTreeHelper.GetParent(n) ?? LogicalTreeHelper.GetParent(n))
+        {
+            if (n is T)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsInside(DependencyObject node, DependencyObject ancestor)
+    {
+        for (DependencyObject? n = node; n is not null; n = System.Windows.Media.VisualTreeHelper.GetParent(n) ?? LogicalTreeHelper.GetParent(n))
+        {
+            if (ReferenceEquals(n, ancestor))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private void UpdateVisibility()
     {
@@ -601,6 +741,20 @@ public partial class NotchWindow : Window
     }
 
     /// <summary>Opens the notch on a tab (a click on a NotchPC notification, e.g. the timer).</summary>
+    /// <summary>
+    /// Opens a tab from somewhere else (the taskbar pill): the pointer is not over the notch, so it closes again on
+    /// its own after a few seconds unless the pointer moves onto it.
+    /// </summary>
+    internal void OpenTabFromOutside(string id)
+    {
+        OpenTab(id);
+        if (_expanded && !IsMouseOver)
+        {
+            _collapseTimer.Interval = TimeSpan.FromSeconds(4);
+            _collapseTimer.Start();
+        }
+    }
+
     internal void OpenTab(string id)
     {
         if (_tabs.FirstOrDefault(t => t.Id == id) is not { } tab)
@@ -1217,7 +1371,7 @@ public partial class NotchWindow : Window
         }
         else if (_monitor is not null)
         {
-            _lyricsWindow.PlaceBelowNotch(_monitor, LyricsTop);
+            _lyricsWindow.PlaceBelowNotch(_monitor, LyricsTop, NotchOffset);
         }
     }
 

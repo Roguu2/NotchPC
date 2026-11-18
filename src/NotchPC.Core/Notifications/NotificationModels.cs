@@ -34,6 +34,9 @@ public static class NotificationTargets
 {
     private const string TabPrefix = "notch:";
 
+    /// <summary>"Install the downloaded update and restart".</summary>
+    public const string InstallUpdate = "notchpc:install-update";
+
     /// <summary>A tab of the notch (see TabIds).</summary>
     public static string Tab(string tabId) => TabPrefix + tabId;
 

@@ -98,6 +98,7 @@ public sealed class SettingsStore
         s.GameOverlay.Hotkey = NotchPC.Core.Games.OverlayHotkeys.Normalize(s.GameOverlay.Hotkey);
         s.GameOverlay.Games = NotchPC.Core.Games.GameDetection.Normalize(s.GameOverlay.Games);
         s.GameOverlay.Ignored = NotchPC.Core.Games.GameDetection.Normalize(s.GameOverlay.Ignored);
+        s.Updates ??= new UpdateSettings();
         s.Web ??= new WebSettings();
         s.Web.Width = Math.Clamp(s.Web.Width, 480, 2400);
         s.Web.Height = Math.Clamp(s.Web.Height, 360, 1600);

@@ -41,13 +41,32 @@ public static class NotchLayout
     /// Physical rectangle of a window that is <paramref name="widthDip"/> x <paramref name="heightDip"/> DIPs,
     /// horizontally centred on the monitor and glued to its top edge.
     /// </summary>
-    public static ScreenRect TopCenter(MonitorDescriptor monitor, double widthDip, double heightDip)
+    public static ScreenRect TopCenter(MonitorDescriptor monitor, double widthDip, double heightDip, double offsetDip = 0)
     {
         ArgumentNullException.ThrowIfNull(monitor);
         var w = (int)Math.Round(widthDip * monitor.Scale);
         var h = (int)Math.Round(heightDip * monitor.Scale);
-        var left = monitor.Bounds.Left + ((monitor.Bounds.Width - w) / 2);
+        var left = monitor.Bounds.Left + ((monitor.Bounds.Width - w) / 2) + (int)Math.Round(offsetDip * monitor.Scale);
+        left = Math.Clamp(left, monitor.Bounds.Left, Math.Max(monitor.Bounds.Left, monitor.Bounds.Right - w));
         return ScreenRect.FromSize(left, monitor.Bounds.Top, w, h);
+    }
+
+    /// <summary>
+    /// Keeps a moved notch on its monitor: the widest window it uses (the expanded canvas) must fit, so the notch
+    /// looks the same open and closed.
+    /// </summary>
+    public static double ClampOffset(MonitorDescriptor monitor, double offsetDip, double widestDip)
+    {
+        ArgumentNullException.ThrowIfNull(monitor);
+        var max = Math.Max(0, ((monitor.Bounds.Width / monitor.Scale) - widestDip) / 2);
+        return Math.Clamp(offsetDip, -max, max);
+    }
+
+    /// <summary>Horizontal centre of the notch in physical pixels.</summary>
+    public static int CenterX(MonitorDescriptor monitor, double offsetDip)
+    {
+        ArgumentNullException.ThrowIfNull(monitor);
+        return monitor.Bounds.Left + (monitor.Bounds.Width / 2) + (int)Math.Round(offsetDip * monitor.Scale);
     }
 
     /// <summary>

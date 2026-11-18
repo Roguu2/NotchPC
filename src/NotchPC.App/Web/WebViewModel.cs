@@ -114,7 +114,7 @@ internal sealed class WebViewModel : ObservableObject, IDisposable
         var work = m.WorkArea;
         var width = Math.Min((int)(web.Width * m.Scale), work.Width - 16);
         var height = Math.Min((int)(web.Height * m.Scale), work.Height - (int)(GapBelowNotch * m.Scale) - 8);
-        var x = m.Bounds.Left + ((m.Bounds.Width - width) / 2);
+        var x = Math.Clamp(NotchLayout.CenterX(m, _settings.Current.Notch.HorizontalOffset) - (width / 2), m.Bounds.Left, m.Bounds.Right - width);
         var y = m.Bounds.Top + (int)((_settings.Current.Notch.TopOffset + GapBelowNotch) * m.Scale);
         var hwnd = new WindowInteropHelper(window).EnsureHandle();
         WindowHelper.Place(hwnd, ScreenRect.FromSize(x, y, width, height));

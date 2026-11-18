@@ -70,12 +70,23 @@ and videos and uses practically no CPU while you are not looking at it.
       Open a website in a panel under the notch, with your favourite sites one click away.
     </td>
   </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>↔️ Where you want it</h3>
+      Drag the notch along the top edge or onto another monitor. Dark, rounded and out of the way.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🔄 Updates itself</h3>
+      New versions download in the background and install when you restart NotchPC or close it.
+    </td>
+  </tr>
 </table>
 
 ## Get started
 
 1. **Download** `NotchPC-<version>-Setup.exe` from the [latest release](https://github.com/Roguu2/NotchPC/releases/latest).
-2. **Run it** and click **Install**. It installs just for you: no administrator rights, nothing else to install.
+2. **Run it** and click **Install**. It installs just for you (pick another folder if you like): no administrator rights,
+   nothing else to install.
 3. **Hover the top of your screen.** The notch is there. Right-click the tray icon for the settings.
 
 > The installer isn't code-signed yet, so Windows may ask once whether to trust it:
@@ -88,7 +99,9 @@ Prefer no installer? Take `NotchPC-<version>-win-x64-portable.zip`, unzip it any
 <details>
 <summary><b>How do I update or uninstall it?</b></summary>
 
-Run the newer installer: it updates NotchPC and keeps your settings. To remove it: Windows Settings → Apps →
+NotchPC updates itself: a new version downloads in the background and installs when you restart NotchPC from the
+notification or close it (Settings → Updates and info; you can turn it off there). Installing a newer installer by hand
+works too and keeps your settings. To remove it: Windows Settings → Apps →
 Installed apps → NotchPC → Uninstall. You will be asked whether to keep your settings.
 </details>
 

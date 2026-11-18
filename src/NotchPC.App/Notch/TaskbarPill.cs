@@ -29,6 +29,9 @@ internal sealed class TaskbarPill : IDisposable
     private readonly MusicViewModel _music;
     private readonly FullscreenWatcher _watcher;
     private readonly Action _openMusic;
+    private readonly System.Windows.Threading.DispatcherTimer _settle;
+    private readonly Queue<long> _lifts = new();
+    private ExplorerEvents? _explorer;
     private Window? _window;
     private IntPtr _hwnd;
     private Image? _cover;
@@ -41,6 +44,31 @@ internal sealed class TaskbarPill : IDisposable
         _music = music;
         _watcher = watcher;
         _openMusic = openMusic;
+
+        // Shell events come in bursts (taskbar animations): handle them once, a moment after the last one.
+        _settle = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(60) };
+        _settle.Tick += (_, _) =>
+        {
+            _settle.Stop();
+
+            // Guard against a tug of war (the taskbar lifting itself again after every lift): at most 5 a second.
+            var now = Environment.TickCount64;
+            _lifts.Enqueue(now);
+            while (_lifts.Count > 0 && now - _lifts.Peek() > 1000)
+            {
+                _lifts.Dequeue();
+            }
+
+            if (_lifts.Count > 5)
+            {
+                _settle.Interval = TimeSpan.FromSeconds(1);
+                _settle.Start();
+                return;
+            }
+
+            _settle.Interval = TimeSpan.FromMilliseconds(60);
+            Update();
+        };
         _settings.Changed += OnChanged;
         _music.PropertyChanged += OnMusicChanged;
         _watcher.Evaluated += OnChanged;
@@ -54,8 +82,37 @@ internal sealed class TaskbarPill : IDisposable
         _music.PropertyChanged -= OnMusicChanged;
         _watcher.Evaluated -= OnChanged;
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= OnChanged;
+        StopShellEvents();
+        _settle.Stop();
         _window?.Close();
         _window = null;
+    }
+
+    /// <summary>
+    /// While the pill shows, follow the taskbar itself: Windows lifts the taskbar over windows lying on it (after a
+    /// click, a hover preview, a new tray icon…), so the pill is lifted back and re-placed when the tray changes width.
+    /// </summary>
+    private void StartShellEvents()
+    {
+        if (_explorer is not null)
+        {
+            return;
+        }
+
+        _explorer = new ExplorerEvents();
+        _explorer.Changed += (_, _) =>
+        {
+            if (!_settle.IsEnabled)
+            {
+                _settle.Start();
+            }
+        };
+    }
+
+    private void StopShellEvents()
+    {
+        _explorer?.Dispose();
+        _explorer = null;
     }
 
     private void OnChanged(object? sender, EventArgs e) =>
@@ -76,8 +133,11 @@ internal sealed class TaskbarPill : IDisposable
         if (place is not { } rect)
         {
             _window?.Hide();
+            StopShellEvents();
             return;
         }
+
+        StartShellEvents();
 
         EnsureWindow();
         _cover!.Source = _music.Cover;

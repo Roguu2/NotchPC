@@ -408,4 +408,42 @@
   <data name="Settings.TaskbarPill" xml:space="preserve"><value>Muzyka na pasku zadań (eksperyment)</value></data>
   <data name="Settings.TaskbarPill.Hint" xml:space="preserve"><value>Mała pigułka na lewo od zegara, gdy gra muzyka; kliknięcie otwiera zakładkę muzyki. Windows 11 nie pozwala jej wstawić do samego paska, więc leży na nim (pasek na dole, nie ukrywany automatycznie).</value></data>
   <data name="Taskbar.Pill.Hint" xml:space="preserve"><value>Otwórz zakładkę muzyki</value></data>
+  <data name="Settings.Page.General" xml:space="preserve"><value>Język i uruchamianie razem z Windows.</value></data>
+  <data name="Settings.Page.Notch" xml:space="preserve"><value>Gdzie jest notch, jak reaguje na mysz i jakie ma zakładki.</value></data>
+  <data name="Settings.Page.Music" xml:space="preserve"><value>Odtwarzacz w zamkniętym notchu, tekst piosenki i muzyka na pasku zadań.</value></data>
+  <data name="Settings.Page.Widgets" xml:space="preserve"><value>Karty na pulpicie: które, jak są ułożone, pogoda, kalendarz i czujniki.</value></data>
+  <data name="Settings.Page.Capture" xml:space="preserve"><value>Historia schowka, zrzuty ekranu i nagrywanie.</value></data>
+  <data name="Settings.Page.Notify" xml:space="preserve"><value>Banery w notchu, dźwięk, poświata i powiadomienia Windows.</value></data>
+  <data name="Settings.Page.Overlay" xml:space="preserve"><value>Pasek z FPS i temperaturami nad grami.</value></data>
+  <data name="Settings.Page.Phone" xml:space="preserve"><value>Sterowanie tym komputerem z telefonu.</value></data>
+  <data name="Settings.Page.About" xml:space="preserve"><value>Wersja, automatyczne aktualizacje i gdzie NotchPC trzyma swoje pliki.</value></data>
+  <data name="Settings.Updates" xml:space="preserve"><value>Aktualizacje i informacje</value></data>
+  <data name="Settings.Group.Where" xml:space="preserve"><value>Gdzie</value></data>
+  <data name="Settings.Group.Position" xml:space="preserve"><value>Położenie</value></data>
+  <data name="Settings.Group.Behaviour" xml:space="preserve"><value>Zachowanie</value></data>
+  <data name="Settings.Position" xml:space="preserve"><value>Położenie na ekranie</value></data>
+  <data name="Settings.Position.Hint" xml:space="preserve"><value>Przeciągnij notch w lewo albo w prawo za pasek zakładek (gdy jest otwarty) albo za pigułkę (gdy jest zamknięty) – także na inny monitor.</value></data>
+  <data name="Settings.Position.Center" xml:space="preserve"><value>Wyśrodkuj</value></data>
+  <data name="Settings.TopOffset" xml:space="preserve"><value>Odstęp od górnej krawędzi</value></data>
+  <data name="Settings.TopOffset.Hint" xml:space="preserve"><value>0 = przy samej krawędzi ekranu.</value></data>
+  <data name="Updates.Current" xml:space="preserve"><value>NotchPC {0}</value></data>
+  <data name="Updates.Auto" xml:space="preserve"><value>Automatyczne aktualizacje</value></data>
+  <data name="Updates.Auto.Hint" xml:space="preserve"><value>Co kilka godzin sprawdza, czy jest nowa wersja, i pobiera ją w tle. Instaluje się, gdy uruchomisz NotchPC ponownie z powiadomienia albo zamkniesz go z zasobnika.</value></data>
+  <data name="Updates.CheckNow" xml:space="preserve"><value>Sprawdź teraz</value></data>
+  <data name="Updates.InstallNow" xml:space="preserve"><value>Uruchom ponownie i zaktualizuj</value></data>
+  <data name="Updates.WhatsNew" xml:space="preserve"><value>Co nowego</value></data>
+  <data name="Updates.Checking" xml:space="preserve"><value>Sprawdzanie aktualizacji…</value></data>
+  <data name="Updates.Downloading" xml:space="preserve"><value>Pobieranie wersji {0}… {1}%</value></data>
+  <data name="Updates.ReadyStatus" xml:space="preserve"><value>Wersja {0} jest gotowa. Uruchom NotchPC ponownie, żeby ją zainstalować.</value></data>
+  <data name="Updates.AvailableStatus" xml:space="preserve"><value>Jest wersja {0}. Ta kopia nie jest zainstalowana instalatorem, więc pobierz ją ze strony wydania.</value></data>
+  <data name="Updates.UpToDate" xml:space="preserve"><value>Masz najnowszą wersję.</value></data>
+  <data name="Updates.CheckedAt" xml:space="preserve"><value> Sprawdzono {0}.</value></data>
+  <data name="Updates.Idle" xml:space="preserve"><value>Aktualizacje są sprawdzane automatycznie.</value></data>
+  <data name="Updates.NotInstalled" xml:space="preserve"><value>Ta kopia nie jest zainstalowana instalatorem (wersja przenośna albo zbudowana z kodu): dostaniesz tylko informację o nowej wersji.</value></data>
+  <data name="Updates.Failed" xml:space="preserve"><value>Nie udało się sprawdzić aktualizacji: {0}</value></data>
+  <data name="Updates.BadDownload" xml:space="preserve"><value>Pobrany plik nie zgadza się z wydaniem (rozmiar albo suma kontrolna).</value></data>
+  <data name="Updates.Ready.Title" xml:space="preserve"><value>NotchPC {0} jest gotowy</value></data>
+  <data name="Updates.Ready.Body" xml:space="preserve"><value>Kliknij, aby uruchomić ponownie i zaktualizować teraz, albo zainstaluje się przy zamknięciu NotchPC.</value></data>
+  <data name="Updates.Available.Title" xml:space="preserve"><value>Jest NotchPC {0}</value></data>
+  <data name="Updates.Available.Body" xml:space="preserve"><value>Kliknij, aby otworzyć stronę pobierania.</value></data>
 </root>

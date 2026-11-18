@@ -15,8 +15,12 @@ internal static class Program
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
-        if (args.Any(a => string.Equals(a, "--uninstall", StringComparison.OrdinalIgnoreCase)))
+        bool Has(string arg) => args.Any(a => string.Equals(a, arg, StringComparison.OrdinalIgnoreCase));
+
+        if (Has("--uninstall"))
         {
+            // The uninstaller is the copy inside the install folder: that folder is the one to remove.
+            Installer.InstallDir = Application.StartupPath;
             return Uninstall();
         }
 
@@ -26,9 +30,38 @@ internal static class Program
             return 1;
         }
 
+        if (Has("--update"))
+        {
+            return SilentUpdate(relaunch: Has("--relaunch"));
+        }
+
         using var form = new SetupForm();
         Application.Run(form);
         return 0;
+    }
+
+    /// <summary>
+    /// Automatic update started by NotchPC: no window, same folder and shortcuts as before, NotchPC started again
+    /// afterwards when asked to (--relaunch). Errors are shown, since nobody would notice otherwise.
+    /// </summary>
+    private static int SilentUpdate(bool relaunch)
+    {
+        try
+        {
+            Installer.InstallDir = Installer.ExistingInstallDir() ?? Installer.DefaultInstallDir;
+            Installer.Install(Installer.HasDesktopShortcut, _ => { });
+            if (relaunch)
+            {
+                Installer.Launch(autostart: null);
+            }
+
+            return 0;
+        }
+        catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            MessageBox.Show(Strings.Failed(ex.Message), "NotchPC", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return 1;
+        }
     }
 
     private static int Uninstall()
@@ -54,6 +87,8 @@ internal sealed class SetupForm : Form
     private static readonly Color Muted = Color.FromArgb(160, 160, 168);
     private static readonly Color Accent = Color.FromArgb(10, 132, 255);
 
+    private readonly TextBox _folder;
+    private readonly Button _browse;
     private readonly CheckBox _autostart;
     private readonly CheckBox _desktop;
     private readonly CheckBox _launch;
@@ -73,7 +108,7 @@ internal sealed class SetupForm : Form
         StartPosition = FormStartPosition.CenterScreen;
         AutoScaleMode = AutoScaleMode.Dpi;
         AutoScaleDimensions = new SizeF(96f, 96f);
-        ClientSize = new Size(520, 330);
+        ClientSize = new Size(520, 392);
         BackColor = Back;
         ForeColor = Fore;
         Font = new Font("Segoe UI", 10f);
@@ -90,23 +125,63 @@ internal sealed class SetupForm : Form
         {
             Text = Installer.IsInstalled ? Strings.Update : Strings.Info,
             ForeColor = Muted,
-            Bounds = new Rectangle(28, 92, 464, 58),
+            Bounds = new Rectangle(28, 92, 464, 44),
         };
 
-        _autostart = Check(Strings.Autostart, 158, true);
-        _desktop = Check(Strings.Desktop, 188, true);
-        _launch = Check(Strings.Launch, 218, true);
-        _progress = new ProgressBar { Bounds = new Rectangle(28, 254, 464, 8), Visible = false };
-        _status = new Label { ForeColor = Muted, Bounds = new Rectangle(28, 268, 300, 22) };
+        // Install folder (an update keeps the current one).
+        var folderLabel = new Label { Text = Strings.Folder, AutoSize = true, Location = new Point(28, 142), ForeColor = Fore };
+        _folder = new TextBox
+        {
+            Text = Installer.InstallDir,
+            ReadOnly = true,
+            Bounds = new Rectangle(28, 166, 352, 28),
+            BackColor = Color.FromArgb(36, 36, 40),
+            ForeColor = Fore,
+            BorderStyle = BorderStyle.FixedSingle,
+        };
+        _browse = Button(Strings.Browse, new Point(388, 164), primary: false);
+        _browse.Size = new Size(104, 30);
+        _browse.Click += (_, _) => PickFolder();
+        _browse.Enabled = !Installer.IsInstalled;
 
-        _install = Button(Installer.IsInstalled ? Strings.UpdateButton : Strings.InstallButton, new Point(372, 280), primary: true);
-        _cancel = Button(Strings.Cancel, new Point(252, 280), primary: false);
+        _autostart = Check(Strings.Autostart, 212, true);
+        _desktop = Check(Strings.Desktop, 242, Installer.IsInstalled ? Installer.HasDesktopShortcut : true);
+        _launch = Check(Strings.Launch, 272, true);
+        _progress = new ProgressBar { Bounds = new Rectangle(28, 310, 464, 8), Visible = false };
+        _status = new Label { ForeColor = Muted, Bounds = new Rectangle(28, 324, 220, 44) };
+
+        _install = Button(Installer.IsInstalled ? Strings.UpdateButton : Strings.InstallButton, new Point(372, 340), primary: true);
+        _cancel = Button(Strings.Cancel, new Point(252, 340), primary: false);
         _install.Click += async (_, _) => await InstallAsync();
         _cancel.Click += (_, _) => Close();
         AcceptButton = _install;
         CancelButton = _cancel;
 
-        Controls.AddRange([logo, title, version, info, _autostart, _desktop, _launch, _progress, _status, _install, _cancel]);
+        Controls.AddRange([logo, title, version, info, folderLabel, _folder, _browse, _autostart, _desktop, _launch, _progress, _status, _install, _cancel]);
+    }
+
+    private void PickFolder()
+    {
+        using var dialog = new FolderBrowserDialog
+        {
+            Description = Strings.PickFolder,
+            ShowNewFolderButton = true,
+            SelectedPath = System.IO.Path.GetDirectoryName(Installer.InstallDir) ?? Installer.InstallDir,
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK || string.IsNullOrWhiteSpace(dialog.SelectedPath))
+        {
+            return;
+        }
+
+        var target = Installer.Normalize(dialog.SelectedPath);
+        if (Installer.CheckWritable(target) is { } problem)
+        {
+            MessageBox.Show(this, Strings.NotWritable(target, problem), "NotchPC", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        Installer.InstallDir = target;
+        _folder.Text = target;
     }
 
     private static CheckBox Check(string text, int y, bool on) => new()
@@ -149,7 +224,7 @@ internal sealed class SetupForm : Form
 
         _install.Enabled = false;
         _cancel.Enabled = false;
-        _autostart.Enabled = _desktop.Enabled = _launch.Enabled = false;
+        _autostart.Enabled = _desktop.Enabled = _launch.Enabled = _browse.Enabled = false;
         _progress.Visible = true;
         _status.Text = Strings.Working;
         var desktop = _desktop.Checked;
@@ -193,6 +268,18 @@ internal static class Strings
         : "NotchPC is already installed – it will be updated. Your settings are kept.";
 
     public static string Autostart => Pl ? "Uruchamiaj razem z Windows" : "Start with Windows";
+
+    public static string Folder => Pl ? "Folder instalacji" : "Install folder";
+
+    public static string Browse => Pl ? "Zmień…" : "Change…";
+
+    public static string PickFolder => Pl
+        ? "Wybierz, gdzie zainstalować NotchPC (powstanie w nim folder NotchPC)."
+        : "Choose where to install NotchPC (a NotchPC folder is created inside).";
+
+    public static string NotWritable(string dir, string why) => Pl
+        ? $"Nie można zapisywać w {dir}.\n{why}\n\nFoldery takie jak Program Files wymagają uprawnień administratora – wybierz inny, np. na swoim dysku albo w folderze użytkownika."
+        : $"Cannot write to {dir}.\n{why}\n\nFolders such as Program Files need administrator rights – pick another one, e.g. on your own drive or in your user folder.";
 
     public static string Desktop => Pl ? "Skrót na pulpicie" : "Desktop shortcut";
 

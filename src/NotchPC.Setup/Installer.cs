@@ -21,8 +21,48 @@ internal static class Installer
     private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\NotchPC";
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
 
-    public static string InstallDir { get; } =
+    public static string DefaultInstallDir { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "NotchPC");
+
+    /// <summary>Where the app's package identity manifest lives (fixed by the app, whatever the install folder).</summary>
+    private static string IdentityDir => Path.Combine(DefaultInstallDir, "identity");
+
+    /// <summary>The chosen folder: the previous install's (from Windows' app list) or the default one.</summary>
+    public static string InstallDir { get; set; } = ExistingInstallDir() ?? DefaultInstallDir;
+
+    /// <summary>Where NotchPC is installed now, or null.</summary>
+    public static string? ExistingInstallDir()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(UninstallKey);
+        return key?.GetValue("InstallLocation") is string dir && File.Exists(Path.Combine(dir, ExeName)) ? dir : null;
+    }
+
+    /// <summary>
+    /// A folder the user picked becomes "...\NotchPC" unless it already is one, so installing (and later
+    /// uninstalling, which deletes the folder) never mixes NotchPC with other files.
+    /// </summary>
+    public static string Normalize(string picked)
+    {
+        var full = Path.GetFullPath(picked.Trim()).TrimEnd('\\');
+        return string.Equals(Path.GetFileName(full), "NotchPC", StringComparison.OrdinalIgnoreCase) ? full : Path.Combine(full, "NotchPC");
+    }
+
+    /// <summary>Null when the folder can be written to, else why not (e.g. Program Files needs admin rights).</summary>
+    public static string? CheckWritable(string dir)
+    {
+        try
+        {
+            Directory.CreateDirectory(dir);
+            var probe = Path.Combine(dir, ".notchpc-write-test");
+            File.WriteAllText(probe, "ok");
+            File.Delete(probe);
+            return null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException)
+        {
+            return ex.Message;
+        }
+    }
 
     public static string Version { get; } =
         Assembly.GetExecutingAssembly().GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "?";
@@ -35,7 +75,9 @@ internal static class Installer
 
     public static bool HasPayload => Assembly.GetExecutingAssembly().GetManifestResourceInfo("payload.zip") is not null;
 
-    public static bool IsInstalled => File.Exists(Path.Combine(InstallDir, ExeName));
+    public static bool IsInstalled => ExistingInstallDir() is not null;
+
+    public static bool HasDesktopShortcut => File.Exists(DesktopShortcut);
 
     public static IReadOnlyList<Process> RunningApp() =>
         Process.GetProcessesByName("NotchPC").Concat(Process.GetProcessesByName("NotchPC.Sensors")).ToList();
@@ -110,9 +152,9 @@ internal static class Installer
         Register(exe);
     }
 
-    /// <summary>Starts NotchPC; the autostart choice is handed to it (it owns that setting).</summary>
-    public static void Launch(bool autostart) =>
-        Process.Start(new ProcessStartInfo(Path.Combine(InstallDir, ExeName), autostart ? "--autostart on" : "--autostart off")
+    /// <summary>Starts NotchPC; the autostart choice (if any) is handed to it (it owns that setting).</summary>
+    public static void Launch(bool? autostart) =>
+        Process.Start(new ProcessStartInfo(Path.Combine(InstallDir, ExeName), autostart is null ? "" : autostart.Value ? "--autostart on" : "--autostart off")
         {
             UseShellExecute = false,
             WorkingDirectory = InstallDir,
@@ -126,6 +168,7 @@ internal static class Installer
         // Windows notifications identity (registered from NotchPC's settings) and the optional elevated sensors task.
         RunHidden("powershell.exe", "-NoProfile -NonInteractive -Command \"Get-AppxPackage -Name NotchPC | Remove-AppxPackage\"");
         RunHidden("schtasks.exe", "/delete /tn \"NotchPC Sensors\" /f");
+        TryDelete(IdentityDir);
 
         using (var run = Registry.CurrentUser.OpenSubKey(RunKey, writable: true))
         {
@@ -153,12 +196,22 @@ internal static class Installer
             }
         }
 
-        // This uninstaller runs from the install folder: delete the folder a moment after it exits.
-        RunHidden("cmd.exe", $"/c ping 127.0.0.1 -n 3 > nul & rmdir /s /q \"{InstallDir}\"", wait: false);
+        // This uninstaller runs from the install folder: delete the folder a moment after it exits. Only a folder
+        // that really is a NotchPC install (never whatever folder this file happens to be in).
+        if (string.Equals(Path.GetFileName(InstallDir.TrimEnd('\\')), "NotchPC", StringComparison.OrdinalIgnoreCase)
+            && File.Exists(Path.Combine(InstallDir, ExeName)))
+        {
+            RunHidden("cmd.exe", $"/c ping 127.0.0.1 -n 3 > nul & rmdir /s /q \"{InstallDir}\"", wait: false);
+        }
     }
 
     private static void ClearOldFiles()
     {
+        if (!File.Exists(Path.Combine(InstallDir, ExeName)))
+        {
+            return; // not a previous install: never delete anything there
+        }
+
         foreach (var entry in new DirectoryInfo(InstallDir).EnumerateFileSystemInfos())
         {
             // "identity" holds the Windows notifications registration: keep it across updates.

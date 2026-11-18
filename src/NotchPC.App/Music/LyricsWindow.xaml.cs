@@ -52,10 +52,10 @@ public partial class LyricsWindow : Window
     public ScreenRect? Bounds => _hwnd == IntPtr.Zero ? null : WindowHelper.GetBounds(_hwnd);
 
     /// <summary>Places the card (physical pixels) horizontally centred under the notch.</summary>
-    public void PlaceBelowNotch(MonitorDescriptor monitor, double topDip)
+    public void PlaceBelowNotch(MonitorDescriptor monitor, double topDip, double notchOffsetDip = 0)
     {
         ArgumentNullException.ThrowIfNull(monitor);
-        var x = ((monitor.Bounds.Width / monitor.Scale) - CardWidth) / 2;
+        var x = (((monitor.Bounds.Width / monitor.Scale) - CardWidth) / 2) + notchOffsetDip;
         Place(NotchLayout.PlaceCard(monitor, x, topDip, CardWidth, CardHeight));
     }
 

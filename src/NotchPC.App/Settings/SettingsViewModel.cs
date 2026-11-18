@@ -22,12 +22,13 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
 {
     private readonly SettingsService _settings;
 
-    public SettingsViewModel(SettingsService settings, System.Net.Http.HttpClient http, Widgets.SensorsClient sensors, Clipboard.ClipboardService clipboard, Apps.CaptureService capture, Notifications.NotificationHub hub, Games.GameOverlayController overlay, Remote.RemoteServer remote)
+    public SettingsViewModel(SettingsService settings, System.Net.Http.HttpClient http, Widgets.SensorsClient sensors, Clipboard.ClipboardService clipboard, Apps.CaptureService capture, Notifications.NotificationHub hub, Games.GameOverlayController overlay, Remote.RemoteServer remote, Updates.UpdateService updates)
     {
         _settings = settings;
         Notify = new NotificationSettingsViewModel(settings, hub);
         Overlay = new GameOverlaySettingsViewModel(settings, overlay);
         Remote = new RemoteSettingsViewModel(settings, remote);
+        Updates = new UpdatesViewModel(settings, updates);
         Widgets = new WidgetSettingsViewModel(settings, http, sensors);
         Capture = new CaptureSettingsViewModel(settings, clipboard, capture);
         MoveUpCommand = new RelayCommand<TabRow>(row => Move(row, -1), row => row is not null && Tabs.IndexOf(row) > 0);
@@ -52,6 +53,9 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
 
     /// <summary>The "Phone remote" section.</summary>
     public RemoteSettingsViewModel Remote { get; }
+
+    /// <summary>Automatic updates.</summary>
+    public UpdatesViewModel Updates { get; }
 
     public ObservableCollection<SelectOption> Languages { get; } = [];
 
@@ -170,6 +174,39 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.Update(s => s.Notch.TaskbarPill = value);
             OnPropertyChanged();
         }
+    }
+
+    /// <summary>The notch was dragged away from the centre (or onto another monitor than the primary).</summary>
+    public bool NotchMoved => Math.Abs(_settings.Current.Notch.HorizontalOffset) > 0.5;
+
+    public double TopOffset
+    {
+        get => _settings.Current.Notch.TopOffset;
+        set
+        {
+            var v = (int)Math.Round(value);
+            if (v == _settings.Current.Notch.TopOffset)
+            {
+                return;
+            }
+
+            _settings.Update(s => s.Notch.TopOffset = v);
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(TopOffsetText));
+        }
+    }
+
+    public string TopOffsetText => $"{_settings.Current.Notch.TopOffset} px";
+
+    internal SettingsService Settings => _settings;
+
+    public void CenterNotch() => _settings.Update(s => s.Notch.HorizontalOffset = 0);
+
+    public void RefreshNotchPosition()
+    {
+        OnPropertyChanged(nameof(NotchMoved));
+        OnPropertyChanged(nameof(TopOffset));
+        OnPropertyChanged(nameof(TopOffsetText));
     }
 
     public double HoverDelay

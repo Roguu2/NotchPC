@@ -56,6 +56,9 @@ internal sealed class NotificationHub : IDisposable
     /// <summary>A click leads to another app: the notch should get out of the way first.</summary>
     public event EventHandler? CollapseRequested;
 
+    /// <summary>The "update ready" notification was clicked.</summary>
+    public event EventHandler? InstallUpdateRequested;
+
     public IReadOnlyList<NotchNotification> Items => _history.Items;
 
     /// <summary>New Windows notifications arrive as they come (identity registered and access allowed).</summary>
@@ -122,6 +125,12 @@ internal sealed class NotificationHub : IDisposable
     public void Open(NotchNotification n)
     {
         ArgumentNullException.ThrowIfNull(n);
+        if (n.Target == NotificationTargets.InstallUpdate)
+        {
+            InstallUpdateRequested?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
         if (NotificationTargets.TabOf(n.Target) is { } tab)
         {
             TabRequested?.Invoke(this, tab);
