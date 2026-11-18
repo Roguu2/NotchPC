@@ -116,8 +116,9 @@ Notifications → Register. Without it, the notifications tab still reads what i
 <details>
 <summary><b>The game overlay shows no CPU temperature</b></summary>
 
-Reading the CPU temperature needs a kernel driver (PawnIO) and administrator rights. GPU temperature, loads and FPS
-work without them. Settings → Desktop widgets explains the optional setup.
+Windows cannot read the CPU temperature without a kernel driver. Settings → Desktop widgets → **Turn on CPU
+temperature** installs the free, signed PawnIO driver from Windows' package catalog (winget) and lets the sensors run as
+administrator, after one Windows prompt. GPU temperature, loads and FPS work without it.
 </details>
 
 <details>

@@ -19,6 +19,7 @@ internal sealed class SensorsClient : IDisposable
     private readonly SynchronizationContext _ui;
     private CancellationTokenSource? _cts;
     private Process? _ownProcess;
+    private Task _run = Task.CompletedTask;
 
     public SensorsClient()
     {
@@ -71,7 +72,76 @@ internal sealed class SensorsClient : IDisposable
         }
 
         _cts = new CancellationTokenSource();
-        _ = RunAsync(_cts.Token);
+        _run = RunLoopAsync(_run, _cts.Token);
+    }
+
+    /// <summary>
+    /// Keeps the helper connected while something needs it: waits for the previous run (and its helper process) to
+    /// end first, then connects; if the helper does not connect or goes away, tries again with a growing pause.
+    /// </summary>
+    private async Task RunLoopAsync(Task previous, CancellationToken ct)
+    {
+        try
+        {
+            await previous.ConfigureAwait(false);
+        }
+#pragma warning disable CA1031 // The previous run already logged its own errors.
+        catch (Exception)
+#pragma warning restore CA1031
+        {
+        }
+
+        var attempt = 0;
+        while (!ct.IsCancellationRequested)
+        {
+            // The elevated scheduled task does not start a second helper while the old one still runs
+            // (it exits by itself about a second after its pipe closed): wait for it, or the start is ignored.
+            await WaitForOldHelpersAsync(ct).ConfigureAwait(false);
+            var delivered = await RunAsync(ct).ConfigureAwait(false);
+            if (ct.IsCancellationRequested)
+            {
+                return;
+            }
+
+            attempt = delivered ? 1 : attempt + 1;
+            var pause = TimeSpan.FromSeconds(Math.Min(30, 2 * attempt));
+            AppLog.Info($"Sensors helper stopped or did not connect; retrying in {pause.TotalSeconds:0} s");
+            try
+            {
+                await Task.Delay(pause, ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+        }
+    }
+
+    private static async Task WaitForOldHelpersAsync(CancellationToken ct)
+    {
+        for (var i = 0; i < 25; i++)
+        {
+            var running = Process.GetProcessesByName("NotchPC.Sensors");
+            var any = running.Length > 0;
+            foreach (var p in running)
+            {
+                p.Dispose();
+            }
+
+            if (!any)
+            {
+                return;
+            }
+
+            try
+            {
+                await Task.Delay(200, ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+        }
     }
 
     private void Stop()
@@ -105,9 +175,11 @@ internal sealed class SensorsClient : IDisposable
         }
     }
 
-    private async Task RunAsync(CancellationToken ct)
+    /// <summary>One connection to the helper. True when it delivered readings (it ran, then stopped).</summary>
+    private async Task<bool> RunAsync(CancellationToken ct)
     {
         var name = SensorProtocol.PipeName(Process.GetCurrentProcess().SessionId);
+        var delivered = false;
         try
         {
             await using var pipe = new NamedPipeServerStream(name, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
@@ -131,6 +203,7 @@ internal sealed class SensorsClient : IDisposable
 
                 if (SensorProtocol.Deserialize(line) is { } snapshot)
                 {
+                    delivered = true;
                     _ui.Post(_ => SnapshotReceived?.Invoke(this, snapshot), null);
                 }
             }
@@ -143,6 +216,8 @@ internal sealed class SensorsClient : IDisposable
         {
             AppLog.Error("Sensors pipe failed", ex);
         }
+
+        return delivered;
     }
 
     private void LaunchHelper()

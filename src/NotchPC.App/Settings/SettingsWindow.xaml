@@ -456,8 +456,9 @@
                         <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.CpuTemp}" />
                         <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Settings.Widgets.CpuTemp.Hint}" />
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <ui:Button Content="{loc:Tr Settings.Widgets.CpuTemp.Enable}" Click="OnEnableCpuTemp"
-                                       IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}" />
+                            <ui:Button Content="{loc:Tr Settings.Widgets.CpuTemp.Enable}" Appearance="Primary" Click="OnEnableCpuTemp"
+                                       IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}"
+                                       Visibility="{Binding CpuTempReady, Converter={StaticResource InverseBoolToVis}}" />
                             <ui:Button Content="{loc:Tr Settings.Widgets.CpuTemp.Disable}" Margin="8,0,0,0" Click="OnDisableCpuTemp"
                                        IsEnabled="{Binding CpuTempTaskExists}" />
                         </StackPanel>

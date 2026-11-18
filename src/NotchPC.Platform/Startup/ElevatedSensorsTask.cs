@@ -44,7 +44,7 @@ public static class ElevatedSensorsTask
     /// <summary>Removes the task (UAC prompt).</summary>
     public static bool Delete() => RunSchtasks($"/delete /tn \"{TaskName}\" /f", elevate: true) == 0;
 
-    private static string TaskXml(string exePath) => $"""
+    internal static string TaskXml(string exePath) => $"""
         <?xml version="1.0" encoding="UTF-16"?>
         <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
           <RegistrationInfo>

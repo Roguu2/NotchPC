@@ -107,7 +107,7 @@
   <data name="Widget.Calendar.AllDay" xml:space="preserve"><value>All day</value></data>
   <data name="Widget.Calendar.Tomorrow" xml:space="preserve"><value>Tomorrow</value></data>
   <data name="Widget.Calendar.Now" xml:space="preserve"><value>Now</value></data>
-  <data name="Widget.Stats.CpuTempHint" xml:space="preserve"><value>CPU temperature needs the PawnIO driver and the administrator mode (Settings → Widgets).</value></data>
+  <data name="Widget.Stats.CpuTempHint" xml:space="preserve"><value>The CPU temperature needs one click: Settings → Desktop widgets → Turn on CPU temperature.</value></data>
   <data name="Widget.Stats.Paused" xml:space="preserve"><value>Paused while covered</value></data>
   <data name="Widget.DragHint" xml:space="preserve"><value>Drag to move</value></data>
   <data name="Widget.Chip.Timer" xml:space="preserve"><value>Timer</value></data>
@@ -170,10 +170,10 @@
   <data name="Settings.Widgets.Ics.Invalid" xml:space="preserve"><value>That is not an https:// iCal link</value></data>
   <data name="Settings.Widgets.Ics.Clear" xml:space="preserve"><value>Remove</value></data>
   <data name="Settings.Widgets.CpuTemp" xml:space="preserve"><value>CPU temperature</value></data>
-  <data name="Settings.Widgets.CpuTemp.Hint" xml:space="preserve"><value>Needs the free PawnIO driver (install it yourself from pawnio.eu or with: winget install namazso.PawnIO) and the sensors running as administrator. "Enable" creates a Windows scheduled task (one UAC prompt); later starts need no prompt.</value></data>
-  <data name="Settings.Widgets.CpuTemp.Enable" xml:space="preserve"><value>Enable (administrator)</value></data>
-  <data name="Settings.Widgets.CpuTemp.Disable" xml:space="preserve"><value>Disable</value></data>
-  <data name="Settings.Widgets.CpuTemp.On" xml:space="preserve"><value>On: sensors run as administrator</value></data>
+  <data name="Settings.Widgets.CpuTemp.Hint" xml:space="preserve"><value>Windows has no way to read the CPU temperature without a driver. One click installs the free, signed PawnIO driver from Windows' official package catalog (winget) and lets the sensors run as administrator. Windows asks once (UAC).</value></data>
+  <data name="Settings.Widgets.CpuTemp.Enable" xml:space="preserve"><value>Turn on CPU temperature</value></data>
+  <data name="Settings.Widgets.CpuTemp.Disable" xml:space="preserve"><value>Turn off</value></data>
+  <data name="Settings.Widgets.CpuTemp.On" xml:space="preserve"><value>On: the CPU temperature is read (PawnIO installed, sensors run as administrator). If it does not appear, restart the PC once.</value></data>
   <data name="Settings.Widgets.CpuTemp.Off" xml:space="preserve"><value>Off: sensors run without administrator rights</value></data>
   <data name="Settings.Widgets.CpuTemp.Failed" xml:space="preserve"><value>Cancelled or failed</value></data>
 
@@ -457,4 +457,13 @@
   <data name="Settings.Uninstall.Button" xml:space="preserve"><value>Uninstall…</value></data>
   <data name="Settings.Uninstall.Hint" xml:space="preserve"><value>Removes NotchPC from this PC. You will be asked to confirm and whether to keep your settings.</value></data>
   <data name="Settings.Uninstall.Portable" xml:space="preserve"><value>This copy was not installed with the installer: to remove it, close NotchPC and delete its folder.</value></data>
+  <data name="Settings.Widgets.CpuTemp.State" xml:space="preserve"><value>Off. PawnIO driver: {0} · sensors as administrator: {1}</value></data>
+  <data name="Settings.Widgets.CpuTemp.Yes" xml:space="preserve"><value>yes</value></data>
+  <data name="Settings.Widgets.CpuTemp.No" xml:space="preserve"><value>no</value></data>
+  <data name="Settings.Widgets.CpuTemp.Working" xml:space="preserve"><value>Installing… confirm the Windows prompt. Downloading the driver can take a minute.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Removing" xml:space="preserve"><value>Turning off… confirm the Windows prompt.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.Declined" xml:space="preserve"><value>Cancelled in the Windows prompt. Nothing was changed.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.NoWinget" xml:space="preserve"><value>This Windows has no package manager (winget). Install PawnIO by hand from github.com/namazso/PawnIO.Setup and click again.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.DriverFailed" xml:space="preserve"><value>The PawnIO driver could not be installed. Check the internet connection, or install it by hand from github.com/namazso/PawnIO.Setup and click again.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.TaskFailed" xml:space="preserve"><value>PawnIO is installed, but the sensors task could not be created. Click again.</value></data>
 </root>

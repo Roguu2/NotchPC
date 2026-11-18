@@ -107,7 +107,7 @@
   <data name="Widget.Calendar.AllDay" xml:space="preserve"><value>Cały dzień</value></data>
   <data name="Widget.Calendar.Tomorrow" xml:space="preserve"><value>Jutro</value></data>
   <data name="Widget.Calendar.Now" xml:space="preserve"><value>Teraz</value></data>
-  <data name="Widget.Stats.CpuTempHint" xml:space="preserve"><value>Temperatura CPU wymaga sterownika PawnIO i trybu administratora (Ustawienia → Widgety).</value></data>
+  <data name="Widget.Stats.CpuTempHint" xml:space="preserve"><value>Temperatura procesora wymaga jednego kliknięcia: Ustawienia → Widgety pulpitu → Włącz temperaturę procesora.</value></data>
   <data name="Widget.Stats.Paused" xml:space="preserve"><value>Wstrzymane, gdy zasłonięte</value></data>
   <data name="Widget.DragHint" xml:space="preserve"><value>Przeciągnij, aby przesunąć</value></data>
   <data name="Widget.Chip.Timer" xml:space="preserve"><value>Timer</value></data>
@@ -169,11 +169,11 @@
   <data name="Settings.Widgets.Ics.Saved" xml:space="preserve"><value>Link zapisany</value></data>
   <data name="Settings.Widgets.Ics.Invalid" xml:space="preserve"><value>To nie jest link https:// do iCal</value></data>
   <data name="Settings.Widgets.Ics.Clear" xml:space="preserve"><value>Usuń</value></data>
-  <data name="Settings.Widgets.CpuTemp" xml:space="preserve"><value>Temperatura CPU</value></data>
-  <data name="Settings.Widgets.CpuTemp.Hint" xml:space="preserve"><value>Wymaga darmowego sterownika PawnIO (zainstaluj go sam z pawnio.eu albo: winget install namazso.PawnIO) i czujników działających jako administrator. „Włącz” tworzy zadanie w Harmonogramie zadań (jedno okno UAC); kolejne uruchomienia są już bez pytania.</value></data>
-  <data name="Settings.Widgets.CpuTemp.Enable" xml:space="preserve"><value>Włącz (administrator)</value></data>
+  <data name="Settings.Widgets.CpuTemp" xml:space="preserve"><value>Temperatura procesora</value></data>
+  <data name="Settings.Widgets.CpuTemp.Hint" xml:space="preserve"><value>Windows nie potrafi odczytać temperatury procesora bez sterownika. Jedno kliknięcie instaluje darmowy, podpisany sterownik PawnIO z oficjalnego katalogu Windows (winget) i pozwala czujnikom działać jako administrator. Windows zapyta raz (UAC).</value></data>
+  <data name="Settings.Widgets.CpuTemp.Enable" xml:space="preserve"><value>Włącz temperaturę procesora</value></data>
   <data name="Settings.Widgets.CpuTemp.Disable" xml:space="preserve"><value>Wyłącz</value></data>
-  <data name="Settings.Widgets.CpuTemp.On" xml:space="preserve"><value>Włączone: czujniki działają jako administrator</value></data>
+  <data name="Settings.Widgets.CpuTemp.On" xml:space="preserve"><value>Włączone: temperatura procesora jest odczytywana (PawnIO zainstalowany, czujniki jako administrator). Jeśli się nie pojawia, uruchom raz komputer ponownie.</value></data>
   <data name="Settings.Widgets.CpuTemp.Off" xml:space="preserve"><value>Wyłączone: czujniki działają bez uprawnień administratora</value></data>
   <data name="Settings.Widgets.CpuTemp.Failed" xml:space="preserve"><value>Anulowano albo nie udało się</value></data>
 
@@ -457,4 +457,13 @@
   <data name="Settings.Uninstall.Button" xml:space="preserve"><value>Odinstaluj…</value></data>
   <data name="Settings.Uninstall.Hint" xml:space="preserve"><value>Usuwa NotchPC z tego komputera. Najpierw zapyta o potwierdzenie i o to, czy zachować Twoje ustawienia.</value></data>
   <data name="Settings.Uninstall.Portable" xml:space="preserve"><value>Ta kopia nie jest zainstalowana instalatorem: żeby ją usunąć, zamknij NotchPC i skasuj jej folder.</value></data>
+  <data name="Settings.Widgets.CpuTemp.State" xml:space="preserve"><value>Wyłączone. Sterownik PawnIO: {0} · czujniki jako administrator: {1}</value></data>
+  <data name="Settings.Widgets.CpuTemp.Yes" xml:space="preserve"><value>tak</value></data>
+  <data name="Settings.Widgets.CpuTemp.No" xml:space="preserve"><value>nie</value></data>
+  <data name="Settings.Widgets.CpuTemp.Working" xml:space="preserve"><value>Instalowanie… potwierdź okno Windows. Pobranie sterownika może potrwać minutę.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Removing" xml:space="preserve"><value>Wyłączanie… potwierdź okno Windows.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.Declined" xml:space="preserve"><value>Anulowano w oknie Windows. Nic nie zostało zmienione.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.NoWinget" xml:space="preserve"><value>Ten Windows nie ma menedżera pakietów (winget). Zainstaluj PawnIO ręcznie z github.com/namazso/PawnIO.Setup i kliknij ponownie.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.DriverFailed" xml:space="preserve"><value>Nie udało się zainstalować sterownika PawnIO. Sprawdź internet albo zainstaluj go ręcznie z github.com/namazso/PawnIO.Setup i kliknij ponownie.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Result.TaskFailed" xml:space="preserve"><value>PawnIO jest zainstalowany, ale nie udało się utworzyć zadania czujników. Kliknij ponownie.</value></data>
 </root>

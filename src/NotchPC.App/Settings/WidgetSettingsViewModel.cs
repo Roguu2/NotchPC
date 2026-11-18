@@ -279,7 +279,11 @@ internal sealed class WidgetSettingsViewModel : ObservableObject
     /// <summary>Back to the default column, natural sizes.</summary>
     public void ResetPositions() => _settings.Update(s => s.Widgets.Positions.Clear());
 
-    /// <summary>Creates or removes the elevated scheduled task for the sensors helper (one UAC prompt).</summary>
+    /// <summary>
+    /// One click: installs the PawnIO driver (winget) if missing and makes the sensors helper run as administrator,
+    /// in one elevated step (one UAC prompt). Turning it off removes only the task (PawnIO stays, remove it in
+    /// Windows Settings → Apps if you like).
+    /// </summary>
     public async Task SetCpuTemperatureAsync(bool enable)
     {
         if (IsBusy)
@@ -288,15 +292,27 @@ internal sealed class WidgetSettingsViewModel : ObservableObject
         }
 
         IsBusy = true;
+        CpuTempStatus = Loc.Get(enable ? "Settings.Widgets.CpuTemp.Working" : "Settings.Widgets.CpuTemp.Removing");
         try
         {
-            var ok = await Task.Run(() => enable
-                ? ElevatedSensorsTask.Create(System.IO.Path.GetFullPath(SensorsClient.HelperPath))
-                : ElevatedSensorsTask.Delete());
-            await RefreshCpuTempAsync();
-            if (!ok)
+            if (enable)
             {
-                CpuTempStatus = Loc.Get("Settings.Widgets.CpuTemp.Failed");
+                var result = await Task.Run(() => CpuTempSetup.Enable(System.IO.Path.GetFullPath(SensorsClient.HelperPath)));
+                AppLog.Info($"CPU temperature setup: {result}");
+                await RefreshCpuTempAsync();
+                if (result != CpuTempSetupResult.Ok)
+                {
+                    CpuTempStatus = Loc.Get("Settings.Widgets.CpuTemp.Result." + result);
+                }
+            }
+            else
+            {
+                var ok = await Task.Run(ElevatedSensorsTask.Delete);
+                await RefreshCpuTempAsync();
+                if (!ok)
+                {
+                    CpuTempStatus = Loc.Get("Settings.Widgets.CpuTemp.Failed");
+                }
             }
 
             _sensors.Restart();
@@ -307,12 +323,23 @@ internal sealed class WidgetSettingsViewModel : ObservableObject
         }
     }
 
+    public bool CpuTempReady { get; private set; }
+
     public async Task RefreshCpuTempAsync()
     {
         CpuTempTaskExists = await Task.Run(ElevatedSensorsTask.Exists);
+        var driver = CpuTempSetup.IsDriverInstalled();
+        CpuTempReady = CpuTempTaskExists && driver;
         Raise(nameof(CpuTempTaskExists));
-        CpuTempStatus = Loc.Get(CpuTempTaskExists ? "Settings.Widgets.CpuTemp.On" : "Settings.Widgets.CpuTemp.Off");
+        Raise(nameof(CpuTempReady));
+        CpuTempStatus = CpuTempText(driver);
     }
+
+    private string CpuTempText(bool driver) => CpuTempTaskExists && driver
+        ? Loc.Get("Settings.Widgets.CpuTemp.On")
+        : Loc.Format("Settings.Widgets.CpuTemp.State",
+            Loc.Get(driver ? "Settings.Widgets.CpuTemp.Yes" : "Settings.Widgets.CpuTemp.No"),
+            Loc.Get(CpuTempTaskExists ? "Settings.Widgets.CpuTemp.Yes" : "Settings.Widgets.CpuTemp.No"));
 
     private void Update(Action<Core.Settings.AppSettings> change, [System.Runtime.CompilerServices.CallerMemberName] string? name = null)
     {
@@ -325,9 +352,9 @@ internal sealed class WidgetSettingsViewModel : ObservableObject
         CityStatus = string.IsNullOrEmpty(W.WeatherPlace) ? "" : Loc.Format("Settings.Widgets.City.Current", W.WeatherPlace);
         CalendarStatus = HasCalendar ? Loc.Get("Settings.Widgets.Ics.Saved") : "";
         Raise(nameof(HasCalendar));
-        if (!string.IsNullOrEmpty(CpuTempStatus))
+        if (!string.IsNullOrEmpty(CpuTempStatus) && !IsBusy)
         {
-            CpuTempStatus = Loc.Get(CpuTempTaskExists ? "Settings.Widgets.CpuTemp.On" : "Settings.Widgets.CpuTemp.Off");
+            CpuTempStatus = CpuTempText(CpuTempSetup.IsDriverInstalled());
         }
     }
 }
