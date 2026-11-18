@@ -241,7 +241,7 @@ public static partial class AppActivator
         }
     }
 
-    private static string? ProcessPath(uint pid)
+    internal static string? ProcessPath(uint pid)
     {
         var process = OpenProcess(ProcessQueryLimitedInformation, false, pid);
         if (process == IntPtr.Zero)
@@ -268,7 +268,7 @@ public static partial class AppActivator
     }
 
     /// <summary>The program behind a Start menu entry (System.Link.TargetParsingPath), or null for packaged apps.</summary>
-    private static string? TargetOf(string aumid)
+    internal static string? TargetOf(string aumid)
     {
         lock (TargetCache)
         {

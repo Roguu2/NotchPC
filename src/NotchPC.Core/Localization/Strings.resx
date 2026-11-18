@@ -466,4 +466,6 @@
   <data name="Settings.Widgets.CpuTemp.Result.NoWinget" xml:space="preserve"><value>This Windows has no package manager (winget). Install PawnIO by hand from github.com/namazso/PawnIO.Setup and click again.</value></data>
   <data name="Settings.Widgets.CpuTemp.Result.DriverFailed" xml:space="preserve"><value>The PawnIO driver could not be installed. Check the internet connection, or install it by hand from github.com/namazso/PawnIO.Setup and click again.</value></data>
   <data name="Settings.Widgets.CpuTemp.Result.TaskFailed" xml:space="preserve"><value>PawnIO is installed, but the sensors task could not be created. Click again.</value></data>
+  <data name="Music.Volume.App" xml:space="preserve"><value>Volume of {0} (other sounds stay as they are)</value></data>
+  <data name="Music.Volume.Device" xml:space="preserve"><value>Volume of the whole PC (the player's own volume could not be found)</value></data>
 </root>

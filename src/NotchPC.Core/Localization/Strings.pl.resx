@@ -466,4 +466,6 @@
   <data name="Settings.Widgets.CpuTemp.Result.NoWinget" xml:space="preserve"><value>Ten Windows nie ma menedżera pakietów (winget). Zainstaluj PawnIO ręcznie z github.com/namazso/PawnIO.Setup i kliknij ponownie.</value></data>
   <data name="Settings.Widgets.CpuTemp.Result.DriverFailed" xml:space="preserve"><value>Nie udało się zainstalować sterownika PawnIO. Sprawdź internet albo zainstaluj go ręcznie z github.com/namazso/PawnIO.Setup i kliknij ponownie.</value></data>
   <data name="Settings.Widgets.CpuTemp.Result.TaskFailed" xml:space="preserve"><value>PawnIO jest zainstalowany, ale nie udało się utworzyć zadania czujników. Kliknij ponownie.</value></data>
+  <data name="Music.Volume.App" xml:space="preserve"><value>Głośność: {0} (inne dźwięki bez zmian)</value></data>
+  <data name="Music.Volume.Device" xml:space="preserve"><value>Głośność całego komputera (nie znaleziono głośności samego odtwarzacza)</value></data>
 </root>

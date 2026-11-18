@@ -67,6 +67,52 @@ public static partial class AudioSessions
     public static void SetMute(string key, bool muted) =>
         ForApp(key, v => v.SetMute(muted, ref _context));
 
+    /// <summary>
+    /// The mixer entry of the app behind a media session (Windows' media controls name it by AppUserModelID, e.g.
+    /// "Spotify.exe", "Brave.UserData.Profile2", "com.spotitube.app", "SpotifyAB.SpotifyMusic_…!Spotify"):
+    /// its window, else its Start menu shortcut, else its name inside the ID. Null when nothing matches.
+    /// </summary>
+    public static AudioApp? FindForMediaSource(string appUserModelId)
+    {
+        if (string.IsNullOrWhiteSpace(appUserModelId))
+        {
+            return null;
+        }
+
+        var apps = List().Where(a => !a.IsSystemSounds && a.ExePath is not null).ToList();
+        if (apps.Count == 0)
+        {
+            return null;
+        }
+
+        AudioApp? Pick(Func<AudioApp, bool> match) =>
+            apps.Where(match).OrderByDescending(a => a.IsActive).FirstOrDefault();
+
+        // 1. A window that carries this ID (browsers per profile, packaged apps).
+        var hwnd = Shell.AppActivator.FindWindow(appUserModelId);
+        if (hwnd != IntPtr.Zero && Shell.WindowHelper.ProcessIdOf(hwnd) is var pid && pid != 0
+            && Shell.AppActivator.ProcessPath(pid) is { } windowExe
+            && Pick(a => string.Equals(a.ExePath, windowExe, StringComparison.OrdinalIgnoreCase)) is { } byWindow)
+        {
+            return byWindow;
+        }
+
+        // 2. The Start menu shortcut with this ID (Electron and other installed desktop apps).
+        if (Shell.AppActivator.TargetOf(appUserModelId) is { } target)
+        {
+            var folder = Path.GetDirectoryName(target) ?? "";
+            if (Pick(a => string.Equals(a.ExePath, target, StringComparison.OrdinalIgnoreCase)
+                          || (folder.Length > 3 && a.ExePath!.StartsWith(folder + "\\", StringComparison.OrdinalIgnoreCase))) is { } byShortcut)
+            {
+                return byShortcut;
+            }
+        }
+
+        // 3. The program's name inside the ID.
+        return Pick(a => Core.Music.MediaSources.NameMatches(appUserModelId, a.ExePath!));
+    }
+
+
     private static void ForApp(string key, Action<ISimpleAudioVolume> action)
     {
         var paths = new Dictionary<uint, string?>();

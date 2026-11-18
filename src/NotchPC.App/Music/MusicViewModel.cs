@@ -77,6 +77,14 @@ internal sealed class MusicViewModel : INotifyPropertyChanged, IDisposable
     private readonly DispatcherTimer _ticker;
     private readonly DispatcherTimer _thumbnailRetry;
     private MediaSnapshot? _snapshot;
+
+    // The playing app's own volume (its entry in the Windows volume mixer), when it can be found.
+    private readonly System.Windows.Threading.DispatcherTimer _appPoll;
+    private string? _appKey;
+    private string? _appName;
+    private double _appVolume;
+    private bool _appMuted;
+    private bool _appResolving;
     private string? _coverKey;
     private string? _lyricsKey;
     private LyricsDocument? _lyrics;
@@ -101,6 +109,11 @@ internal sealed class MusicViewModel : INotifyPropertyChanged, IDisposable
 
         _output = TryCreate(AudioFlow.Output);
         _mic = TryCreate(AudioFlow.Input);
+
+        // While the music panel is open: follow the player's mixer entry (it may appear only once it plays,
+        // and its volume can change in Windows' mixer).
+        _appPoll = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _appPoll.Tick += (_, _) => _ = ResolveAppAsync();
         if (_output is not null)
         {
             _output.Changed += (_, _) => Raise(nameof(Volume), nameof(IsOutputMuted), nameof(VolumeGlyph));
@@ -184,28 +197,59 @@ internal sealed class MusicViewModel : INotifyPropertyChanged, IDisposable
         private set => Set(ref _remainingText, value);
     }
 
-    /// <summary>0..100 (Windows master volume of the default output).</summary>
+    /// <summary>
+    /// 0..100: the volume of the app that plays (its entry in the Windows volume mixer), so other sounds stay as
+    /// they are. Falls back to the device volume when the player's mixer entry cannot be found.
+    /// </summary>
     public double Volume
     {
-        get => (_output?.Volume ?? 0) * 100;
+        get => _appKey is not null ? _appVolume * 100 : (_output?.Volume ?? 0) * 100;
         set
         {
-            if (_output is null || Math.Abs(value - Volume) < 0.5)
+            if (Math.Abs(value - Volume) < 0.5)
             {
                 return;
             }
 
-            _output.SetVolume((float)(value / 100));
-            if (value > 0 && _output.IsMuted)
+            if (_appKey is { } key)
             {
-                _output.SetMuted(false);
+                _appVolume = Math.Clamp(value / 100, 0, 1);
+                var level = (float)_appVolume;
+                var unmute = value > 0 && _appMuted;
+                _appMuted = _appMuted && !unmute;
+                _ = Task.Run(() =>
+                {
+                    AudioSessions.SetVolume(key, level);
+                    if (unmute)
+                    {
+                        AudioSessions.SetMute(key, false);
+                    }
+                });
+            }
+            else
+            {
+                if (_output is null)
+                {
+                    return;
+                }
+
+                _output.SetVolume((float)(value / 100));
+                if (value > 0 && _output.IsMuted)
+                {
+                    _output.SetMuted(false);
+                }
             }
 
-            Raise(nameof(Volume), nameof(VolumeGlyph));
+            Raise(nameof(Volume), nameof(VolumeGlyph), nameof(IsOutputMuted));
         }
     }
 
-    public bool IsOutputMuted => _output?.IsMuted ?? false;
+    public bool IsOutputMuted => _appKey is not null ? _appMuted : _output?.IsMuted ?? false;
+
+    /// <summary>Tooltip of the slider: whose volume it is.</summary>
+    public string VolumeToolTip => _appName is { } name
+        ? Loc.Format("Music.Volume.App", name)
+        : Loc.Get("Music.Volume.Device");
 
     public string VolumeGlyph
     {
@@ -284,6 +328,15 @@ internal sealed class MusicViewModel : INotifyPropertyChanged, IDisposable
     {
         _panelVisible = visible;
         UpdateTicker();
+        if (visible)
+        {
+            _ = ResolveAppAsync();
+            _appPoll.Start();
+        }
+        else
+        {
+            _appPoll.Stop();
+        }
     }
 
     /// <summary>The lyrics card is on screen.</summary>
@@ -349,7 +402,54 @@ internal sealed class MusicViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public void ToggleOutputMute() => _output?.SetMuted(!IsOutputMuted);
+    public void ToggleOutputMute()
+    {
+        if (_appKey is { } key)
+        {
+            _appMuted = !_appMuted;
+            var muted = _appMuted;
+            _ = Task.Run(() => AudioSessions.SetMute(key, muted));
+            Raise(nameof(IsOutputMuted), nameof(VolumeGlyph));
+            return;
+        }
+
+        _output?.SetMuted(!IsOutputMuted);
+    }
+
+    /// <summary>Finds the playing app's mixer entry (off the UI thread; ~50 ms).</summary>
+    private async Task ResolveAppAsync()
+    {
+        if (_appResolving)
+        {
+            return;
+        }
+
+        _appResolving = true;
+        try
+        {
+            var source = _snapshot?.SourceApp;
+            var app = string.IsNullOrEmpty(source) ? null : await Task.Run(() => AudioSessions.FindForMediaSource(source)).ConfigureAwait(true);
+            if (_snapshot?.SourceApp != source)
+            {
+                return; // the player changed meanwhile; the next round picks it up
+            }
+
+            var changed = app?.Key != _appKey || app?.Name != _appName
+                          || (app is not null && (Math.Abs(app.Volume - _appVolume) > 0.004 || app.Muted != _appMuted));
+            _appKey = app?.Key;
+            _appName = app?.Name;
+            _appVolume = app?.Volume ?? 0;
+            _appMuted = app?.Muted ?? false;
+            if (changed)
+            {
+                Raise(nameof(Volume), nameof(IsOutputMuted), nameof(VolumeGlyph), nameof(VolumeToolTip));
+            }
+        }
+        finally
+        {
+            _appResolving = false;
+        }
+    }
 
     public void ToggleMic()
     {
@@ -388,7 +488,12 @@ internal sealed class MusicViewModel : INotifyPropertyChanged, IDisposable
     private void OnMediaChanged(MediaSnapshot? snapshot)
     {
         var trackChanged = snapshot?.TrackKey != _snapshot?.TrackKey;
+        var playerChanged = snapshot?.SourceApp != _snapshot?.SourceApp;
         _snapshot = snapshot;
+        if (playerChanged)
+        {
+            _ = ResolveAppAsync();
+        }
 
         Raise(nameof(HasMedia), nameof(IsPlaying), nameof(Title), nameof(ArtistText), nameof(CanPlayPause),
               nameof(CanGoNext), nameof(CanGoPrevious), nameof(CanSeek), nameof(HasTimeline), nameof(PlayPauseGlyph),

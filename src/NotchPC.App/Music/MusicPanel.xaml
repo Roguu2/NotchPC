@@ -126,7 +126,7 @@
                     </Button>
                     <Button Style="{StaticResource NotchSmallIconButton}" Content="{Binding VolumeGlyph}" ToolTip="{loc:Tr Music.MuteOutput}" Click="OnMuteOutput" />
                     <Slider Style="{StaticResource NotchSlider}" Width="110" Margin="4,0,0,0" VerticalAlignment="Center"
-                            Value="{Binding Volume, Mode=TwoWay}" ToolTip="{loc:Tr Music.Volume}" />
+                            Value="{Binding Volume, Mode=TwoWay}" ToolTip="{Binding VolumeToolTip}" />
                 </StackPanel>
 
                 <TextBlock Grid.Column="4" Text="{Binding RemainingText}" FontFamily="{StaticResource MonoFont}" FontSize="11"
