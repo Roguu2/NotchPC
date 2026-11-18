@@ -1,0 +1,45 @@
+name: Build
+
+# Every push and pull request: build the solution (warnings are errors) and run the tests.
+# Run by hand (Actions → Build → Run workflow) to also get the installer as an artifact without releasing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        run: dotnet build NotchPC.sln -c Release -nologo
+
+      - name: Test
+        run: dotnet test tests/NotchPC.Tests -c Release --no-build -nologo
+
+      - name: Installer (manual runs only)
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: ./scripts/publish.ps1
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          name: NotchPC-installer
+          path: |
+            publish/*.exe
+            publish/*.zip
+          retention-days: 14

@@ -1,0 +1,187 @@
+<UserControl x:Class="NotchPC.App.Widgets.CalendarWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:NotchPC.App.Localization"
+             xmlns:local="clr-namespace:NotchPC.App.Widgets"
+             xmlns:controls="clr-namespace:NotchPC.App.Controls"
+             Foreground="{StaticResource IslandForeground}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <DataTemplate DataType="{x:Type local:AgendaHeaderRow}">
+            <TextBlock Text="{Binding Text}" FontSize="11" FontWeight="SemiBold" Margin="0,8,0,3"
+                       Foreground="{StaticResource IslandForegroundMuted}" />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:AgendaEventRow}">
+            <Grid Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="58" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="3" Height="14" CornerRadius="1.5" Background="{StaticResource CalendarAccentBrush}"
+                        Margin="0,0,7,0" VerticalAlignment="Center" />
+                <TextBlock x:Name="Time" Grid.Column="1" Text="{Binding Time}" FontSize="11.5" VerticalAlignment="Center"
+                           Foreground="{StaticResource IslandForegroundMuted}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding Title}" FontSize="12.5" TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center" ToolTip="{Binding Title}" />
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsNow}" Value="True">
+                    <Setter TargetName="Time" Property="Foreground" Value="{StaticResource CalendarAccentBrush}" />
+                    <Setter TargetName="Time" Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource NotchSmallIconButton}">
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="FontSize" Value="10" />
+        </Style>
+
+        <Style x:Key="DayButton" TargetType="Button">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{StaticResource IslandForeground}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="Transparent">
+                            <Border x:Name="Bg" Width="24" Height="24" CornerRadius="12" BorderThickness="1" BorderBrush="Transparent" Background="Transparent" />
+                            <TextBlock x:Name="Num" Text="{Binding Number}" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Ellipse x:Name="Dot" Width="3.5" Height="3.5" Fill="{StaticResource CalendarAccentBrush}" VerticalAlignment="Bottom"
+                                     HorizontalAlignment="Center" Margin="0,0,0,1" Visibility="Hidden" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding InMonth}" Value="False">
+                                <Setter TargetName="Num" Property="Opacity" Value="0.3" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasEvents}" Value="True">
+                                <Setter TargetName="Dot" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource CalendarAccentBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#33FFFFFF" />
+                                <Setter TargetName="Num" Property="FontWeight" Value="SemiBold" />
+                            </DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#1FFFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Date and week (always) -->
+        <Grid x:Name="Header" Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding DayNumber}" FontSize="30" FontWeight="SemiBold" Margin="0,-6,0,0" />
+                <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding DayName}" FontSize="11" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding MonthName}" FontSize="11" Foreground="{StaticResource IslandForegroundMuted}" />
+                </StackPanel>
+            </StackPanel>
+            <TextBlock Text="{Binding WeekText}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Top"
+                       Foreground="{StaticResource IslandForegroundMuted}" />
+        </Grid>
+
+        <!-- Compact: next event + day progress -->
+        <StackPanel x:Name="CompactBody" Grid.Row="1">
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="3" Height="16" CornerRadius="1.5" Background="{StaticResource CalendarAccentBrush}"
+                        Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding EventTitle}" FontSize="13"
+                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding EventTitle}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasEvent}" Value="False">
+                                    <Setter Property="FontWeight" Value="Normal" />
+                                    <Setter Property="Foreground" Value="{StaticResource IslandForegroundMuted}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Grid.Column="2" Text="{Binding EventTime}" FontSize="12" Margin="8,0,0,0" VerticalAlignment="Center" />
+            </Grid>
+            <controls:MiniBar Value="{Binding DayProgress}" Height="4" Margin="0,9,0,0" Fill="#CCFFFFFF" />
+        </StackPanel>
+
+        <!-- Agenda: upcoming days with their events (wheel to scroll) -->
+        <Grid x:Name="AgendaBody" Grid.Row="1" Visibility="Collapsed" Margin="0,4,0,0">
+            <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False">
+                <ItemsControl ItemsSource="{Binding Agenda}" Focusable="False" />
+            </ScrollViewer>
+            <TextBlock Text="{Binding AgendaEmptyText}" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource IslandForegroundMuted}"
+                       Visibility="{Binding AgendaEmpty, Converter={StaticResource BoolToVis}}" />
+        </Grid>
+
+        <!-- Month: pick any day, its events below -->
+        <Grid x:Name="MonthBody" Grid.Row="1" Visibility="Collapsed" Margin="0,8,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <TextBlock Text="{Binding MonthTitle}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource NavButton}" Content="&#xE76B;" ToolTip="{loc:Tr Widget.Calendar.PrevMonth}" Click="OnPrevMonth" />
+                    <Button Style="{StaticResource NavButton}" Content="&#xE76C;" ToolTip="{loc:Tr Widget.Calendar.NextMonth}" Click="OnNextMonth" Margin="2,0,0,0" />
+                </StackPanel>
+            </Grid>
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding WeekdayNames}" Margin="0,6,0,2" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="7" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="10" HorizontalAlignment="Center" Foreground="{StaticResource IslandForegroundDim}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding MonthDays}" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="7" Rows="6" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:MonthDay}">
+                        <Button Style="{StaticResource DayButton}" Height="27" Tag="{Binding Date}" Click="OnDay" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Grid Grid.Row="3" Margin="0,6,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False">
+                    <ItemsControl ItemsSource="{Binding Agenda}" Focusable="False" />
+                </ScrollViewer>
+                <TextBlock Text="{Binding AgendaEmptyText}" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Foreground="{StaticResource IslandForegroundMuted}"
+                           Visibility="{Binding AgendaEmpty, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,103 @@
+<UserControl x:Class="NotchPC.App.Shelf.ShelfPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:NotchPC.App.Localization"
+             xmlns:shelf="clr-namespace:NotchPC.App.Shelf"
+             xmlns:controls="clr-namespace:NotchPC.App.Controls"
+             Foreground="{StaticResource IslandForeground}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <controls:InverseBoolToVisibility x:Key="InverseBoolToVis" />
+
+        <Style x:Key="TileCorner" TargetType="Button" BasedOn="{StaticResource NotchSmallIconButton}">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="Background" Value="#CC2A2A2E" />
+            <Setter Property="Foreground" Value="{StaticResource IslandForeground}" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+
+        <DataTemplate x:Key="ShelfTile" DataType="{x:Type shelf:ShelfItem}">
+            <Border x:Name="Tile" Width="78" Height="86" Margin="0,0,5,6" CornerRadius="12" Background="Transparent"
+                    Tag="{Binding}" ToolTip="{Binding ToolTip}" Cursor="Hand"
+                    PreviewMouseLeftButtonDown="OnTileDown" MouseMove="OnTileMove" MouseLeftButtonUp="OnTileUp">
+                <Grid>
+                    <StackPanel Margin="4,8,4,4">
+                        <Grid Width="46" Height="46">
+                            <TextBlock Text="&#xE7C3;" FontFamily="{StaticResource IconFont}" FontSize="26"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource IslandForegroundDim}" />
+                            <Image Source="{Binding Thumbnail}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Grid>
+                        <TextBlock Text="{Binding Name}" FontSize="11" Margin="0,5,0,0" TextAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" TextWrapping="Wrap" MaxHeight="28" />
+                    </StackPanel>
+                    <Button x:Name="RemoveBtn" Style="{StaticResource TileCorner}" Content="&#xE711;" HorizontalAlignment="Right" Margin="0,3,3,0"
+                            Tag="{Binding}" Click="OnRemove" ToolTip="{loc:Tr Shelf.Remove}" Visibility="Hidden" />
+                    <Button x:Name="FolderBtn" Style="{StaticResource TileCorner}" Content="&#xE838;" HorizontalAlignment="Left" Margin="3,3,0,0"
+                            Tag="{Binding}" Click="OnShowInFolder" ToolTip="{loc:Tr Shelf.ShowInFolder}" Visibility="Hidden" />
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <Trigger SourceName="Tile" Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Tile" Property="Background" Value="{StaticResource IslandHover}" />
+                    <Setter TargetName="RemoveBtn" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="FolderBtn" Property="Visibility" Value="Visible" />
+                </Trigger>
+                <DataTrigger Binding="{Binding Exists}" Value="False">
+                    <Setter TargetName="Tile" Property="Opacity" Value="0.4" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" Margin="2,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{loc:Tr Tab.files}" FontSize="13" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding CountText}" FontSize="11.5" Margin="8,1,0,0" Foreground="{StaticResource IslandForegroundMuted}"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+            <!-- Drag this to take every file off the shelf at once -->
+            <Border x:Name="DragAll" Grid.Column="1" CornerRadius="13" Height="26" Padding="10,0" Background="#1AFFFFFF" Cursor="SizeAll"
+                    ToolTip="{loc:Tr Shelf.DragAll.Hint}" PreviewMouseLeftButtonDown="OnTileDown" MouseMove="OnDragAllMove"
+                    Visibility="{Binding IsEmpty, Converter={StaticResource InverseBoolToVis}}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="&#xE759;" FontFamily="{StaticResource IconFont}" FontSize="11" VerticalAlignment="Center" />
+                    <TextBlock Text="{loc:Tr Shelf.DragAll}" FontSize="11.5" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+            <Button Grid.Column="2" Style="{StaticResource NotchIconButton}" Width="28" Height="28" Margin="4,0,0,0" FontSize="13"
+                    Content="&#xE74D;" Click="OnClear" ToolTip="{loc:Tr Shelf.Clear}"
+                    Visibility="{Binding IsEmpty, Converter={StaticResource InverseBoolToVis}}" />
+        </Grid>
+
+        <Grid>
+            <ScrollViewer Style="{StaticResource NotchScrollViewer}">
+                <ItemsControl ItemsSource="{Binding Items}" ItemTemplate="{StaticResource ShelfTile}" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Border CornerRadius="14" BorderThickness="1.5" BorderBrush="#33FFFFFF" Margin="0,0,0,2" IsHitTestVisible="False"
+                    Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20,0">
+                    <TextBlock Text="&#xE898;" FontFamily="{StaticResource IconFont}" FontSize="24" HorizontalAlignment="Center"
+                               Foreground="{StaticResource IslandForegroundMuted}" />
+                    <TextBlock Text="{loc:Tr Shelf.Empty}" FontSize="13" FontWeight="SemiBold" Margin="0,8,0,0" HorizontalAlignment="Center" />
+                    <TextBlock Text="{loc:Tr Shelf.EmptyHint}" FontSize="11.5" Margin="0,4,0,0" TextAlignment="Center" TextWrapping="Wrap"
+                               Foreground="{StaticResource IslandForegroundMuted}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</UserControl>

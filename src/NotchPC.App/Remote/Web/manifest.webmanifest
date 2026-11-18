@@ -1,0 +1,9 @@
+{
+  "name": "NotchPC",
+  "short_name": "NotchPC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0d",
+  "theme_color": "#0b0b0d",
+  "icons": [{ "src": "/icon.png", "sizes": "192x192", "type": "image/png" }]
+}

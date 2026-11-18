@@ -1,0 +1,246 @@
+<UserControl x:Class="NotchPC.App.QuickSettings.QuickSettingsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:NotchPC.App.Localization"
+             xmlns:qs="clr-namespace:NotchPC.App.QuickSettings"
+             xmlns:controls="clr-namespace:NotchPC.App.Controls"
+             Foreground="{StaticResource IslandForeground}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <controls:InverseBoolToVisibility x:Key="InverseBoolToVis" />
+
+        <!-- Tile: dark when off, light when on (like Windows quick settings) -->
+        <ControlTemplate x:Key="TileTemplate" TargetType="ButtonBase">
+            <Border x:Name="Bg" CornerRadius="14" Background="#17FFFFFF" BorderBrush="#14FFFFFF" BorderThickness="1" Padding="10,8,8,7">
+                <ContentPresenter />
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Bg" Property="BorderBrush" Value="#59FFFFFF" />
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                    <Setter TargetName="Bg" Property="Background" Value="#FFF0F0F2" />
+                    <Setter Property="Foreground" Value="#FF141416" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.4" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <Style x:Key="Tile" TargetType="ButtonBase">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Height" Value="70" />
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="Foreground" Value="{StaticResource IslandForeground}" />
+            <Setter Property="Template" Value="{StaticResource TileTemplate}" />
+        </Style>
+        <Style x:Key="TileGlyph" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style x:Key="TileLink" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="Opacity" Value="0.55" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style x:Key="TileLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,6,0,1" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style x:Key="TileStatus" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="Opacity" Value="0.65" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SliderRowIcon" TargetType="Button" BasedOn="{StaticResource NotchIconButton}">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Volume + output device -->
+        <Grid DockPanel.Dock="Top" Height="32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Style="{StaticResource SliderRowIcon}" Content="{Binding VolumeGlyph}" Click="OnToggleMute" ToolTip="{loc:Tr Quick.Mute}" />
+            <Slider Grid.Column="1" Style="{StaticResource NotchSlider}" Margin="6,0,6,0" VerticalAlignment="Center"
+                    Value="{Binding Volume}" IsEnabled="{Binding HasOutput}" />
+            <TextBlock Grid.Column="2" Text="{Binding VolumeText}" FontSize="11.5" VerticalAlignment="Center" TextAlignment="Right"
+                       Foreground="{StaticResource IslandForegroundMuted}" />
+            <Button Grid.Column="3" Margin="8,0,0,0" Height="26" MaxWidth="150" Focusable="False" Cursor="Hand" Click="OnShowDevices"
+                    ToolTip="{loc:Tr Quick.Output.Hint}">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" CornerRadius="13" Background="#17FFFFFF" Padding="10,0,8,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding OutputName}" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="110"
+                                           Foreground="{StaticResource IslandForeground}" VerticalAlignment="Center" />
+                                <TextBlock Text="&#xE70D;" FontFamily="{StaticResource IconFont}" FontSize="8" Margin="6,1,0,0"
+                                           Foreground="{StaticResource IslandForegroundMuted}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#29FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+
+        <!-- Brightness (DDC/CI) -->
+        <Grid DockPanel.Dock="Top" Height="32" Margin="0,4,0,8" ToolTip="{Binding BrightnessHint}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="40" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="&#xE706;" FontFamily="{StaticResource IconFont}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Slider Grid.Column="1" Style="{StaticResource NotchSlider}" Margin="6,0,6,0" VerticalAlignment="Center"
+                    Value="{Binding Brightness}" IsEnabled="{Binding HasBrightness}" />
+            <TextBlock Grid.Column="2" Text="{Binding BrightnessText}" FontSize="11.5" VerticalAlignment="Center" TextAlignment="Right"
+                       Foreground="{StaticResource IslandForegroundMuted}" />
+        </Grid>
+
+        <Grid>
+            <!-- Tiles -->
+            <UniformGrid Columns="4" VerticalAlignment="Top" Margin="-3,0,-3,0"
+                         Visibility="{Binding ShowDevices, Converter={StaticResource InverseBoolToVis}}">
+                <ToggleButton Style="{StaticResource Tile}" IsChecked="{Binding MicOn}" IsEnabled="{Binding HasMic}" ToolTip="{loc:Tr Quick.Mic.Hint}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TileGlyph}" Text="&#xE720;" />
+                        <TextBlock Style="{StaticResource TileLabel}" Text="{loc:Tr Quick.Mic}" />
+                        <TextBlock Style="{StaticResource TileStatus}" Text="{Binding MicStatus}" />
+                    </StackPanel>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource Tile}" IsChecked="{Binding NetworkOk, Mode=OneWay}" Click="OnNetwork" ToolTip="{loc:Tr Quick.Network.Hint}">
+                    <Grid>
+                        <TextBlock Style="{StaticResource TileLink}" Text="&#xE8A7;" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource TileGlyph}" Text="{Binding NetworkGlyph}" />
+                            <TextBlock Style="{StaticResource TileLabel}" Text="{Binding NetworkTitle}" />
+                            <TextBlock Style="{StaticResource TileStatus}" Text="{Binding NetworkStatusText}" />
+                        </StackPanel>
+                    </Grid>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource Tile}" IsChecked="{Binding WifiOn}"
+                              Visibility="{Binding HasWifi, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TileGlyph}" Text="&#xE701;" />
+                        <TextBlock Style="{StaticResource TileLabel}" Text="Wi-Fi" />
+                        <TextBlock Style="{StaticResource TileStatus}" Text="{loc:Tr Quick.Radio}" />
+                    </StackPanel>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource Tile}" IsChecked="{Binding BluetoothOn}"
+                              Visibility="{Binding HasBluetooth, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TileGlyph}" Text="&#xE702;" />
+                        <TextBlock Style="{StaticResource TileLabel}" Text="Bluetooth" />
+                        <TextBlock Style="{StaticResource TileStatus}" Text="{loc:Tr Quick.Radio}" />
+                    </StackPanel>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource Tile}" IsChecked="{Binding DarkMode}" ToolTip="{loc:Tr Quick.Dark.Hint}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TileGlyph}" Text="&#xE793;" />
+                        <TextBlock Style="{StaticResource TileLabel}" Text="{loc:Tr Quick.Dark}" />
+                        <TextBlock Style="{StaticResource TileStatus}" Text="{loc:Tr Quick.Dark.Status}" />
+                    </StackPanel>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource Tile}" IsChecked="{Binding KeepAwake}" ToolTip="{loc:Tr Quick.Awake.Hint}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TileGlyph}" Text="&#xEC32;" />
+                        <TextBlock Style="{StaticResource TileLabel}" Text="{loc:Tr Quick.Awake}" />
+                        <TextBlock Style="{StaticResource TileStatus}" Text="{Binding KeepAwakeStatus}" />
+                    </StackPanel>
+                </ToggleButton>
+                <Button Style="{StaticResource Tile}" Tag="ms-settings:nightlight" Click="OnOpenSettings" ToolTip="{loc:Tr Quick.NoApi.Hint}">
+                    <Grid>
+                        <TextBlock Style="{StaticResource TileLink}" Text="&#xE8A7;" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource TileGlyph}" Text="&#xF08C;" />
+                            <TextBlock Style="{StaticResource TileLabel}" Text="{loc:Tr Quick.NightLight}" />
+                            <TextBlock Style="{StaticResource TileStatus}" Text="{loc:Tr Quick.InSettings}" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <Button Style="{StaticResource Tile}" Tag="ms-settings:notifications" Click="OnOpenSettings" ToolTip="{loc:Tr Quick.NoApi.Hint}">
+                    <Grid>
+                        <TextBlock Style="{StaticResource TileLink}" Text="&#xE8A7;" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource TileGlyph}" Text="&#xE7ED;" />
+                            <TextBlock Style="{StaticResource TileLabel}" Text="{loc:Tr Quick.Dnd}" />
+                            <TextBlock Style="{StaticResource TileStatus}" Text="{loc:Tr Quick.InSettings}" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <Button Style="{StaticResource Tile}" Click="OnLock" ToolTip="{loc:Tr Quick.Lock.Hint}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TileGlyph}" Text="&#xE72E;" />
+                        <TextBlock Style="{StaticResource TileLabel}" Text="{loc:Tr Quick.Lock}" />
+                        <TextBlock Style="{StaticResource TileStatus}" Text="Win+L" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+
+            <!-- Output device list -->
+            <DockPanel Visibility="{Binding ShowDevices, Converter={StaticResource BoolToVis}}">
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,4">
+                    <TextBlock Text="{loc:Tr Quick.Output}" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,0,0" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource NotchSmallIconButton}" Content="&#xE713;" Tag="ms-settings:sound" Click="OnOpenSettings"
+                                ToolTip="{loc:Tr Quick.Output.Settings}" />
+                        <Button Style="{StaticResource NotchSmallIconButton}" Content="&#xE711;" Click="OnHideDevices" ToolTip="{loc:Tr Quick.Back}" />
+                    </StackPanel>
+                </Grid>
+                <ScrollViewer Style="{StaticResource NotchScrollViewer}">
+                    <ItemsControl ItemsSource="{Binding Devices}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type qs:AudioDeviceItem}">
+                                <Button Tag="{Binding}" Click="OnSelectDevice" Focusable="False" Cursor="Hand" Margin="0,1">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bg" CornerRadius="10" Background="Transparent" Padding="10,7">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="22" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock x:Name="Check" Text="&#xE73E;" FontFamily="{StaticResource IconFont}" FontSize="12"
+                                                               VerticalAlignment="Center" Visibility="Hidden" Foreground="{StaticResource IslandForeground}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12.5" TextTrimming="CharacterEllipsis"
+                                                               Foreground="{StaticResource IslandForeground}" VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="{StaticResource IslandHover}" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding IsDefault}" Value="True">
+                                                    <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</UserControl>

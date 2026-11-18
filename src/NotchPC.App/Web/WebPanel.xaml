@@ -1,0 +1,44 @@
+<UserControl x:Class="NotchPC.App.Web.WebPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:NotchPC.App.Localization"
+             xmlns:w="clr-namespace:NotchPC.App.Web"
+             Foreground="{StaticResource IslandForeground}">
+    <DockPanel>
+        <TextBox x:Name="Address" DockPanel.Dock="Top" Style="{StaticResource NotchSearchBox}" Tag="{loc:Tr Web.Address}"
+                 PreviewKeyDown="OnAddressKey" Margin="0,0,0,10" />
+
+        <ItemsControl ItemsSource="{Binding Tiles}" Focusable="False">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel HorizontalAlignment="Center" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type w:WebTile}">
+                    <Grid x:Name="Tile" Width="78" Height="80" Margin="2" Background="Transparent" Cursor="Hand"
+                          Tag="{Binding}" MouseLeftButtonUp="OnTileClick" ToolTip="{Binding Url}">
+                        <Border x:Name="Bg" CornerRadius="14" Background="Transparent" />
+                        <StackPanel VerticalAlignment="Center">
+                            <Border Width="38" Height="38" CornerRadius="19" Background="{Binding Fill}" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding Letter}" FontSize="17" FontWeight="SemiBold" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="{Binding Name}" FontSize="11" Margin="4,6,4,0" TextTrimming="CharacterEllipsis"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <Button x:Name="Remove" Style="{StaticResource NotchSmallIconButton}" Content="&#xE711;" Tag="{Binding}"
+                                HorizontalAlignment="Right" VerticalAlignment="Top" Click="OnRemove" Visibility="Hidden"
+                                ToolTip="{loc:Tr Web.Remove}" />
+                    </Grid>
+                    <DataTemplate.Triggers>
+                        <Trigger SourceName="Tile" Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource IslandHover}" />
+                            <Setter TargetName="Remove" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App.Name" xml:space="preserve"><value>NotchPC</value></data>
+  <data name="App.AlreadyRunning" xml:space="preserve"><value>NotchPC is already running. Opening its settings.</value></data>
+
+  <data name="Tray.Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Tray.ShowNotch" xml:space="preserve"><value>Show notch</value></data>
+  <data name="Tray.HideNotch" xml:space="preserve"><value>Hide notch</value></data>
+  <data name="Tray.Exit" xml:space="preserve"><value>Exit</value></data>
+
+  <data name="Tab.music" xml:space="preserve"><value>Music</value></data>
+  <data name="Tab.web" xml:space="preserve"><value>Web</value></data>
+  <data name="Tab.notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Tab.files" xml:space="preserve"><value>File shelf</value></data>
+  <data name="Tab.clipboard" xml:space="preserve"><value>Clipboard</value></data>
+  <data name="Tab.widgets" xml:space="preserve"><value>Widgets</value></data>
+  <data name="Tab.quick-settings" xml:space="preserve"><value>Quick settings</value></data>
+  <data name="Tab.apps" xml:space="preserve"><value>Apps &amp; capture</value></data>
+  <data name="Tab.phone" xml:space="preserve"><value>Phone remote</value></data>
+  <data name="Tab.audio" xml:space="preserve"><value>Audio devices</value></data>
+  <data name="Tab.settings" xml:space="preserve"><value>Settings</value></data>
+
+  <data name="Placeholder.ComingInStage" xml:space="preserve"><value>Coming in stage {0}</value></data>
+  <data name="Placeholder.Hint" xml:space="preserve"><value>This tab is a placeholder for now.</value></data>
+
+  <data name="Settings.Title" xml:space="preserve"><value>NotchPC settings</value></data>
+  <data name="Settings.General" xml:space="preserve"><value>General</value></data>
+  <data name="Settings.Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings.Language.Hint" xml:space="preserve"><value>Changes apply immediately.</value></data>
+  <data name="Settings.Language.System" xml:space="preserve"><value>Windows default</value></data>
+  <data name="Settings.StartWithWindows" xml:space="preserve"><value>Start with Windows</value></data>
+  <data name="Settings.StartWithWindows.Hint" xml:space="preserve"><value>Adds NotchPC to your user's startup programs (no administrator rights needed).</value></data>
+  <data name="Settings.Notch" xml:space="preserve"><value>Notch</value></data>
+  <data name="Settings.Monitor" xml:space="preserve"><value>Monitor</value></data>
+  <data name="Settings.Monitor.Hint" xml:space="preserve"><value>Where the notch is shown.</value></data>
+  <data name="Settings.Monitor.Primary" xml:space="preserve"><value>Primary monitor</value></data>
+  <data name="Settings.Monitor.Item" xml:space="preserve"><value>{0} – {1}×{2}, {3}%</value></data>
+  <data name="Settings.Monitor.PrimarySuffix" xml:space="preserve"><value>(primary)</value></data>
+  <data name="Settings.HoverDelay" xml:space="preserve"><value>Expand delay</value></data>
+  <data name="Settings.HoverDelay.Hint" xml:space="preserve"><value>How long the cursor rests on the pill before it opens.</value></data>
+  <data name="Settings.CollapseDelay" xml:space="preserve"><value>Collapse delay</value></data>
+  <data name="Settings.CollapseDelay.Hint" xml:space="preserve"><value>How long after the cursor leaves the panel it closes.</value></data>
+  <data name="Settings.Milliseconds" xml:space="preserve"><value>{0} ms</value></data>
+  <data name="Settings.HideOnFullscreen" xml:space="preserve"><value>Hide over fullscreen apps</value></data>
+  <data name="Settings.HideOnFullscreen.Hint" xml:space="preserve"><value>Games, videos and F11 browser windows on the notch's monitor stay uncovered.</value></data>
+  <data name="Settings.Tabs" xml:space="preserve"><value>Tabs</value></data>
+  <data name="Settings.Tabs.Hint" xml:space="preserve"><value>Choose which tabs appear in the notch. Use the arrows to change their order.</value></data>
+  <data name="Settings.MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="Settings.MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="Settings.About" xml:space="preserve"><value>About</value></data>
+  <data name="Settings.Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Settings.OpenFolder" xml:space="preserve"><value>Open settings folder</value></data>
+  <data name="Settings.Music" xml:space="preserve"><value>Music</value></data>
+  <data name="Settings.MiniPlayer" xml:space="preserve"><value>Show what is playing in the pill</value></data>
+  <data name="Settings.MiniPlayer.Hint" xml:space="preserve"><value>Cover and a small equalizer in the collapsed notch while music plays.</value></data>
+  <data name="Settings.MiniPlayerAnimation" xml:space="preserve"><value>Animate the equalizer</value></data>
+  <data name="Settings.MiniPlayerAnimation.Hint" xml:space="preserve"><value>Uses a little CPU while music plays. Off = still bars.</value></data>
+
+  <data name="Music.NothingPlaying" xml:space="preserve"><value>Nothing playing</value></data>
+  <data name="Music.NothingPlaying.Hint" xml:space="preserve"><value>Start music in Spotify, a browser or any other player.</value></data>
+  <data name="Music.UnknownArtist" xml:space="preserve"><value>Unknown artist</value></data>
+  <data name="Music.Previous" xml:space="preserve"><value>Previous</value></data>
+  <data name="Music.PlayPause" xml:space="preserve"><value>Play / pause</value></data>
+  <data name="Music.Next" xml:space="preserve"><value>Next</value></data>
+  <data name="Music.Volume" xml:space="preserve"><value>Volume</value></data>
+  <data name="Music.MuteOutput" xml:space="preserve"><value>Mute / unmute sound</value></data>
+  <data name="Music.MicOn" xml:space="preserve"><value>Microphone on – click to mute</value></data>
+  <data name="Music.MicOff" xml:space="preserve"><value>Microphone muted – click to unmute</value></data>
+  <data name="Music.NoMic" xml:space="preserve"><value>No microphone found</value></data>
+  <data name="Music.ShowLyrics" xml:space="preserve"><value>Show / hide lyrics</value></data>
+  <data name="Music.Seek" xml:space="preserve"><value>Click to jump to this point</value></data>
+
+  <data name="Lyrics.Loading" xml:space="preserve"><value>Looking for lyrics…</value></data>
+  <data name="Lyrics.NotFound" xml:space="preserve"><value>No lyrics found for this song</value></data>
+  <data name="Lyrics.Instrumental" xml:space="preserve"><value>Instrumental track</value></data>
+  <data name="Lyrics.Error" xml:space="preserve"><value>Could not reach LRCLIB</value></data>
+  <data name="Lyrics.Retry" xml:space="preserve"><value>Try again</value></data>
+  <data name="Lyrics.Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Lyrics.NotSynced" xml:space="preserve"><value>Lyrics without timing</value></data>
+  <data name="Lyrics.Source" xml:space="preserve"><value>Lyrics: LRCLIB</value></data>
+  <data name="Widget.Timer.Focus" xml:space="preserve"><value>Focus timer</value></data>
+  <data name="Widget.Timer.Break" xml:space="preserve"><value>Break</value></data>
+  <data name="Widget.Timer.Lengths" xml:space="preserve"><value>{0} + {1} min</value></data>
+  <data name="Widget.Timer.StartPause" xml:space="preserve"><value>Start / pause</value></data>
+  <data name="Widget.Timer.Minus" xml:space="preserve"><value>5 minutes less</value></data>
+  <data name="Widget.Timer.Plus" xml:space="preserve"><value>5 minutes more</value></data>
+  <data name="Widget.Timer.ResetHint" xml:space="preserve"><value>Double-click the dial to reset</value></data>
+  <data name="Widget.Weather.NotSet" xml:space="preserve"><value>Set your city in NotchPC settings</value></data>
+  <data name="Widget.Weather.Error" xml:space="preserve"><value>Weather unavailable</value></data>
+  <data name="Widget.Weather.Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="Widget.Calendar.Week" xml:space="preserve"><value>Week {0}</value></data>
+  <data name="Widget.Calendar.NotSet" xml:space="preserve"><value>Add your calendar link in settings</value></data>
+  <data name="Widget.Calendar.NoEvents" xml:space="preserve"><value>No events in the next 7 days</value></data>
+  <data name="Widget.Calendar.Error" xml:space="preserve"><value>Could not load the calendar</value></data>
+  <data name="Widget.Calendar.AllDay" xml:space="preserve"><value>All day</value></data>
+  <data name="Widget.Calendar.Tomorrow" xml:space="preserve"><value>Tomorrow</value></data>
+  <data name="Widget.Calendar.Now" xml:space="preserve"><value>Now</value></data>
+  <data name="Widget.Stats.CpuTempHint" xml:space="preserve"><value>CPU temperature needs the PawnIO driver and the administrator mode (Settings → Widgets).</value></data>
+  <data name="Widget.Stats.Paused" xml:space="preserve"><value>Paused while covered</value></data>
+  <data name="Widget.DragHint" xml:space="preserve"><value>Drag to move</value></data>
+  <data name="Widget.Chip.Timer" xml:space="preserve"><value>Timer</value></data>
+  <data name="Widget.Chip.Stats" xml:space="preserve"><value>Stats</value></data>
+  <data name="Widget.Chip.Lock" xml:space="preserve"><value>Lock</value></data>
+  <data name="Widget.Chip.Grid" xml:space="preserve"><value>Grid</value></data>
+  <data name="Widget.Forecast.Hours" xml:space="preserve"><value>Hours</value></data>
+  <data name="Widget.Forecast.Days" xml:space="preserve"><value>Days</value></data>
+  <data name="Widget.Calendar.Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Widget.Calendar.NoEventsDay" xml:space="preserve"><value>No events this day</value></data>
+  <data name="Widget.Calendar.PrevMonth" xml:space="preserve"><value>Previous month</value></data>
+  <data name="Widget.Calendar.NextMonth" xml:space="preserve"><value>Next month</value></data>
+  <data name="Widget.Timer.Today" xml:space="preserve"><value>Today: {0} × focus · {1}</value></data>
+  <data name="Widget.Timer.NextBreak" xml:space="preserve"><value>Then a {0} min break</value></data>
+  <data name="Widget.Timer.NextFocus" xml:space="preserve"><value>Then {0} min of focus</value></data>
+  <data name="Widget.Stats.LastMinute" xml:space="preserve"><value>last minute</value></data>
+  <data name="Settings.ScrollTitles" xml:space="preserve"><value>Scroll long titles in the pill</value></data>
+  <data name="Settings.ScrollTitles.Hint" xml:space="preserve"><value>A title that does not fit scrolls slowly three times after each track change, then stops.</value></data>
+  <data name="Widget.DragHint.Full" xml:space="preserve"><value>Drag to move · drag the corner to resize</value></data>
+  <data name="Settings.Widgets.Layout" xml:space="preserve"><value>Layout</value></data>
+  <data name="Settings.Widgets.Layout.Hint" xml:space="preserve"><value>Grid: widgets snap to cells and never overlap; a dotted grid shows while you move them. Free: any place, any size. Resize a widget by dragging its bottom-right corner.</value></data>
+  <data name="Settings.Widgets.Layout.Grid" xml:space="preserve"><value>Grid</value></data>
+  <data name="Settings.Widgets.Layout.Free" xml:space="preserve"><value>Free</value></data>
+  <data name="Settings.Widgets.Layout.Cell" xml:space="preserve"><value>Cell size</value></data>
+  <data name="Settings.Widgets.Layout.Margin" xml:space="preserve"><value>Margin from screen edges</value></data>
+  <data name="Settings.Widgets.Layout.ShowGrid" xml:space="preserve"><value>Show the grid while moving</value></data>
+
+  <data name="Weather.Sunny" xml:space="preserve"><value>Sunny</value></data>
+  <data name="Weather.ClearNight" xml:space="preserve"><value>Clear</value></data>
+  <data name="Weather.PartlyCloudy" xml:space="preserve"><value>Partly cloudy</value></data>
+  <data name="Weather.Cloudy" xml:space="preserve"><value>Cloudy</value></data>
+  <data name="Weather.Fog" xml:space="preserve"><value>Fog</value></data>
+  <data name="Weather.Drizzle" xml:space="preserve"><value>Drizzle</value></data>
+  <data name="Weather.Rain" xml:space="preserve"><value>Rain</value></data>
+  <data name="Weather.FreezingRain" xml:space="preserve"><value>Freezing rain</value></data>
+  <data name="Weather.Snow" xml:space="preserve"><value>Snow</value></data>
+  <data name="Weather.Showers" xml:space="preserve"><value>Showers</value></data>
+  <data name="Weather.SnowShowers" xml:space="preserve"><value>Snow showers</value></data>
+  <data name="Weather.Thunderstorm" xml:space="preserve"><value>Thunderstorm</value></data>
+
+  <data name="Settings.Widgets" xml:space="preserve"><value>Desktop widgets</value></data>
+  <data name="Settings.Widgets.Hint" xml:space="preserve"><value>Widgets sit on the desktop, under your windows. Drag them anywhere.</value></data>
+  <data name="Settings.Widgets.Timer" xml:space="preserve"><value>Focus timer</value></data>
+  <data name="Settings.Widgets.Weather" xml:space="preserve"><value>Weather</value></data>
+  <data name="Settings.Widgets.Calendar" xml:space="preserve"><value>Calendar</value></data>
+  <data name="Settings.Widgets.Stats" xml:space="preserve"><value>PC stats</value></data>
+  <data name="Settings.Widgets.Locked" xml:space="preserve"><value>Lock widget positions</value></data>
+  <data name="Settings.Widgets.ResetPositions" xml:space="preserve"><value>Reset positions</value></data>
+  <data name="Settings.Widgets.FocusLength" xml:space="preserve"><value>Focus / break length (min)</value></data>
+  <data name="Settings.Widgets.City" xml:space="preserve"><value>City</value></data>
+  <data name="Settings.Widgets.City.Hint" xml:space="preserve"><value>Weather from Open-Meteo (free, no account). Type a city and press Search.</value></data>
+  <data name="Settings.Widgets.City.Search" xml:space="preserve"><value>Search</value></data>
+  <data name="Settings.Widgets.City.NotFound" xml:space="preserve"><value>City not found</value></data>
+  <data name="Settings.Widgets.City.Error" xml:space="preserve"><value>Open-Meteo is unreachable</value></data>
+  <data name="Settings.Widgets.City.Current" xml:space="preserve"><value>Current: {0}</value></data>
+  <data name="Settings.Widgets.Ics" xml:space="preserve"><value>Calendar link (iCal)</value></data>
+  <data name="Settings.Widgets.Ics.Hint" xml:space="preserve"><value>Google Calendar → Settings → your calendar → "Secret address in iCal format". Stored encrypted for your Windows account.</value></data>
+  <data name="Settings.Widgets.Ics.Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Settings.Widgets.Ics.Saved" xml:space="preserve"><value>Link saved</value></data>
+  <data name="Settings.Widgets.Ics.Invalid" xml:space="preserve"><value>That is not an https:// iCal link</value></data>
+  <data name="Settings.Widgets.Ics.Clear" xml:space="preserve"><value>Remove</value></data>
+  <data name="Settings.Widgets.CpuTemp" xml:space="preserve"><value>CPU temperature</value></data>
+  <data name="Settings.Widgets.CpuTemp.Hint" xml:space="preserve"><value>Needs the free PawnIO driver (install it yourself from pawnio.eu or with: winget install namazso.PawnIO) and the sensors running as administrator. "Enable" creates a Windows scheduled task (one UAC prompt); later starts need no prompt.</value></data>
+  <data name="Settings.Widgets.CpuTemp.Enable" xml:space="preserve"><value>Enable (administrator)</value></data>
+  <data name="Settings.Widgets.CpuTemp.Disable" xml:space="preserve"><value>Disable</value></data>
+  <data name="Settings.Widgets.CpuTemp.On" xml:space="preserve"><value>On: sensors run as administrator</value></data>
+  <data name="Settings.Widgets.CpuTemp.Off" xml:space="preserve"><value>Off: sensors run without administrator rights</value></data>
+  <data name="Settings.Widgets.CpuTemp.Failed" xml:space="preserve"><value>Cancelled or failed</value></data>
+
+  <data name="Lyrics.DragHint" xml:space="preserve"><value>Drag to move the card. Double-click to put it back under the notch.</value></data>
+  <data name="Settings.LyricsPosition" xml:space="preserve"><value>Lyrics card position</value></data>
+  <data name="Settings.LyricsPosition.Hint" xml:space="preserve"><value>Drag the card by its header to any place, also on another monitor.</value></data>
+  <data name="Settings.LyricsPosition.Reset" xml:space="preserve"><value>Put back under the notch</value></data>
+  <data name="Clip.Search" xml:space="preserve"><value>Search clipboard</value></data>
+  <data name="Clip.Clear" xml:space="preserve"><value>Clear history (pinned items stay)</value></data>
+  <data name="Clip.Empty" xml:space="preserve"><value>Nothing copied yet</value></data>
+  <data name="Clip.EmptyHint" xml:space="preserve"><value>Copied text, images and files will appear here.</value></data>
+  <data name="Clip.NoResults" xml:space="preserve"><value>No matches</value></data>
+  <data name="Clip.Disabled" xml:space="preserve"><value>Clipboard history is turned off in Settings</value></data>
+  <data name="Clip.Paste" xml:space="preserve"><value>Paste into the app you were using</value></data>
+  <data name="Clip.Pin" xml:space="preserve"><value>Pin</value></data>
+  <data name="Clip.Unpin" xml:space="preserve"><value>Unpin</value></data>
+  <data name="Clip.Delete" xml:space="preserve"><value>Remove</value></data>
+  <data name="Clip.Image" xml:space="preserve"><value>Image {0}×{1}</value></data>
+  <data name="Clip.Files" xml:space="preserve"><value>{0} files</value></data>
+  <data name="Clip.JustNow" xml:space="preserve"><value>just now</value></data>
+  <data name="Clip.MinutesAgo" xml:space="preserve"><value>{0} min ago</value></data>
+  <data name="Clip.ClickToCopy" xml:space="preserve"><value>Click to copy</value></data>
+  <data name="Flash.Copied" xml:space="preserve"><value>Copied</value></data>
+  <data name="Flash.ClipboardBusy" xml:space="preserve"><value>Clipboard is busy, try again</value></data>
+  <data name="Flash.PasteFailed" xml:space="preserve"><value>Could not paste</value></data>
+  <data name="Shelf.Count" xml:space="preserve"><value>{0} items</value></data>
+  <data name="Shelf.Empty" xml:space="preserve"><value>Drop files here</value></data>
+  <data name="Shelf.EmptyHint" xml:space="preserve"><value>Drag files onto the notch. They stay where they are – the shelf only remembers them.</value></data>
+  <data name="Shelf.DragAll" xml:space="preserve"><value>Drag all</value></data>
+  <data name="Shelf.DragAll.Hint" xml:space="preserve"><value>Drag this to take all files off the shelf at once</value></data>
+  <data name="Shelf.Clear" xml:space="preserve"><value>Clear shelf</value></data>
+  <data name="Shelf.ShowInFolder" xml:space="preserve"><value>Show in folder</value></data>
+  <data name="Shelf.Remove" xml:space="preserve"><value>Remove from shelf</value></data>
+  <data name="Shelf.Missing" xml:space="preserve"><value>File not found (moved or deleted)</value></data>
+  <data name="Apps.Screenshot" xml:space="preserve"><value>Screenshot</value></data>
+  <data name="Apps.Screenshot.Hint" xml:space="preserve"><value>Capture the whole screen the notch is on (saved to Pictures\Screenshots and copied)</value></data>
+  <data name="Apps.Snip" xml:space="preserve"><value>Snip</value></data>
+  <data name="Apps.Snip.Tip" xml:space="preserve"><value>Select an area of the screen</value></data>
+  <data name="Apps.Snip.Hint" xml:space="preserve"><value>Drag to select an area · Esc cancels</value></data>
+  <data name="Apps.Record" xml:space="preserve"><value>Record</value></data>
+  <data name="Apps.Record.Hint" xml:space="preserve"><value>Start or stop screen recording in ShareX</value></data>
+  <data name="Apps.Remove" xml:space="preserve"><value>Remove shortcut</value></data>
+  <data name="Apps.Add" xml:space="preserve"><value>Add</value></data>
+  <data name="Apps.Add.Hint" xml:space="preserve"><value>Add a program or shortcut</value></data>
+  <data name="Apps.Add.Title" xml:space="preserve"><value>Choose a program or shortcut</value></data>
+  <data name="Apps.Add.Filter" xml:space="preserve"><value>Programs and shortcuts</value></data>
+  <data name="Apps.Add.AllFiles" xml:space="preserve"><value>All files</value></data>
+  <data name="Apps.Default.Notepad" xml:space="preserve"><value>Notepad</value></data>
+  <data name="Apps.Default.Explorer" xml:space="preserve"><value>Files</value></data>
+  <data name="Apps.Default.Paint" xml:space="preserve"><value>Paint</value></data>
+  <data name="Apps.Default.Calculator" xml:space="preserve"><value>Calculator</value></data>
+  <data name="Apps.Default.Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Flash.ScreenshotSaved" xml:space="preserve"><value>Screenshot saved and copied</value></data>
+  <data name="Flash.ScreenshotFailed" xml:space="preserve"><value>Screenshot failed</value></data>
+  <data name="Flash.ShareXMissing" xml:space="preserve"><value>ShareX not found – set it in Settings</value></data>
+  <data name="Flash.LaunchFailed" xml:space="preserve"><value>Could not start the app</value></data>
+  <data name="Settings.Capture" xml:space="preserve"><value>Clipboard and screenshots</value></data>
+  <data name="Settings.Capture.History" xml:space="preserve"><value>Clipboard history</value></data>
+  <data name="Settings.Capture.History.Hint" xml:space="preserve"><value>Remembers copied text, images and files (encrypted for your Windows account). Passwords copied from password managers are skipped.</value></data>
+  <data name="Settings.Capture.Limit" xml:space="preserve"><value>History size</value></data>
+  <data name="Settings.Capture.Limit.Hint" xml:space="preserve"><value>Older entries drop off; pinned ones stay.</value></data>
+  <data name="Settings.Capture.Clear" xml:space="preserve"><value>Clear all history</value></data>
+  <data name="Settings.Capture.Clear.Confirm" xml:space="preserve"><value>Delete the whole clipboard history, pinned entries included? This cannot be undone.</value></data>
+  <data name="Settings.Capture.Folder" xml:space="preserve"><value>Screenshot folder</value></data>
+  <data name="Settings.Capture.Folder.Change" xml:space="preserve"><value>Change…</value></data>
+  <data name="Settings.Capture.Folder.Open" xml:space="preserve"><value>Open</value></data>
+  <data name="Settings.Capture.ShareX" xml:space="preserve"><value>ShareX (screen recording)</value></data>
+  <data name="Settings.Capture.ShareX.Found" xml:space="preserve"><value>Using: {0}</value></data>
+  <data name="Settings.Capture.ShareX.Missing" xml:space="preserve"><value>Not found. Install ShareX or point to ShareX.exe.</value></data>
+  <data name="Settings.Capture.ShareX.Pick" xml:space="preserve"><value>Choose ShareX.exe…</value></data>
+  <data name="Quick.Mute" xml:space="preserve"><value>Mute / unmute</value></data>
+  <data name="Quick.Output" xml:space="preserve"><value>Output device</value></data>
+  <data name="Quick.Output.Hint" xml:space="preserve"><value>Choose where the sound goes</value></data>
+  <data name="Quick.Output.None" xml:space="preserve"><value>No output device</value></data>
+  <data name="Quick.Output.Settings" xml:space="preserve"><value>Sound settings</value></data>
+  <data name="Quick.Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Quick.Brightness.Hint" xml:space="preserve"><value>Monitor brightness over DDC/CI (all monitors that support it)</value></data>
+  <data name="Quick.Brightness.Missing" xml:space="preserve"><value>No monitor answers over DDC/CI – turn it on in the monitor's menu</value></data>
+  <data name="Quick.Mic" xml:space="preserve"><value>Microphone</value></data>
+  <data name="Quick.Mic.Hint" xml:space="preserve"><value>Mute the default microphone for every app</value></data>
+  <data name="Quick.On" xml:space="preserve"><value>On</value></data>
+  <data name="Quick.Off" xml:space="preserve"><value>Off</value></data>
+  <data name="Quick.Muted" xml:space="preserve"><value>Muted</value></data>
+  <data name="Quick.None" xml:space="preserve"><value>None</value></data>
+  <data name="Quick.Network" xml:space="preserve"><value>Network</value></data>
+  <data name="Quick.Network.Hint" xml:space="preserve"><value>Network status – click for Windows network settings</value></data>
+  <data name="Quick.Network.Internet" xml:space="preserve"><value>Connected</value></data>
+  <data name="Quick.Network.NoInternet" xml:space="preserve"><value>No internet</value></data>
+  <data name="Quick.Network.None" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="Quick.Radio" xml:space="preserve"><value>Radio</value></data>
+  <data name="Quick.Dark" xml:space="preserve"><value>Dark mode</value></data>
+  <data name="Quick.Dark.Status" xml:space="preserve"><value>Windows and apps</value></data>
+  <data name="Quick.Dark.Hint" xml:space="preserve"><value>Switch Windows and apps between dark and light mode</value></data>
+  <data name="Quick.Awake" xml:space="preserve"><value>Stay awake</value></data>
+  <data name="Quick.Awake.Hint" xml:space="preserve"><value>Keep the PC and the screen awake until you turn it off or close NotchPC</value></data>
+  <data name="Quick.NightLight" xml:space="preserve"><value>Night light</value></data>
+  <data name="Quick.Dnd" xml:space="preserve"><value>Do not disturb</value></data>
+  <data name="Quick.InSettings" xml:space="preserve"><value>In settings</value></data>
+  <data name="Quick.NoApi.Hint" xml:space="preserve"><value>Windows has no public switch for this – opens the right page in Settings</value></data>
+  <data name="Quick.Lock" xml:space="preserve"><value>Lock</value></data>
+  <data name="Quick.Lock.Hint" xml:space="preserve"><value>Lock the PC</value></data>
+  <data name="Notify.Count" xml:space="preserve"><value>{0} items</value></data>
+  <data name="Notify.Empty" xml:space="preserve"><value>No notifications</value></data>
+  <data name="Notify.Dismiss" xml:space="preserve"><value>Remove (also from the Windows Action Center)</value></data>
+  <data name="Notify.ClearAll" xml:space="preserve"><value>Clear all (also the Windows Action Center)</value></data>
+  <data name="Notify.Status.Live" xml:space="preserve"><value>Windows notifications arrive live</value></data>
+  <data name="Notify.Status.OnOpen" xml:space="preserve"><value>Windows notifications are read when this tab opens – live ones: Settings → Notifications</value></data>
+  <data name="Notify.Status.Denied" xml:space="preserve"><value>Windows does not allow reading notifications – Settings → Privacy → Notifications</value></data>
+  <data name="Notify.Timer.FocusDone" xml:space="preserve"><value>Focus session done</value></data>
+  <data name="Notify.Timer.FocusDone.Body" xml:space="preserve"><value>Time for a break.</value></data>
+  <data name="Notify.Timer.BreakDone" xml:space="preserve"><value>Break is over</value></data>
+  <data name="Notify.Timer.BreakDone.Body" xml:space="preserve"><value>Ready for the next session?</value></data>
+  <data name="Notify.Calendar.Body" xml:space="preserve"><value>At {0} (in {1} min)</value></data>
+  <data name="Settings.Notify" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Settings.Notify.App" xml:space="preserve"><value>NotchPC notifications</value></data>
+  <data name="Settings.Notify.App.Hint" xml:space="preserve"><value>Timer end and calendar reminders pop up in the notch.</value></data>
+  <data name="Settings.Notify.System" xml:space="preserve"><value>Windows notifications in the notch</value></data>
+  <data name="Settings.Notify.System.Hint" xml:space="preserve"><value>New notifications of other apps pop up in the notch (Windows still shows its own as well). Needs the registration below.</value></data>
+  <data name="Settings.Notify.Busy" xml:space="preserve"><value>Quiet while busy</value></data>
+  <data name="Settings.Notify.Busy.Hint" xml:space="preserve"><value>No pop-ups when Windows says you are busy: fullscreen app, presentation, Do not disturb. They still land in the list.</value></data>
+  <data name="Settings.Notify.Seconds" xml:space="preserve"><value>Pop-up time (seconds)</value></data>
+  <data name="Settings.Notify.Reminder" xml:space="preserve"><value>Calendar reminder (minutes before)</value></data>
+  <data name="Settings.Notify.Reminder.Hint" xml:space="preserve"><value>0 = off. Works while the calendar widget is on.</value></data>
+  <data name="Settings.Notify.Identity" xml:space="preserve"><value>Live Windows notifications</value></data>
+  <data name="Settings.Notify.Identity.Hint" xml:space="preserve"><value>Windows only tells apps with a package identity about new notifications. NotchPC registers a small package for your account that points at this NotchPC.exe – no certificate, no admin, but Windows Developer Mode must be on. You can remove it at any time.</value></data>
+  <data name="Settings.Notify.Identity.Register" xml:space="preserve"><value>Register NotchPC</value></data>
+  <data name="Settings.Notify.Identity.Unregister" xml:space="preserve"><value>Remove registration</value></data>
+  <data name="Settings.Notify.Identity.Restart.Button" xml:space="preserve"><value>Restart NotchPC</value></data>
+  <data name="Settings.Notify.Identity.DevMode" xml:space="preserve"><value>Developer settings</value></data>
+  <data name="Settings.Notify.Identity.Live" xml:space="preserve"><value>On: new Windows notifications arrive live.</value></data>
+  <data name="Settings.Notify.Identity.Restart" xml:space="preserve"><value>Registered. Restart NotchPC to start receiving them.</value></data>
+  <data name="Settings.Notify.Identity.Off" xml:space="preserve"><value>Off: the list is read from the Action Center when you open the tab.</value></data>
+  <data name="Settings.Notify.Identity.NoDevMode" xml:space="preserve"><value>Developer Mode is off, so the registration is not possible (Settings → System → For developers).</value></data>
+  <data name="Settings.Notify.Identity.Denied" xml:space="preserve"><value>Windows does not allow reading notifications: Settings → Privacy &amp; security → Notifications.</value></data>
+  <data name="Settings.Notify.Identity.Error" xml:space="preserve"><value>Did not work: {0}</value></data>
+  <data name="Settings.Notify.Sample" xml:space="preserve"><value>Show example</value></data>
+  <data name="Notify.Sample.Title" xml:space="preserve"><value>This is a NotchPC notification</value></data>
+  <data name="Notify.Sample.Body" xml:space="preserve"><value>Hover it to open the list, or wait – it hides by itself.</value></data>
+  <data name="Settings.Notify.Sound" xml:space="preserve"><value>Notification sound</value></data>
+  <data name="Settings.Notify.Sound.Hint" xml:space="preserve"><value>Plays with a banner. Windows plays its own sound for other apps' notifications too – you can turn that off in Windows settings (System → Notifications).</value></data>
+  <data name="Settings.Notify.Sound.chime" xml:space="preserve"><value>Chime</value></data>
+  <data name="Settings.Notify.Sound.drop" xml:space="preserve"><value>Drop</value></data>
+  <data name="Settings.Notify.Sound.glass" xml:space="preserve"><value>Glass</value></data>
+  <data name="Settings.Notify.Sound.none" xml:space="preserve"><value>No sound</value></data>
+  <data name="Settings.Notify.Sound.Play" xml:space="preserve"><value>Play</value></data>
+  <data name="Settings.Notify.Volume" xml:space="preserve"><value>Sound volume</value></data>
+  <data name="Settings.Notify.Glow" xml:space="preserve"><value>Glow</value></data>
+  <data name="Settings.Notify.Glow.Hint" xml:space="preserve"><value>A coloured light around the banner that pulses when a notification arrives.</value></data>
+  <data name="Settings.Notify.Glow.Accent" xml:space="preserve"><value>Windows accent colour</value></data>
+  <data name="Settings.Notify.Glow.5AC8FA" xml:space="preserve"><value>Blue</value></data>
+  <data name="Settings.Notify.Glow.BF5AF2" xml:space="preserve"><value>Purple</value></data>
+  <data name="Settings.Notify.Glow.FF375F" xml:space="preserve"><value>Pink</value></data>
+  <data name="Settings.Notify.Glow.FF9F0A" xml:space="preserve"><value>Orange</value></data>
+  <data name="Settings.Notify.Glow.30D158" xml:space="preserve"><value>Green</value></data>
+  <data name="Settings.Notify.Glow.FFFFFF" xml:space="preserve"><value>White</value></data>
+  <data name="Notify.Open" xml:space="preserve"><value>Open</value></data>
+  <data name="Notify.OpenInWindows" xml:space="preserve"><value>Show in the Windows notification center – a click there goes exactly where the notification leads</value></data>
+  <data name="Settings.Overlay" xml:space="preserve"><value>Game overlay</value></data>
+  <data name="Settings.Overlay.Enabled" xml:space="preserve"><value>Game overlay</value></data>
+  <data name="Settings.Overlay.Enabled.Hint" xml:space="preserve"><value>A small bar over a game: FPS, CPU and GPU load and temperature, RAM, clock. FPS is read from Windows graphics events, nothing is injected into the game.</value></data>
+  <data name="Settings.Overlay.Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="Settings.Overlay.Auto" xml:space="preserve"><value>Detect games automatically</value></data>
+  <data name="Settings.Overlay.Auto.Hint" xml:space="preserve"><value>Any app that fills its whole screen, except the ones below (browsers and players by default).</value></data>
+  <data name="Settings.Overlay.Hotkey" xml:space="preserve"><value>Shortcut</value></data>
+  <data name="Settings.Overlay.Hotkey.Hint" xml:space="preserve"><value>In a game: hides the overlay for that game; in a windowed game: shows it. NotchPC remembers the choice per game.</value></data>
+  <data name="Settings.Overlay.Hotkey.Taken" xml:space="preserve"><value>Another app already uses this shortcut – pick a different one.</value></data>
+  <data name="Settings.Overlay.Hotkey.None" xml:space="preserve"><value>No shortcut</value></data>
+  <data name="Settings.Overlay.Position" xml:space="preserve"><value>Position</value></data>
+  <data name="Settings.Overlay.Position.top-left" xml:space="preserve"><value>Top left</value></data>
+  <data name="Settings.Overlay.Position.top-right" xml:space="preserve"><value>Top right</value></data>
+  <data name="Settings.Overlay.Position.bottom-left" xml:space="preserve"><value>Bottom left</value></data>
+  <data name="Settings.Overlay.Position.bottom-right" xml:space="preserve"><value>Bottom right</value></data>
+  <data name="Settings.Overlay.Clock" xml:space="preserve"><value>Show the clock</value></data>
+  <data name="Settings.Overlay.Games" xml:space="preserve"><value>Always show for</value></data>
+  <data name="Settings.Overlay.Games.Hint" xml:space="preserve"><value>Also when the game runs in a window. Added with the shortcut.</value></data>
+  <data name="Settings.Overlay.Ignored" xml:space="preserve"><value>Never show for</value></data>
+  <data name="Settings.Overlay.Ignored.Hint" xml:space="preserve"><value>Click a name to remove it.</value></data>
+  <data name="Settings.Overlay.Ignored.Reset" xml:space="preserve"><value>Restore the default list</value></data>
+  <data name="Settings.Overlay.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Settings.Overlay.Fps.Hint" xml:space="preserve"><value>FPS: starts with the overlay.</value></data>
+  <data name="Overlay.Fps.Ok" xml:space="preserve"><value>FPS: reading Windows graphics events works.</value></data>
+  <data name="Overlay.Fps.Error" xml:space="preserve"><value>FPS unavailable: Windows refused the event session (error {0}). Your account must be in the "Performance Log Users" group.</value></data>
+  <data name="Overlay.HiddenFor" xml:space="preserve"><value>Overlay off for {0} · {1} turns it back on</value></data>
+  <data name="Remote.Status.Off" xml:space="preserve"><value>The remote is off.</value></data>
+  <data name="Remote.Status.On" xml:space="preserve"><value>Running at {0}</value></data>
+  <data name="Remote.Status.Starting" xml:space="preserve"><value>Starting…</value></data>
+  <data name="Remote.Status.NoNetwork" xml:space="preserve"><value>Running, but no home network was found (Wi-Fi or cable).</value></data>
+  <data name="Remote.Status.Error" xml:space="preserve"><value>Could not start: {0}</value></data>
+  <data name="Remote.Scan" xml:space="preserve"><value>Scan the code with the phone's camera. The phone must be on the same Wi-Fi. The code works once and for 10 minutes.</value></data>
+  <data name="Remote.OffHint" xml:space="preserve"><value>Turning it on opens a port in the home network only. Windows may ask once whether to allow NotchPC on private networks – choose Allow.</value></data>
+  <data name="Remote.Devices" xml:space="preserve"><value>Paired phones: {0} · connected now: {1}</value></data>
+  <data name="Remote.TurnOn" xml:space="preserve"><value>Turn on</value></data>
+  <data name="Remote.TurnOff" xml:space="preserve"><value>Turn off</value></data>
+  <data name="Remote.NewCode" xml:space="preserve"><value>New code</value></data>
+  <data name="Remote.Paired.Title" xml:space="preserve"><value>New phone paired</value></data>
+  <data name="Remote.Paired.Body" xml:space="preserve"><value>{0} can now control this PC. You can remove it in the settings.</value></data>
+  <data name="Remote.Shutdown.Title" xml:space="preserve"><value>Shutting down (from the phone)</value></data>
+  <data name="Remote.Restart.Title" xml:space="preserve"><value>Restarting (from the phone)</value></data>
+  <data name="Remote.Shutdown.Body" xml:space="preserve"><value>In {0} s. You can cancel it on the phone (Power → Cancel shutdown).</value></data>
+  <data name="Remote.Device.Paired" xml:space="preserve"><value>Paired {0}</value></data>
+  <data name="Remote.Device.Seen" xml:space="preserve"><value>Paired {0} · last used {1}</value></data>
+  <data name="Settings.Remote.Enabled" xml:space="preserve"><value>Phone remote</value></data>
+  <data name="Settings.Remote.Delay" xml:space="preserve"><value>Delay before shutdown / restart (s)</value></data>
+  <data name="Settings.Remote.Delay.Hint" xml:space="preserve"><value>Time to cancel it from the phone. 0 = at once.</value></data>
+  <data name="Settings.Remote.Devices" xml:space="preserve"><value>Paired phones</value></data>
+  <data name="Settings.Remote.Devices.Hint" xml:space="preserve"><value>Removing a phone disconnects it at once; it has to scan a new code to come back. Pairing: notch → Phone tab.</value></data>
+  <data name="Settings.Remote.Devices.None" xml:space="preserve"><value>No paired phones yet.</value></data>
+  <data name="Settings.Remote.Unpair" xml:space="preserve"><value>Remove</value></data>
+  <data name="Audio.Output" xml:space="preserve"><value>Output</value></data>
+  <data name="Audio.Apps" xml:space="preserve"><value>Apps</value></data>
+  <data name="Audio.SystemSounds" xml:space="preserve"><value>System sounds</value></data>
+  <data name="Audio.NoApps" xml:space="preserve"><value>No app is playing sound.</value></data>
+  <data name="Web.Address" xml:space="preserve"><value>Address or search…</value></data>
+  <data name="Web.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Web.Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Web.Forward" xml:space="preserve"><value>Forward</value></data>
+  <data name="Web.Reload" xml:space="preserve"><value>Reload</value></data>
+  <data name="Web.Bookmark" xml:space="preserve"><value>Add this page to the notch</value></data>
+  <data name="Web.Pin" xml:space="preserve"><value>Keep open (do not hide when another window is clicked)</value></data>
+  <data name="Web.OpenInBrowser" xml:space="preserve"><value>Open in the browser</value></data>
+  <data name="Web.Close" xml:space="preserve"><value>Hide (Esc)</value></data>
+  <data name="Web.NoRuntime" xml:space="preserve"><value>The Microsoft Edge WebView2 Runtime is missing. Install it from microsoft.com (search: WebView2 Runtime) and open the page again.</value></data>
+  <data name="Web.Failed" xml:space="preserve"><value>The page view could not start: {0}</value></data>
+  <data name="Settings.Widgets.Twitch" xml:space="preserve"><value>Twitch chat</value></data>
+  <data name="Settings.Widgets.Twitch.Channel" xml:space="preserve"><value>Channel</value></data>
+  <data name="Settings.Widgets.Twitch.Placeholder" xml:space="preserve"><value>name or twitch.tv link</value></data>
+  <data name="Settings.Widgets.Twitch.Invalid" xml:space="preserve"><value>That is not a Twitch channel name (3–25 letters, digits, _).</value></data>
+  <data name="Widget.Twitch.NoChannel" xml:space="preserve"><value>Enter a channel in Settings → Desktop widgets.</value></data>
+  <data name="Widget.Twitch.Connecting" xml:space="preserve"><value>Connecting to the chat…</value></data>
+  <data name="Widget.Twitch.Retrying" xml:space="preserve"><value>No connection – trying again…</value></data>
+  <data name="Widget.Twitch.Quiet" xml:space="preserve"><value>Connected. Nobody has written yet.</value></data>
+  <data name="Settings.TaskbarPill" xml:space="preserve"><value>Now playing on the taskbar (experiment)</value></data>
+  <data name="Settings.TaskbarPill.Hint" xml:space="preserve"><value>A small pill left of the clock while music plays; a click opens the music tab. Windows 11 cannot host it in the taskbar itself, so it is laid over it (bottom taskbar, not auto-hidden).</value></data>
+  <data name="Taskbar.Pill.Hint" xml:space="preserve"><value>Open the music tab</value></data>
+</root>

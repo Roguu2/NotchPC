@@ -1,0 +1,81 @@
+name: Release
+
+# Builds the installer and the portable zip for a v* tag and publishes them as a release of this repository.
+# Uses the built-in GITHUB_TOKEN: no secrets needed. The release stays a draft until both files are attached.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Check tag matches the version
+        shell: pwsh
+        run: |
+          $version = (Select-Xml -Path Directory.Build.props -XPath "//Version").Node.InnerText
+          if ("v$version" -ne $env:GITHUB_REF_NAME) {
+            Write-Error "Tag $env:GITHUB_REF_NAME does not match <Version> $version in Directory.Build.props"
+            exit 1
+          }
+          "VERSION=$version" | Out-File -Append $env:GITHUB_ENV
+
+      - name: Test
+        run: dotnet test tests/NotchPC.Tests -c Release -nologo
+
+      - name: Build installer and portable zip
+        shell: pwsh
+        run: ./scripts/publish.ps1
+
+      - name: Write release notes
+        shell: bash
+        run: |
+          # A hand-written note for this version wins; otherwise the commit subjects since the previous tag.
+          if [ -f ".github/release-notes/$GITHUB_REF_NAME.md" ]; then
+            cp ".github/release-notes/$GITHUB_REF_NAME.md" notes.md
+          else
+            previous=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || true)
+            range=${previous:+$previous..}$GITHUB_REF_NAME
+            {
+              echo "## What's new"
+              echo
+              git log "$range" --no-merges --pretty='- %s' || echo "- Maintenance release"
+            } > notes.md
+          fi
+          cat notes.md
+
+      - name: Create draft release with the files
+        shell: bash
+        run: |
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag \
+            --title "NotchPC $VERSION" --notes-file notes.md \
+            "publish/NotchPC-$VERSION-Setup.exe" \
+            "publish/NotchPC-$VERSION-win-x64-portable.zip"
+
+      - name: Verify and publish
+        shell: bash
+        run: |
+          assets=$(gh release view "$GITHUB_REF_NAME" --json assets --jq '.assets[].name')
+          echo "$assets"
+          for required in "NotchPC-$VERSION-Setup.exe" "NotchPC-$VERSION-win-x64-portable.zip"; do
+            if ! grep -qx "$required" <<< "$assets"; then
+              echo "::error::Release is missing $required — leaving it as a draft"
+              exit 1
+            fi
+          done
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest

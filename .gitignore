@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+publish/
+artifacts/
+
+# Reference screenshots of another app: kept locally, never published.
+ref/

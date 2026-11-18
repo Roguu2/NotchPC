@@ -1,0 +1,43 @@
+﻿<Application x:Class="NotchPC.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- WPF-UI styles are used by the settings window; notch controls use explicit styles. -->
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />
+                <!-- Notch design tokens and styles (see ref/ screenshots). -->
+                <ResourceDictionary Source="Controls/NotchStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- A tooltip inherits the font of its control: on icon buttons that is Segoe Fluent Icons, which has no
+                 letters (text showed as boxes). Every tooltip uses the UI font, dark like the notch. -->
+            <Style TargetType="ToolTip">
+                <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="Foreground" Value="#F2FFFFFF" />
+                <Setter Property="HasDropShadow" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToolTip">
+                            <Border Background="#F21C1C1F" BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8"
+                                    Padding="9,5" Margin="0,2" MaxWidth="360">
+                                <ContentPresenter>
+                                    <ContentPresenter.Resources>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextWrapping" Value="Wrap" />
+                                        </Style>
+                                    </ContentPresenter.Resources>
+                                </ContentPresenter>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

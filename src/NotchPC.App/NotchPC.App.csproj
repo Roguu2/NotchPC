@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <RootNamespace>NotchPC.App</RootNamespace>
+    <AssemblyName>NotchPC</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <!-- Only for NotifyIcon (tray). WinForms namespaces are not imported globally to avoid clashes with WPF. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\NotchPC.ico</ApplicationIcon>
+    <!-- WFO0003 wants WinForms' SetHighDpiMode; this is a WPF app, the manifest is the correct place for PerMonitorV2. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\NotchPC.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NotchPC.Core\NotchPC.Core.csproj" />
+    <ProjectReference Include="..\NotchPC.Platform\NotchPC.Platform.csproj" />
+    <!-- Separate helper process (hardware sensors): built first, copied to .\sensors (not referenced as a library). -->
+    <ProjectReference Include="..\NotchPC.Sensors\NotchPC.Sensors.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" Private="false" />
+  </ItemGroup>
+
+  <Target Name="CopySensorsHelper" AfterTargets="Build">
+    <ItemGroup>
+      <SensorsHelperFiles Include="..\NotchPC.Sensors\bin\$(Configuration)\net10.0-windows10.0.19041.0\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SensorsHelperFiles)" DestinationFolder="$(OutDir)sensors\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <!-- QR code for pairing the phone remote. -->
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+    <!-- Web panel (uses the Evergreen WebView2 runtime that ships with Windows 11). -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Phone remote: Kestrel + WebSockets (listening in the LAN needs no admin, unlike HttpListener). -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <EmbeddedResource Include="Remote\Web\*.*" LogicalName="NotchPC.Remote.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>
