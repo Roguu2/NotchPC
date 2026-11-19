@@ -40,6 +40,12 @@ internal sealed class RemoteSettingsViewModel : ObservableObject
         set => _settings.Update(s => s.Remote.PowerDelaySeconds = value);
     }
 
+    public bool FilesAndClipboard
+    {
+        get => _settings.Current.Remote.FilesAndClipboard;
+        set => _settings.Update(s => s.Remote.FilesAndClipboard = value);
+    }
+
     public string StatusText => _server.Error is { } error
         ? Loc.Format("Remote.Status.Error", error)
         : _server.Address is { } address ? Loc.Format("Remote.Status.On", address) : Loc.Get("Remote.Status.Off");
@@ -62,6 +68,7 @@ internal sealed class RemoteSettingsViewModel : ObservableObject
         Raise(nameof(HasDevices));
         Raise(nameof(Enabled));
         Raise(nameof(PowerDelay));
+        Raise(nameof(FilesAndClipboard));
         Raise(nameof(StatusText));
     }
 }

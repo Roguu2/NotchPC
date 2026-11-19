@@ -36,7 +36,7 @@ public partial class SettingsWindow : FluentWindow
     private void OnNavChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         var name = (Nav.SelectedItem as System.Windows.Controls.ListBoxItem)?.Tag as string ?? "General";
-        foreach (var page in new FrameworkElement[] { PageGeneral, PageNotch, PageMusic, PageWidgets, PageCapture, PageNotify, PageOverlay, PagePhone, PageAbout })
+        foreach (var page in new FrameworkElement[] { PageGeneral, PageNotch, PageAppearance, PageMusic, PageWidgets, PageCapture, PageNotify, PageOverlay, PagePhone, PageAbout })
         {
             page.Visibility = page.Name == "Page" + name ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -187,6 +187,8 @@ public partial class SettingsWindow : FluentWindow
         Process.Start(new ProcessStartInfo("ms-settings:developers") { UseShellExecute = true })?.Dispose();
 
     private void OnUninstall(object sender, RoutedEventArgs e) => _viewModel.Uninstall();
+
+    private void OnResetTheme(object sender, RoutedEventArgs e) => _viewModel.Appearance.Reset();
 
     private void OnOpenFolder(object sender, RoutedEventArgs e)
     {

@@ -24,6 +24,7 @@ internal sealed class GameOverlayController : IDisposable
     private readonly SettingsService _settings;
     private readonly SensorsClient _sensors;
     private readonly FullscreenWatcher _watcher;
+    private readonly GameSessionTracker _sessions;
     private readonly FpsMeter _fps = new();
     private readonly DispatcherTimer _tick;
     private readonly DispatcherTimer _messageTimer;
@@ -38,11 +39,12 @@ internal sealed class GameOverlayController : IDisposable
     private readonly HashSet<object> _remote = [];
     private IReadOnlyDictionary<uint, double> _rates = new Dictionary<uint, double>();
 
-    public GameOverlayController(SettingsService settings, SensorsClient sensors, FullscreenWatcher watcher)
+    public GameOverlayController(SettingsService settings, SensorsClient sensors, FullscreenWatcher watcher, GameSessionTracker sessions)
     {
         _settings = settings;
         _sensors = sensors;
         _watcher = watcher;
+        _sessions = sessions;
         _tick = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
         _tick.Tick += (_, _) => Update();
         _messageTimer = new DispatcherTimer { Interval = MessageTime };
@@ -66,6 +68,9 @@ internal sealed class GameOverlayController : IDisposable
 
     /// <summary>Settings → status of the shortcut (false: another app owns that combination).</summary>
     public bool HotkeyWorks { get; private set; } = true;
+
+    /// <summary>The overlay window itself shows (a game can also be followed just for the session stats).</summary>
+    private bool ShowsWindow => _settings.Current.GameOverlay.Enabled || _preview;
 
     /// <summary>Plain-language state of the FPS counter, null before the overlay first showed.</summary>
     public string? FpsStatus => !_fpsTried
@@ -160,7 +165,7 @@ internal sealed class GameOverlayController : IDisposable
         }
 
         var s = _settings.Current.GameOverlay;
-        if (!s.Enabled)
+        if (!s.Enabled && !s.SessionStats)
         {
             Hide();
             return;
@@ -193,6 +198,11 @@ internal sealed class GameOverlayController : IDisposable
     {
         var changed = _app?.ProcessId != app.ProcessId;
         _app = app;
+        if (!_preview && _settings.Current.GameOverlay.SessionStats)
+        {
+            _sessions.InFront(app.ProcessId, app.ProcessName);
+        }
+
         _window ??= new GameOverlayWindow();
         _window.SetClockVisible(_settings.Current.GameOverlay.ShowClock);
         if (!_visible)
@@ -211,8 +221,15 @@ internal sealed class GameOverlayController : IDisposable
         }
 
         Update();
-        _window.Show();
-        _window.Place(app.Monitor, _settings.Current.GameOverlay.Position);
+        if (ShowsWindow)
+        {
+            _window.Show();
+            _window.Place(app.Monitor, _settings.Current.GameOverlay.Position);
+        }
+        else
+        {
+            _window.Hide();
+        }
     }
 
     private void Hide()
@@ -225,6 +242,7 @@ internal sealed class GameOverlayController : IDisposable
         _visible = false;
         _app = null;
         _window?.Hide();
+        _sessions.Away();
         if (_remote.Count == 0)
         {
             StopMeasuring();
@@ -277,6 +295,16 @@ internal sealed class GameOverlayController : IDisposable
         if (_fps.IsRunning && _rates.TryGetValue(_app.ProcessId, out var rate))
         {
             fps = rate;
+        }
+
+        if (!_preview)
+        {
+            _sessions.Sample(_fps.IsRunning ? fps ?? 0 : null);
+        }
+
+        if (!ShowsWindow)
+        {
+            return;
         }
 
         var s = _snapshot;

@@ -14,6 +14,8 @@
     <SolidColorBrush x:Key="IslandHover" Color="#1AFFFFFF" />
     <SolidColorBrush x:Key="IslandPressed" Color="#29FFFFFF" />
     <SolidColorBrush x:Key="IslandSeparator" Color="#33FFFFFF" />
+    <!-- Theme accent (Settings → Appearance): sliders, the selected tab, highlights. -->
+    <SolidColorBrush x:Key="NotchAccent" Color="#FFFFFFFF" />
 
     <!-- Desktop widget card (ref/Widgets.jpg) -->
     <SolidColorBrush x:Key="WidgetBackground" Color="#E6141416" />
@@ -217,7 +219,7 @@
                     <Grid Height="18" Background="Transparent">
                         <Track x:Name="PART_Track" VerticalAlignment="Center">
                             <Track.DecreaseRepeatButton>
-                                <RepeatButton Style="{StaticResource NotchSliderFill}" Background="White" Command="Slider.DecreaseLarge" />
+                                <RepeatButton Style="{StaticResource NotchSliderFill}" Background="{StaticResource NotchAccent}" Command="Slider.DecreaseLarge" />
                             </Track.DecreaseRepeatButton>
                             <Track.IncreaseRepeatButton>
                                 <RepeatButton Style="{StaticResource NotchSliderFill}" Background="#40FFFFFF" Command="Slider.IncreaseLarge" />

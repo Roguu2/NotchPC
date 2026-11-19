@@ -27,7 +27,6 @@
   <data name="Tab.clipboard" xml:space="preserve"><value>Schowek</value></data>
   <data name="Tab.widgets" xml:space="preserve"><value>Widgety</value></data>
   <data name="Tab.quick-settings" xml:space="preserve"><value>Szybkie ustawienia</value></data>
-  <data name="Tab.apps" xml:space="preserve"><value>Aplikacje i zrzuty</value></data>
   <data name="Tab.phone" xml:space="preserve"><value>Pilot w telefonie</value></data>
   <data name="Tab.audio" xml:space="preserve"><value>Urządzenia audio</value></data>
   <data name="Tab.settings" xml:space="preserve"><value>Ustawienia</value></data>
@@ -56,7 +55,7 @@
   <data name="Settings.HideOnFullscreen" xml:space="preserve"><value>Chowaj przy aplikacjach pełnoekranowych</value></data>
   <data name="Settings.HideOnFullscreen.Hint" xml:space="preserve"><value>Gry, filmy i przeglądarka w trybie F11 na monitorze notcha nie będą zasłaniane.</value></data>
   <data name="Settings.Tabs" xml:space="preserve"><value>Zakładki</value></data>
-  <data name="Settings.Tabs.Hint" xml:space="preserve"><value>Wybierz, które zakładki są w notchu. Strzałkami zmienisz kolejność.</value></data>
+  <data name="Settings.Tabs.Hint" xml:space="preserve"><value>Wybierz, które zakładki są w notchu. Kolejność zmienisz strzałkami albo przeciągając ikony w samym notchu. Pierwsze 9 jest na pasku, reszta pod „Więcej”.</value></data>
   <data name="Settings.MoveUp" xml:space="preserve"><value>Przesuń wyżej</value></data>
   <data name="Settings.MoveDown" xml:space="preserve"><value>Przesuń niżej</value></data>
   <data name="Settings.About" xml:space="preserve"><value>O aplikacji</value></data>
@@ -468,4 +467,89 @@
   <data name="Settings.Widgets.CpuTemp.Result.TaskFailed" xml:space="preserve"><value>PawnIO jest zainstalowany, ale nie udało się utworzyć zadania czujników. Kliknij ponownie.</value></data>
   <data name="Music.Volume.App" xml:space="preserve"><value>Głośność: {0} (inne dźwięki bez zmian)</value></data>
   <data name="Music.Volume.Device" xml:space="preserve"><value>Głośność całego komputera (nie znaleziono głośności samego odtwarzacza)</value></data>
+  <data name="Settings.Appearance" xml:space="preserve"><value>Wygląd</value></data>
+  <data name="Settings.Page.Appearance" xml:space="preserve"><value>Kolory i kształt notcha oraz widgetów na pulpicie. Zmiany widać od razu.</value></data>
+  <data name="Theme.Style" xml:space="preserve"><value>Styl</value></data>
+  <data name="Theme.Style.Hint" xml:space="preserve"><value>Ciemny jak w telefonie, czysta czerń (najlepiej wygląda na ekranach OLED) albo przezroczyste szkło.</value></data>
+  <data name="Theme.Style.dark" xml:space="preserve"><value>Ciemny</value></data>
+  <data name="Theme.Style.oled" xml:space="preserve"><value>Czysta czerń (OLED)</value></data>
+  <data name="Theme.Style.glass" xml:space="preserve"><value>Szkło</value></data>
+  <data name="Theme.Accent" xml:space="preserve"><value>Kolor akcentu</value></data>
+  <data name="Theme.Accent.Hint" xml:space="preserve"><value>Suwaki, wybrana zakładka i wyróżnienia.</value></data>
+  <data name="Theme.Accent.white" xml:space="preserve"><value>Biały</value></data>
+  <data name="Theme.Accent.accent" xml:space="preserve"><value>Kolor akcentu Windows</value></data>
+  <data name="Theme.Accent.5AC8FA" xml:space="preserve"><value>Niebieski</value></data>
+  <data name="Theme.Accent.BF5AF2" xml:space="preserve"><value>Fioletowy</value></data>
+  <data name="Theme.Accent.FF375F" xml:space="preserve"><value>Różowy</value></data>
+  <data name="Theme.Accent.FF9F0A" xml:space="preserve"><value>Pomarańczowy</value></data>
+  <data name="Theme.Accent.30D158" xml:space="preserve"><value>Zielony</value></data>
+  <data name="Theme.Opacity" xml:space="preserve"><value>Krycie</value></data>
+  <data name="Theme.Opacity.Hint" xml:space="preserve"><value>Mniej = bardziej prześwituje pulpit przez notch i widgety.</value></data>
+  <data name="Theme.Corners" xml:space="preserve"><value>Rogi</value></data>
+  <data name="Theme.Corners.round" xml:space="preserve"><value>Okrągłe (pigułka)</value></data>
+  <data name="Theme.Corners.soft" xml:space="preserve"><value>Łagodne</value></data>
+  <data name="Theme.Reset" xml:space="preserve"><value>Przywróć domyślny wygląd</value></data>
+  <data name="Live.Now" xml:space="preserve"><value>teraz</value></data>
+  <data name="Live.Recording" xml:space="preserve"><value>Nagrywanie</value></data>
+  <data name="Settings.Group.Live" xml:space="preserve"><value>Aktywności na żywo</value></data>
+  <data name="Settings.Live.Hint" xml:space="preserve"><value>To, co trwa właśnie teraz, widać w zamkniętej pigułce, jak w iPhonie.</value></data>
+  <data name="Settings.Live.Timer" xml:space="preserve"><value>Odliczanie timera skupienia</value></data>
+  <data name="Settings.Live.Meeting" xml:space="preserve"><value>Spotkanie z kalendarza w ciągu 15 minut</value></data>
+  <data name="Settings.Live.Recording" xml:space="preserve"><value>Nagrywanie ekranu (uruchomione z notcha) z czasem trwania</value></data>
+  <data name="Tab.search" xml:space="preserve"><value>Kalkulator</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Licz albo przeliczaj waluty…</value></data>
+  <data name="Search.Copy" xml:space="preserve"><value>Enter kopiuje wynik</value></data>
+  <data name="Search.Currency.Source" xml:space="preserve"><value>Kurs średni NBP · Enter kopiuje</value></data>
+  <data name="Search.Hint" xml:space="preserve"><value>Spróbuj: 2*19,99 · 15 usd w pln · 200*15%</value></data>
+  <data name="Settings.SearchHotkey" xml:space="preserve"><value>Ctrl+Alt+Spacja otwiera kalkulator</value></data>
+  <data name="Settings.SearchHotkey.Hint" xml:space="preserve"><value>Z dowolnego miejsca: notch otwiera się na kalkulatorze, gotowy do pisania.</value></data>
+  <data name="Widget.Chip.Sticky" xml:space="preserve"><value>Karteczki</value></data>
+  <data name="Widget.Chip.Todo" xml:space="preserve"><value>Zadania</value></data>
+  <data name="Widget.Chip.System" xml:space="preserve"><value>System</value></data>
+  <data name="Settings.Widgets.Sticky" xml:space="preserve"><value>Karteczki</value></data>
+  <data name="Settings.Widgets.Todo" xml:space="preserve"><value>Lista zadań</value></data>
+  <data name="Settings.Widgets.System" xml:space="preserve"><value>Dyski i system</value></data>
+  <data name="Widget.Sticky.Placeholder" xml:space="preserve"><value>Zapisz coś…</value></data>
+  <data name="Widget.Sticky.Add" xml:space="preserve"><value>Nowa karteczka</value></data>
+  <data name="Widget.Sticky.Delete" xml:space="preserve"><value>Usuń tę karteczkę</value></data>
+  <data name="Widget.Sticky.Color" xml:space="preserve"><value>Zmień kolor</value></data>
+  <data name="Widget.Todo.Title" xml:space="preserve"><value>Zadania</value></data>
+  <data name="Widget.Todo.Count" xml:space="preserve"><value>zostało {0} z {1}</value></data>
+  <data name="Widget.Todo.Placeholder" xml:space="preserve"><value>Dodaj zadanie i naciśnij Enter</value></data>
+  <data name="Widget.Todo.ClearDone" xml:space="preserve"><value>Usuń zrobione</value></data>
+  <data name="Widget.Todo.Remove" xml:space="preserve"><value>Usuń</value></data>
+  <data name="Widget.Todo.Empty" xml:space="preserve"><value>Nic do zrobienia. Dodaj zadanie poniżej.</value></data>
+  <data name="Widget.System.Free" xml:space="preserve"><value>{0} wolne z {1}</value></data>
+  <data name="Widget.System.Uptime" xml:space="preserve"><value>Włączony od {0}</value></data>
+  <data name="Tab.games" xml:space="preserve"><value>Gry</value></data>
+  <data name="Games.Week" xml:space="preserve"><value>W tym tygodniu: {0}</value></data>
+  <data name="Games.Week.None" xml:space="preserve"><value>W tym tygodniu bez grania</value></data>
+  <data name="Games.Game.Week" xml:space="preserve"><value>{0} w tym tygodniu</value></data>
+  <data name="Games.Last" xml:space="preserve"><value>Ostatnia sesja</value></data>
+  <data name="Games.Fps" xml:space="preserve"><value>śr. {0} FPS · min {1}</value></data>
+  <data name="Games.Empty" xml:space="preserve"><value>Nie znaleziono gier (Steam, Epic Games, GOG).</value></data>
+  <data name="Games.Loading" xml:space="preserve"><value>Szukam gier…</value></data>
+  <data name="Games.Refresh" xml:space="preserve"><value>Poszukaj gier jeszcze raz</value></data>
+  <data name="Games.Flash" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="Games.Flash.Fps" xml:space="preserve"><value>{0} · {1} · {2} FPS</value></data>
+  <data name="Settings.Overlay.Sessions" xml:space="preserve"><value>Statystyki sesji</value></data>
+  <data name="Settings.Overlay.Sessions.Hint" xml:space="preserve"><value>Zapisuje czas gry i FPS (też przy wyłączonej nakładce). Podsumowanie pokazuje się w notchu po grze i w zakładce Gry.</value></data>
+  <data name="Remote.File.Title" xml:space="preserve"><value>Plik z telefonu</value></data>
+  <data name="Settings.Remote.Files" xml:space="preserve"><value>Pliki i schowek</value></data>
+  <data name="Settings.Remote.Files.Hint" xml:space="preserve"><value>Telefon może wysyłać pliki (do Pobrane\NotchPC i na półkę) i tekst do schowka, pobierać pliki z półki i widzieć ostatnie teksty ze schowka, gdy otworzysz w nim zakładkę Pliki.</value></data>
+  <data name="Tab.more" xml:space="preserve"><value>Więcej</value></data>
+  <data name="Widget.Chip.Apps" xml:space="preserve"><value>Aplikacje</value></data>
+  <data name="Widget.Apps.Title" xml:space="preserve"><value>Aplikacje</value></data>
+  <data name="Settings.Widgets.Apps" xml:space="preserve"><value>Skróty aplikacji</value></data>
+  <data name="Settings.Widgets.Games" xml:space="preserve"><value>Gry i czas grania</value></data>
+  <data name="Quick.Capture" xml:space="preserve"><value>Zrzuty ekranu</value></data>
+  <data name="Games.Sort.recent" xml:space="preserve"><value>Sortowanie: ostatnio grane (kliknij, aby zmienić)</value></data>
+  <data name="Games.Sort.name" xml:space="preserve"><value>Sortowanie: alfabetycznie (kliknij, aby zmienić)</value></data>
+  <data name="Games.Sort.playtime" xml:space="preserve"><value>Sortowanie: najwięcej grane (kliknij, aby zmienić)</value></data>
+  <data name="Games.Favorite" xml:space="preserve"><value>Dodaj do ulubionych (zawsze na górze)</value></data>
+  <data name="Games.Unfavorite" xml:space="preserve"><value>Usuń z ulubionych</value></data>
+  <data name="Games.Hide" xml:space="preserve"><value>Ukryj na liście</value></data>
+  <data name="Games.Restore" xml:space="preserve"><value>Przywróć na listę</value></data>
+  <data name="Games.ShowHidden" xml:space="preserve"><value>Pokaż ukryte gry (żeby je przywrócić)</value></data>
+  <data name="Games.Sort.custom" xml:space="preserve"><value>Sortowanie: własna kolejność – przeciągaj kafelki (kliknij, aby zmienić)</value></data>
 </root>

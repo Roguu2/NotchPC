@@ -55,6 +55,12 @@ internal sealed class GameOverlaySettingsViewModel : ObservableObject
         set => _settings.Update(s => s.GameOverlay.AutoFullscreen = value);
     }
 
+    public bool SessionStats
+    {
+        get => S.SessionStats;
+        set => _settings.Update(s => s.GameOverlay.SessionStats = value);
+    }
+
     public bool ShowClock
     {
         get => S.ShowClock;
@@ -125,7 +131,7 @@ internal sealed class GameOverlaySettingsViewModel : ObservableObject
     {
         foreach (var name in new[]
                  {
-                     nameof(Enabled), nameof(AutoFullscreen), nameof(ShowClock), nameof(Position), nameof(Hotkey),
+                     nameof(Enabled), nameof(AutoFullscreen), nameof(ShowClock), nameof(SessionStats), nameof(Position), nameof(Hotkey),
                      nameof(HotkeyHint), nameof(FpsStatus), nameof(HasGames),
                  })
         {

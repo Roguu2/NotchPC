@@ -15,7 +15,7 @@
       left: 'Lewy', right: 'Prawy', drag: 'Przytrzymaj',
       typeHere: 'Pisz tutaj…',
       volume: 'Głośność', mute: 'Wycisz', unmute: 'Włącz dźwięk',
-      nothingPlaying: 'Nic nie gra', appsEmpty: 'Brak skrótów. Dodaj je w notchu, w zakładce Aplikacje.',
+      nothingPlaying: 'Nic nie gra', appsEmpty: 'Brak skrótów. Dodaj je w widgecie Aplikacje na pulpicie komputera.',
       gameHint: 'Statystyki aplikacji na pierwszym planie komputera. Temperatura CPU wymaga trybu administratora czujników.',
       overlayOn: 'Nakładka na PC: włączona (wyłącz)', overlayOff: 'Nakładka na PC: wyłączona (włącz)',
       slideStart: 'Od początku', slideCurrent: 'Od bieżącego', slideBlack: 'Czarny ekran', slideEnd: 'Zakończ',
@@ -25,6 +25,12 @@
       forget: 'Rozłącz ten telefon', confirmForget: 'Zapomnieć to parowanie na tym telefonie?',
       unpaired: 'Ten telefon nie jest już sparowany.', connecting: 'Łączenie…', sent: 'Wysłano',
       tabPad: 'Touchpad', tabKeys: 'Klawiatura', tabMusic: 'Muzyka', tabApps: 'Aplikacje', tabGame: 'Gra', tabSlides: 'Slajdy', tabPower: 'Zasilanie',
+      tabFiles: 'Pliki', toPc: 'Wyślij na komputer', pickFiles: 'Wybierz pliki lub zdjęcia', fromPc: 'Z półki komputera',
+      filesEmpty: 'Półka jest pusta. Przeciągnij pliki na notch, w zakładkę Pliki.', clipboard: 'Schowek',
+      clipHint: 'Wklej tekst, który ma trafić do schowka komputera…', clipSend: 'Wyślij do schowka PC', clipFromPc: 'Ostatnie ze schowka PC (stuknij, aby skopiować)',
+      clipsEmpty: 'Brak tekstów w schowku komputera.', clipSent: 'Jest w schowku komputera', clipFailed: 'Schowek komputera jest zajęty, spróbuj jeszcze raz',
+      copied: 'Skopiowano', copyFailed: 'Nie udało się skopiować', uploaded: 'Wysłano: {0}', uploadFailed: 'Nie udało się wysłać: {0}',
+      downloadFailed: 'Nie udało się pobrać pliku', filesOff: 'Pliki i schowek są wyłączone w ustawieniach NotchPC (Telefon).',
     },
     en: {
       welcomeTitle: 'Connect to your PC',
@@ -34,7 +40,7 @@
       left: 'Left', right: 'Right', drag: 'Hold',
       typeHere: 'Type here…',
       volume: 'Volume', mute: 'Mute', unmute: 'Unmute',
-      nothingPlaying: 'Nothing playing', appsEmpty: 'No shortcuts. Add them in the notch, Apps tab.',
+      nothingPlaying: 'Nothing playing', appsEmpty: 'No shortcuts. Add them in the Apps widget on the PC desktop.',
       gameHint: 'Stats of the app in front on the PC. CPU temperature needs the sensors\' administrator mode.',
       overlayOn: 'PC overlay: on (turn off)', overlayOff: 'PC overlay: off (turn on)',
       slideStart: 'From start', slideCurrent: 'From current', slideBlack: 'Black screen', slideEnd: 'End show',
@@ -44,6 +50,12 @@
       forget: 'Disconnect this phone', confirmForget: 'Forget the pairing on this phone?',
       unpaired: 'This phone is no longer paired.', connecting: 'Connecting…', sent: 'Sent',
       tabPad: 'Touchpad', tabKeys: 'Keys', tabMusic: 'Music', tabApps: 'Apps', tabGame: 'Game', tabSlides: 'Slides', tabPower: 'Power',
+      tabFiles: 'Files', toPc: 'Send to the PC', pickFiles: 'Choose files or photos', fromPc: 'From the PC shelf',
+      filesEmpty: 'The shelf is empty. Drag files onto the notch, Files tab.', clipboard: 'Clipboard',
+      clipHint: 'Paste text for the PC clipboard…', clipSend: 'Send to the PC clipboard', clipFromPc: 'Recent PC clipboard (tap to copy)',
+      clipsEmpty: 'No texts on the PC clipboard.', clipSent: 'It is on the PC clipboard', clipFailed: 'The PC clipboard is busy, try again',
+      copied: 'Copied', copyFailed: 'Could not copy', uploaded: 'Sent: {0}', uploadFailed: 'Could not send: {0}',
+      downloadFailed: 'Could not download the file', filesOff: 'Files and clipboard are turned off in the NotchPC settings (Phone).',
     },
   };
 
@@ -110,12 +122,23 @@
         $('powerHint').textContent = m.powerDelay > 0 ? t('powerDelay', m.powerDelay) : '';
         showTabs();
         if (current === 'game') send({ t: 'stats', on: true });
+        if (current === 'files') refreshFiles();
         break;
       case 'music':
         renderMusic(m.music);
         break;
       case 'stats':
         renderStats(m);
+        break;
+      case 'files':
+        renderFiles(m);
+        break;
+      case 'clips':
+        renderClips(m);
+        break;
+      case 'clipset':
+        toast(m.ok ? t('clipSent') : t('clipFailed'));
+        if (m.ok) { $('clipText').value = ''; send({ t: 'clips' }); }
         break;
       case 'unpaired':
         localStorage.removeItem(TOKEN_KEY);
@@ -160,6 +183,7 @@
     document.querySelectorAll('.screen').forEach((s) => { s.hidden = s.id !== tab; });
     document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
     if (tab === 'game') send({ t: 'stats', on: true });
+    if (tab === 'files') refreshFiles();
   }
 
   document.querySelectorAll('nav button').forEach((b) => b.addEventListener('click', () => select(b.dataset.tab)));
@@ -297,6 +321,130 @@
     $('overlayBtn').textContent = state.overlay ? t('overlayOn') : t('overlayOff');
   }
   $('overlayBtn').addEventListener('click', () => { send({ t: 'overlay' }); buzz(); });
+
+  // ---------- files & clipboard ----------
+  // Files go over plain HTTP requests with this phone's token in a header; the PC only offers files from its shelf.
+  function refreshFiles() { send({ t: 'files' }); send({ t: 'clips' }); }
+
+  function setFilesOff(off) {
+    $('filesOff').hidden = !off;
+    document.querySelectorAll('#files .card').forEach((c) => { c.hidden = off; });
+  }
+
+  function renderFiles(m) {
+    setFilesOff(!m.on);
+    const list = $('fileList');
+    list.textContent = '';
+    (m.files || []).forEach((f) => {
+      const b = document.createElement('button');
+      b.className = 'file';
+      const name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = f.name;
+      const size = document.createElement('span');
+      size.className = 'size';
+      size.textContent = f.size;
+      b.append(name, size);
+      b.addEventListener('click', () => download(f, b));
+      list.appendChild(b);
+    });
+    $('filesEmpty').hidden = !m.on || (m.files || []).length > 0;
+  }
+
+  async function download(f, button) {
+    button.disabled = true;
+    try {
+      const r = await fetch(`/api/file/${encodeURIComponent(f.id)}`, { headers: { 'X-Token': localStorage.getItem(TOKEN_KEY) || '' } });
+      if (!r.ok) throw new Error(String(r.status));
+      const url = URL.createObjectURL(await r.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = f.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch {
+      toast(t('downloadFailed'));
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function upload(file) {
+    const row = document.createElement('div');
+    row.className = 'upload';
+    const name = document.createElement('div');
+    name.textContent = file.name;
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const fill = document.createElement('i');
+    bar.appendChild(fill);
+    row.append(name, bar);
+    $('uploads').prepend(row);
+
+    // XMLHttpRequest: fetch() has no upload progress.
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.setRequestHeader('X-Token', localStorage.getItem(TOKEN_KEY) || '');
+    xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable) fill.style.width = `${Math.round((e.loaded / e.total) * 100)}%`; };
+    xhr.onload = () => {
+      const ok = xhr.status >= 200 && xhr.status < 300;
+      row.classList.add(ok ? 'done' : 'failed');
+      fill.style.width = '100%';
+      toast(t(ok ? 'uploaded' : 'uploadFailed', file.name));
+      if (ok) buzz();
+    };
+    xhr.onerror = () => { row.classList.add('failed'); toast(t('uploadFailed', file.name)); };
+    xhr.send(file);
+  }
+
+  $('pick').addEventListener('change', (e) => {
+    [...e.target.files].forEach(upload);
+    e.target.value = '';
+  });
+  $('filesRefresh').addEventListener('click', () => { send({ t: 'files' }); buzz(); });
+  $('clipsRefresh').addEventListener('click', () => { send({ t: 'clips' }); buzz(); });
+  $('clipSend').addEventListener('click', () => {
+    const text = $('clipText').value;
+    if (!text) return;
+    send({ t: 'setclip', s: text.slice(0, 20000) });
+    buzz();
+  });
+
+  // The page is plain http in the home network, where navigator.clipboard is often missing: fall back to execCommand.
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
+    } catch { /* fall back */ }
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    area.remove();
+    return ok;
+  }
+
+  function renderClips(m) {
+    setFilesOff(!m.on);
+    const list = $('clipList');
+    list.textContent = '';
+    (m.items || []).forEach((text) => {
+      const b = document.createElement('button');
+      b.className = 'clip';
+      b.textContent = text;
+      b.addEventListener('click', async () => { toast(t(await copyText(text) ? 'copied' : 'copyFailed')); buzz(); });
+      list.appendChild(b);
+    });
+    $('clipsEmpty').hidden = !m.on || (m.items || []).length > 0;
+  }
 
   // ---------- power ----------
   const confirmText = { shutdown: 'confirmShutdown', restart: 'confirmRestart', sleep: 'confirmSleep' };

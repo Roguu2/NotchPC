@@ -9,7 +9,7 @@
     <Deterministic>true</Deterministic>
     <Company>NotchPC</Company>
     <Product>NotchPC</Product>
-    <Version>0.2.3</Version>
+    <Version>0.3.0</Version>
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en;pl</SatelliteResourceLanguages>
   </PropertyGroup>

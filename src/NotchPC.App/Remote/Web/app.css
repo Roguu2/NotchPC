@@ -160,3 +160,36 @@ nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-wi
   font-size: 14px;
   max-width: 90vw;
 }
+
+.pick {
+  display: block;
+  text-align: center;
+  background: var(--card2);
+  border: 1px dashed #4a4a52;
+  border-radius: 14px;
+  padding: 16px 12px;
+  color: var(--accent);
+}
+.pick input { display: none; }
+button.mini { padding: 6px 12px; border-radius: 10px; font-size: 15px; }
+.file { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.file .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.file .size { color: var(--muted); font-size: 13px; flex: none; }
+.upload { font-size: 14px; }
+.upload .bar { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 6px; overflow: hidden; }
+.upload .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.upload.done .bar i { background: var(--good); }
+.upload.failed .bar i { background: var(--danger); width: 100% !important; }
+textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--card2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  resize: vertical;
+  outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+.list button.clip { white-space: pre-wrap; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; font-size: 14px; padding: 12px 14px; }
+.card[hidden] { display: none; }

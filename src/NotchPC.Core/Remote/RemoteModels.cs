@@ -139,6 +139,9 @@ public abstract record RemoteCommand
     private const int MaxText = 500;
     private const int MaxDelta = 2000;
 
+    /// <summary>Longest text the phone may put on the PC clipboard.</summary>
+    public const int MaxClipboard = 20000;
+
     /// <summary>Null for anything malformed or unknown (ignored by the server).</summary>
     public static RemoteCommand? Parse(string json)
     {
@@ -168,6 +171,9 @@ public abstract record RemoteCommand
                 "power" => Str(r, "a") is "lock" or "sleep" or "shutdown" or "restart" or "cancel" ? new Power(Str(r, "a")!) : null,
                 "stats" => new Stats(r.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.True),
                 "overlay" => new ToggleOverlay(),
+                "files" => new ListFiles(),
+                "clips" => new ListClips(),
+                "setclip" => Str(r, "s") is { Length: > 0 and <= MaxClipboard } clip ? new SetClipboard(clip) : null,
                 _ => null,
             };
         }
@@ -212,6 +218,15 @@ public abstract record RemoteCommand
     public sealed record Stats(bool On) : RemoteCommand;
 
     public sealed record ToggleOverlay : RemoteCommand;
+
+    /// <summary>The phone asks for the files the PC offers (the shelf).</summary>
+    public sealed record ListFiles : RemoteCommand;
+
+    /// <summary>The phone asks for the recent texts on the PC clipboard.</summary>
+    public sealed record ListClips : RemoteCommand;
+
+    /// <summary>Text from the phone goes onto the PC clipboard.</summary>
+    public sealed record SetClipboard(string Value) : RemoteCommand;
 }
 
 /// <summary>Named keys and shortcuts the phone may send, as virtual-key sequences (held together, released in reverse).</summary>

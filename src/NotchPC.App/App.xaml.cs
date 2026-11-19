@@ -36,6 +36,8 @@ public partial class App : Application
     private HttpClient? _http;
     private SensorsClient? _sensors;
     private GameOverlayController? _overlay;
+    private GameLibraryService? _games;
+    private GameSessionTracker? _sessions;
     private RemoteServer? _remote;
     private NotchPC.App.Audio.AudioMixerViewModel? _mixer;
     private NotchPC.App.Web.WebViewModel? _web;
@@ -43,6 +45,7 @@ public partial class App : Application
     private NotchPC.App.Updates.UpdateService? _updates;
     private WidgetManager? _widgets;
     private ClipboardService? _clipboard;
+    private NotchPC.App.Shelf.ShelfViewModel? _shelf;
     private CaptureService? _capture;
     private QuickSettingsViewModel? _quick;
     private NotificationHub? _hub;
@@ -65,6 +68,8 @@ public partial class App : Application
         _settings = new SettingsService(new SettingsStore(System.IO.Path.Combine(SettingsStore.DefaultDirectory, "settings.json")));
         Loc.SetCulture(Loc.Resolve(_settings.Current.Language));
         ApplicationThemeManager.Apply(ApplicationTheme.Dark, WindowBackdropType.Mica);
+        ThemeService.Apply(_settings.Current.Theme);
+        _settings.Changed += (_, _) => ThemeService.Apply(_settings.Current.Theme);
 
         // The installer passes the user's choice once: "--autostart on" / "--autostart off".
         var autostartArg = Array.IndexOf(e.Args, "--autostart");
@@ -84,7 +89,7 @@ public partial class App : Application
         _music = new MusicViewModel(_settings, media, new LrclibClient(_http, lyricsCache));
 
         _clipboard = new ClipboardService(_settings, System.IO.Path.Combine(SettingsStore.DefaultDirectory, "clipboard"));
-        _notch = new NotchWindow(_settings, _music, new ClipboardViewModel(_clipboard), new ShelfViewModel(_settings), new AppsViewModel(_settings, _capture = new CaptureService(_settings)), _quick = new QuickSettingsViewModel());
+        _notch = new NotchWindow(_settings, _music, new ClipboardViewModel(_clipboard), _shelf = new ShelfViewModel(_settings), _capture = new CaptureService(_settings), _quick = new QuickSettingsViewModel());
         _notch.SettingsRequested += (_, _) => ShowSettings();
         _hub = new NotificationHub(_settings);
         _notch.AttachNotifications(_hub, new NotificationsViewModel(_hub));
@@ -103,15 +108,23 @@ public partial class App : Application
         Loc.CultureChanged += (_, _) => _tray.RefreshTexts();
 
         _sensors = new SensorsClient();
-        _widgets = new WidgetManager(_settings, _http, _sensors);
+        AppsViewModel.EnsureDefaults(_settings); // the phone lists the shortcuts even without the widget
+        StickyNotesViewModel.ImportOldNote(_settings); // the removed quick-note tab: its text becomes a sticky note
+        _games = new GameLibraryService();
+        _ = _games.GetAsync(); // names for play sessions
+        var gameHistory = new GameHistoryStore();
+        _widgets = new WidgetManager(_settings, _http, _sensors, _games, gameHistory);
         _widgets.Start();
         _updates = new NotchPC.App.Updates.UpdateService(_settings, _hub);
         _updates.Start();
-        _overlay = new GameOverlayController(_settings, _sensors, _notch.Fullscreen);
-        _remote = new RemoteServer(_settings, _music, _overlay, _hub);
+        _sessions = new GameSessionTracker(gameHistory, exe => _games.ForExe(exe));
+        _sessions.Ended += (_, s) => _notch.ShowFlash("\uE7FC", GameSessionText.Flash(s));
+        _overlay = new GameOverlayController(_settings, _sensors, _notch.Fullscreen, _sessions);
+        _remote = new RemoteServer(_settings, _music, _overlay, _hub, _shelf, _clipboard);
         _notch.AttachPhone(new PhoneViewModel(_settings, _remote));
         _notch.AttachAudio(_mixer = new NotchPC.App.Audio.AudioMixerViewModel());
         _notch.AttachWeb(_web = new NotchPC.App.Web.WebViewModel(_settings));
+        _notch.AttachSearch(new NotchPC.App.Search.SearchViewModel(_http, () => _notch.CollapseNow()));
         _taskbarPill = new TaskbarPill(_settings, _music, _notch.Fullscreen, () => _notch.OpenTabFromOutside(NotchPC.Core.Settings.TabIds.Music));
 
         _singleInstance.OnActivationRequested(() => Dispatcher.BeginInvoke(ShowSettings));
@@ -138,6 +151,7 @@ public partial class App : Application
         _taskbarPill?.Dispose();
         _updates?.Dispose();
         _overlay?.Dispose();
+        _sessions?.Dispose();
         _sensors?.Dispose();
         _music?.Dispose();
         _http?.Dispose();

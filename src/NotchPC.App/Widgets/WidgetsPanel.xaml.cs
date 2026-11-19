@@ -28,6 +28,11 @@ internal sealed class WidgetsTabViewModel : ObservableObject
             Raise(nameof(CalendarEnabled));
             Raise(nameof(StatsEnabled));
             Raise(nameof(TwitchEnabled));
+            Raise(nameof(StickyEnabled));
+            Raise(nameof(TodoEnabled));
+            Raise(nameof(SystemEnabled));
+            Raise(nameof(AppsEnabled));
+            Raise(nameof(GamesEnabled));
             Raise(nameof(Locked));
             Raise(nameof(GridMode));
         };
@@ -61,6 +66,36 @@ internal sealed class WidgetsTabViewModel : ObservableObject
     {
         get => _settings.Current.Widgets.TwitchEnabled;
         set => _settings.Update(s => s.Widgets.TwitchEnabled = value);
+    }
+
+    public bool StickyEnabled
+    {
+        get => _settings.Current.Widgets.StickyEnabled;
+        set => _settings.Update(s => s.Widgets.StickyEnabled = value);
+    }
+
+    public bool TodoEnabled
+    {
+        get => _settings.Current.Widgets.TodoEnabled;
+        set => _settings.Update(s => s.Widgets.TodoEnabled = value);
+    }
+
+    public bool SystemEnabled
+    {
+        get => _settings.Current.Widgets.SystemEnabled;
+        set => _settings.Update(s => s.Widgets.SystemEnabled = value);
+    }
+
+    public bool AppsEnabled
+    {
+        get => _settings.Current.Widgets.AppsEnabled;
+        set => _settings.Update(s => s.Widgets.AppsEnabled = value);
+    }
+
+    public bool GamesEnabled
+    {
+        get => _settings.Current.Widgets.GamesEnabled;
+        set => _settings.Update(s => s.Widgets.GamesEnabled = value);
     }
 
     public bool GridMode

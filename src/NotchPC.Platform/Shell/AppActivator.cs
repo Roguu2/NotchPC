@@ -241,7 +241,7 @@ public static partial class AppActivator
         }
     }
 
-    internal static string? ProcessPath(uint pid)
+    public static string? ProcessPath(uint pid)
     {
         var process = OpenProcess(ProcessQueryLimitedInformation, false, pid);
         if (process == IntPtr.Zero)

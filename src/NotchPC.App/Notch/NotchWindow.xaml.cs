@@ -17,6 +17,7 @@ using NotchPC.App.QuickSettings;
 using NotchPC.App.Shelf;
 using NotchPC.App.Widgets;
 using NotchPC.Core.Layout;
+using NotchPC.Core.Notifications;
 using NotchPC.Core.Localization;
 using NotchPC.Core.Settings;
 using NotchPC.Platform.Monitors;
@@ -34,7 +35,7 @@ public partial class NotchWindow : Window
 {
     public static readonly DependencyProperty IslandRadiusProperty = DependencyProperty.Register(
         nameof(IslandRadius), typeof(double), typeof(NotchWindow),
-        new PropertyMetadata(CollapsedRadius, (d, e) => ((NotchWindow)d).Island.CornerRadius = new CornerRadius((double)e.NewValue)));
+        new PropertyMetadata(DefaultCollapsedRadius, (d, e) => ((NotchWindow)d).Island.CornerRadius = new CornerRadius((double)e.NewValue)));
 
     public static readonly DependencyProperty SelectedTabProperty = DependencyProperty.Register(
         nameof(SelectedTab), typeof(NotchTab), typeof(NotchWindow), new PropertyMetadata(null));
@@ -43,14 +44,17 @@ public partial class NotchWindow : Window
     private const double CollapsedWidth = 180;
     private const double MiniPlayerWidth = 330;
     private const double FlashWidth = 290;
+    private const double ActivityWidth = 250;
     private const double BannerWidth = 400;
     private const double BannerHeight = 74;
-    private const double BannerRadius = 26;
+    private double BannerRadius => ThemeCorners.Radii(_settings.Current.Theme.Corners).Banner;
     private const double CollapsedHeight = 32;
-    private const double CollapsedRadius = 16;
+    private const double DefaultCollapsedRadius = 16;
+
+    private double CollapsedRadius => ThemeCorners.Radii(_settings.Current.Theme.Corners).Collapsed;
     private const double ExpandedWidth = 470;
     private const double ExpandedHeight = 190;
-    private const double ExpandedRadius = 28;
+    private double ExpandedRadius => ThemeCorners.Radii(_settings.Current.Theme.Corners).Expanded;
     // The window is resized between two fixed "canvases" (never during an animation). WPF redraws and copies the
     // whole transparent window on every animation frame, so the small collapsed canvas keeps the pill's equalizer cheap.
     private const double CanvasWidth = ExpandedWidth + 90;   // room for spring overshoot
@@ -69,7 +73,6 @@ public partial class NotchWindow : Window
     private readonly MusicViewModel _music;
     private readonly ClipboardViewModel _clipboard;
     private readonly ShelfViewModel _shelf;
-    private readonly AppsViewModel _apps;
     private readonly QuickSettingsViewModel _quick;
     private bool _captureHidden;
     private readonly FullscreenWatcher _fullscreen = new();
@@ -77,6 +80,13 @@ public partial class NotchWindow : Window
     /// <summary>Foreground / fullscreen changes (also used by the game overlay).</summary>
     internal FullscreenWatcher Fullscreen => _fullscreen;
     private readonly ObservableCollection<NotchTab> _tabs = [];
+
+    /// <summary>At most this many tabs (besides the gear) sit in the bar; the rest go behind "more".</summary>
+    private const int MaxBarTabs = 9;
+    private readonly ObservableCollection<NotchTab> _barTabs = [];
+    private readonly ObservableCollection<NotchTab> _moreTabs = [];
+    private readonly NotchTab _moreTab = new(NotchTab.MoreId);
+    private bool _reorderingTabs;
     private readonly DispatcherTimer _expandTimer;
     private readonly DispatcherTimer _collapseTimer;
     private readonly DispatcherTimer _miniOffTimer;
@@ -99,7 +109,7 @@ public partial class NotchWindow : Window
     private bool _flashActive;
     private int _animationGeneration;
 
-    internal NotchWindow(SettingsService settings, MusicViewModel music, ClipboardViewModel clipboard, ShelfViewModel shelf, AppsViewModel apps, QuickSettingsViewModel quick)
+    internal NotchWindow(SettingsService settings, MusicViewModel music, ClipboardViewModel clipboard, ShelfViewModel shelf, CaptureService capture, QuickSettingsViewModel quick)
     {
         _settings = settings;
         _music = music;
@@ -109,29 +119,23 @@ public partial class NotchWindow : Window
 
         Width = CollapsedCanvasWidth;
         Height = CollapsedCanvasExtraHeight + _settings.Current.Notch.TopOffset;
-        TabBar.ItemsSource = _tabs;
+        TabBar.ItemsSource = _barTabs;
+        MorePanel.ItemsSource = _moreTabs;
+
         Island.CornerRadius = new CornerRadius(IslandRadius); // the DP callback only fires on changes
         ExpandedContent.Width = ExpandedWidth - 2;
         MusicPanel.DataContext = music;
         WidgetsPanel.DataContext = new WidgetsTabViewModel(settings);
         ClipboardPanel.DataContext = clipboard;
         ShelfPanel.DataContext = shelf;
-        AppsPanel.DataContext = apps;
         QuickSettingsPanel.DataContext = quick;
+        QuickSettingsPanel.Capture = capture;
         _quick = quick;
         _quick.LayoutChanged += (_, _) =>
         {
             if (_expanded && SelectedTab?.Id == TabIds.QuickSettings)
             {
                 Select(SelectedTab);
-            }
-        };
-        _apps = apps;
-        _apps.RowsChanged += (_, _) =>
-        {
-            if (_expanded && SelectedTab?.Id == TabIds.Apps)
-            {
-                Select(SelectedTab); // re-animates to the new height
             }
         };
         _defaultBackground = Island.Background;
@@ -166,6 +170,7 @@ public partial class NotchWindow : Window
         _bannerTimer = new DispatcherTimer();
         _bannerTimer.Tick += (_, _) => EndBanner();
 
+        HookTabDragging();
         MouseEnter += OnPointerEnter;
         MouseLeave += OnPointerLeave;
         PreviewMouseLeftButtonDown += OnPreviewMouseDown;
@@ -195,6 +200,7 @@ public partial class NotchWindow : Window
         _fullscreen.Trace = AppLog.Info;
         _settings.Changed += OnSettingsChanged;
         _music.PropertyChanged += OnMusicChanged;
+        LiveActivityHub.Current.Changed += (_, _) => OnActivitiesChanged();
         Loc.CultureChanged += OnCultureChanged;
 
         RebuildTabs();
@@ -226,7 +232,86 @@ public partial class NotchWindow : Window
         set => SetValue(SelectedTabProperty, value);
     }
 
-    private double CurrentCollapsedWidth => _flashActive ? FlashWidth : _miniActive ? MiniPlayerWidth : CollapsedWidth;
+    private double CurrentCollapsedWidth => _flashActive ? FlashWidth : _miniActive ? MiniPlayerWidth : _activity is not null ? ActivityWidth : CollapsedWidth;
+
+    // ---------------------------------------------------------------- live activities
+
+    private LiveActivity? _activity;
+    private DispatcherTimer? _activityTick;
+
+    /// <summary>The top running activity (that the settings allow) goes into the pill.</summary>
+    private void OnActivitiesChanged()
+    {
+        var n = _settings.Current.Notch;
+        var top = LiveActivities.Top(LiveActivityHub.Current.All.Where(a => a.Id switch
+        {
+            LiveActivity.Timer => n.LiveTimer,
+            LiveActivity.Meeting => n.LiveMeeting,
+            LiveActivity.Recording => n.LiveRecording,
+            _ => true,
+        }));
+        var widthChanged = (top is null) != (_activity is null);
+        _activity = top;
+        if (top is not null)
+        {
+            var brush = top.ColorHex is { } hex && ColorConverter.ConvertFromString(hex) is Color c
+                ? new SolidColorBrush(c)
+                : (Brush)FindResource("IslandForeground");
+            ActivityGlyph.Text = top.Glyph;
+            ActivityGlyph.Foreground = brush;
+            ChipGlyph.Text = top.Glyph;
+            ChipGlyph.Foreground = brush;
+            ActivityLabel.Text = top.Label;
+            _activityTick ??= CreateActivityTick();
+            _activityTick.Start();
+            UpdateActivityClock();
+        }
+        else
+        {
+            _activityTick?.Stop();
+        }
+
+        if (widthChanged && !_expanded && !_bannerActive && !_flashActive && IsVisible)
+        {
+            SetHotZone(expanded: false);
+            AnimateIsland(CurrentCollapsedWidth, CollapsedHeight, CollapsedRadius, new SpringEase { Damping = 0.8, Frequency = 11 }, ExpandDuration, null);
+        }
+
+        UpdateActivityVisual();
+        UpdateEqualizer();
+    }
+
+    private DispatcherTimer CreateActivityTick()
+    {
+        var t = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
+        t.Tick += (_, _) => UpdateActivityClock();
+        return t;
+    }
+
+    private void UpdateActivityClock()
+    {
+        if (_activity is not { } a)
+        {
+            return;
+        }
+
+        var now = DateTimeOffset.Now;
+        var text = a.Clock == LiveActivityClock.Countdown && a.Id == LiveActivity.Meeting && a.At <= now
+            ? Loc.Get("Live.Now")
+            : LiveActivities.Clock(a, now);
+        ActivityTime.Text = text;
+        ChipTime.Text = text;
+    }
+
+    /// <summary>Which of the pill's layers shows the activity (its own layer, or a chip next to the music).</summary>
+    private void UpdateActivityVisual()
+    {
+        var a = _activity;
+        ActivityLayer.Visibility = a is not null && !_miniActive && !_expanded && !_flashActive && !_bannerActive ? Visibility.Visible : Visibility.Collapsed;
+        var chip = a is not null && _miniActive;
+        ActivityChip.Visibility = chip ? Visibility.Visible : Visibility.Collapsed;
+        Equalizer.Visibility = chip ? Visibility.Collapsed : Visibility.Visible;
+    }
 
     /// <summary>Height of the expanded panel for the selected tab (lists need more room than the player).</summary>
     private double CurrentExpandedHeight => SelectedTab?.Id switch
@@ -234,9 +319,11 @@ public partial class NotchWindow : Window
         TabIds.Clipboard or TabIds.Notifications or TabIds.Audio => MaxExpandedHeight,
         TabIds.Files => 260,
         TabIds.Phone => 270,
+        TabIds.Search => 330,
+        TabIds.Widgets => 262,
+        NotchTab.MoreId => 80 + (76 * Math.Max(1, (_moreTabs.Count + 3) / 4)),
         TabIds.Web => 74 + (84 * _webRows),
-        TabIds.Apps => 106 + (74 * _apps.Rows),
-        TabIds.QuickSettings => 142 + (76 * _quick.TileRows),
+        TabIds.QuickSettings => 186 + (76 * _quick.TileRows),
         _ => ExpandedHeight,
     };
 
@@ -247,6 +334,7 @@ public partial class NotchWindow : Window
         WindowHelper.MakeOverlay(_hwnd, noActivate: true);
         HwndSource.FromHwnd(_hwnd)?.AddHook(WndProc);
         _fullscreen.Attach(_hwnd);
+        ApplySearchHotkey();
         Reposition();
     }
 
@@ -269,6 +357,11 @@ public partial class NotchWindow : Window
         else if (msg == WmDisplayChange)
         {
             Dispatcher.BeginInvoke(Reposition, DispatcherPriority.Background);
+        }
+        else if (msg == GlobalHotkey.WmHotkey && wParam.ToInt32() == SearchHotkeyId)
+        {
+            handled = true;
+            Dispatcher.BeginInvoke(OpenSearch);
         }
 
         return IntPtr.Zero;
@@ -493,9 +586,9 @@ public partial class NotchWindow : Window
 
     private void OnPointerLeave(object sender, MouseEventArgs e)
     {
-        if (_moving || _moveStart is not null)
+        if (_moving || _moveStart is not null || _reorderingTabs)
         {
-            return; // the window moves under the pointer while it is dragged
+            return; // the window moves under the pointer while it is dragged / a tab is being dragged
         }
 
         _expandTimer.Stop();
@@ -719,6 +812,65 @@ public partial class NotchWindow : Window
 
     private int _webRows = 1;
 
+    /// <summary>Connects the search and quick note tabs.</summary>
+    /// <summary>Connects the calculator tab.</summary>
+    internal void AttachSearch(Search.SearchViewModel search) => SearchPanel.DataContext = search;
+
+    private const int SearchHotkeyId = 0x4E53; // "NS"
+    private bool _searchHotkey;
+
+    /// <summary>Ctrl+Alt+Space (when on in the settings): the notch opens on the search tab, ready to type.</summary>
+    private void ApplySearchHotkey()
+    {
+        var wanted = _settings.Current.Notch.SearchHotkey && _hwnd != IntPtr.Zero;
+        if (wanted == _searchHotkey)
+        {
+            return;
+        }
+
+        if (_searchHotkey)
+        {
+            GlobalHotkey.Unregister(_hwnd, SearchHotkeyId);
+            _searchHotkey = false;
+        }
+
+        if (wanted)
+        {
+            _searchHotkey = GlobalHotkey.Register(_hwnd, SearchHotkeyId, 0x0002 | 0x0001, 0x20); // Ctrl+Alt, Space
+            if (!_searchHotkey)
+            {
+                AppLog.Info("Search shortcut Ctrl+Alt+Space is taken by another app");
+            }
+        }
+    }
+
+    private void OpenSearch()
+    {
+        if (!IsVisible || _tabs.All(t => t.Id != TabIds.Search))
+        {
+            return;
+        }
+
+        OpenTab(TabIds.Search);
+        Dispatcher.BeginInvoke(() => TakeKeyboard(SearchPanel.Input), DispatcherPriority.Input);
+    }
+
+    /// <summary>The notch (a no-activate window) takes the keyboard for a text box until it collapses.</summary>
+    private void TakeKeyboard(Control box)
+    {
+        if (!_keyboard)
+        {
+            _previousForeground = WindowHelper.Foreground();
+            WindowHelper.MakeOverlay(_hwnd, noActivate: false);
+            _keyboard = true;
+        }
+
+        WindowHelper.SetForeground(_hwnd);
+        Activate();
+        box.Focus();
+        Keyboard.Focus(box);
+    }
+
     /// <summary>Connects the audio tab (output device and per-app mixer).</summary>
     internal void AttachAudio(Audio.AudioMixerViewModel mixer) => AudioPanel.DataContext = mixer;
 
@@ -811,6 +963,7 @@ public partial class NotchWindow : Window
         MiniPlayer.Visibility = Visibility.Collapsed;
         UpdateEqualizer();
         BannerLayer.Visibility = Visibility.Visible;
+        UpdateActivityVisual();
         BannerLayer.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200)) { BeginTime = TimeSpan.FromMilliseconds(140) });
         AnimateIsland(BannerWidth, BannerHeight, BannerRadius, new SpringEase { Damping = 0.78, Frequency = 11 }, ExpandDuration, null);
         StartGlow();
@@ -961,6 +1114,7 @@ public partial class NotchWindow : Window
 
         MiniPlayer.Visibility = Visibility.Collapsed;
         FlashLayer.Visibility = Visibility.Visible;
+        UpdateActivityVisual();
         FlashLayer.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(180)) { BeginTime = TimeSpan.FromMilliseconds(120) });
         _flashTimer.Start();
     }
@@ -1051,10 +1205,62 @@ public partial class NotchWindow : Window
             _tabs.Add(new NotchTab(t.Id));
         }
 
+        // A tidy bar: the first tabs (in the order from the settings), then "more" for the rest, then the gear.
+        _barTabs.Clear();
+        _moreTabs.Clear();
+        var regular = _tabs.Where(t => t.Id != TabIds.Settings).ToList();
+        var overflow = regular.Count > MaxBarTabs + 1; // one extra tab fits where "more" would be
+        foreach (var t in overflow ? regular.Take(MaxBarTabs) : regular)
+        {
+            _barTabs.Add(t);
+        }
+
+        if (overflow)
+        {
+            foreach (var t in regular.Skip(MaxBarTabs))
+            {
+                _moreTabs.Add(t);
+            }
+
+            _barTabs.Add(_moreTab);
+        }
+
+        if (_tabs.FirstOrDefault(t => t.Id == TabIds.Settings) is { } gear)
+        {
+            _barTabs.Add(gear);
+        }
+
         var selected = _tabs.FirstOrDefault(t => t.Id == previous && t.Id != TabIds.Settings)
                        ?? _tabs.FirstOrDefault(t => t.Id != TabIds.Settings);
         Select(selected);
     }
+
+    /// <summary>Drag a tab (in the bar or behind "more") onto another to change the order; the gear and "more" stay put.</summary>
+    private void HookTabDragging()
+    {
+        foreach (var list in new ItemsControl[] { TabBar, MorePanel })
+        {
+            var reorder = new Controls.DragReorder<NotchTab>(list, t => t.Id is not (TabIds.Settings or NotchTab.MoreId), MoveTab, t => _tabs.IndexOf(t));
+            reorder.Started += (_, _) =>
+            {
+                _reorderingTabs = true;
+                _collapseTimer.Stop();
+            };
+            reorder.Ended += (_, _) =>
+            {
+                _reorderingTabs = false;
+                if (_expanded && !IsMouseOver)
+                {
+                    _collapseTimer.Interval = TimeSpan.FromMilliseconds(Math.Max(1, _settings.Current.Notch.CollapseDelayMs));
+                    _collapseTimer.Start();
+                }
+            };
+        }
+    }
+
+    /// <summary>A tab dropped onto another: the order is saved in the settings (the bar rebuilds from it).</summary>
+    private void MoveTab(NotchTab dragged, NotchTab target, bool after) =>
+        _settings.Update(s => s.Tabs = NotchPC.Core.Layout.ListOrder.MoveBy(s.Tabs, t => t.Id, dragged.Id, target.Id, after));
 
     private void Select(NotchTab? tab)
     {
@@ -1063,6 +1269,8 @@ public partial class NotchWindow : Window
             t.IsSelected = ReferenceEquals(t, tab);
         }
 
+        // A tab from behind "more" keeps the dot under "more", so it is clear where it lives.
+        _moreTab.IsSelected = ReferenceEquals(tab, _moreTab) || (tab is not null && _moreTabs.Contains(tab));
         SelectedTab = tab;
         if (_expanded)
         {
@@ -1090,12 +1298,13 @@ public partial class NotchWindow : Window
         (TabIds.Widgets, WidgetsPanel),
         (TabIds.Clipboard, ClipboardPanel),
         (TabIds.Files, ShelfPanel),
-        (TabIds.Apps, AppsPanel),
         (TabIds.QuickSettings, QuickSettingsPanel),
         (TabIds.Notifications, NotificationsPanel),
         (TabIds.Phone, PhonePanel),
         (TabIds.Audio, AudioPanel),
         (TabIds.Web, WebPanel),
+        (TabIds.Search, SearchPanel),
+        (NotchTab.MoreId, MorePanel),
     ];
 
     private void OnTabClick(object sender, RoutedEventArgs e)
@@ -1258,6 +1467,7 @@ public partial class NotchWindow : Window
 
     private void FadeMiniPlayer(bool show, int delayMs = 0)
     {
+        UpdateActivityVisual();
         if (show)
         {
             MiniPlayer.Visibility = Visibility.Visible;
@@ -1270,6 +1480,7 @@ public partial class NotchWindow : Window
             MiniPlayer.BeginAnimation(OpacityProperty, null);
             MiniPlayer.Opacity = visible ? 1 : 0;
             MiniPlayer.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            UpdateActivityVisual();
         };
         MiniPlayer.BeginAnimation(OpacityProperty, a, HandoffBehavior.SnapshotAndReplace);
     }
@@ -1278,7 +1489,7 @@ public partial class NotchWindow : Window
     private void UpdateEqualizer(bool force = false)
     {
         UpdateMarquee();
-        var run = _miniActive && !_expanded && !_bannerActive && IsVisible && _settings.Current.Music.AnimateMiniPlayer;
+        var run = _miniActive && _activity is null && !_expanded && !_bannerActive && IsVisible && _settings.Current.Music.AnimateMiniPlayer;
         if (run == _equalizerRunning && !force)
         {
             return;
@@ -1422,6 +1633,14 @@ public partial class NotchWindow : Window
         }
 
         ApplyTopOffset();
+        OnActivitiesChanged(); // the settings may hide or show some kinds
+        ApplySearchHotkey();
+        if (!_expanded && !_bannerActive && Math.Abs(IslandRadius - CollapsedRadius) > 0.1)
+        {
+            BeginAnimation(IslandRadiusProperty, null);
+            IslandRadius = CollapsedRadius; // corners changed in the theme
+        }
+
         SetHotZone(_expanded);
         Reposition();
         _fullscreen.Evaluate();
@@ -1436,5 +1655,7 @@ public partial class NotchWindow : Window
         {
             t.RefreshTexts();
         }
+
+        _moreTab.RefreshTexts();
     }
 }

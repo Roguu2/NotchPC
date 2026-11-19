@@ -2,7 +2,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using NotchPC.App.Apps;
 using NotchPC.App.Notch;
+using NotchPC.Core.Localization;
 
 namespace NotchPC.App.QuickSettings;
 
@@ -14,7 +16,69 @@ public partial class QuickSettingsPanel : UserControl
         InitializeComponent();
     }
 
+    private bool _busy;
+
+    /// <summary>Screenshots, snips and recordings (set by the notch).</summary>
+    internal CaptureService? Capture { get; set; }
+
     private QuickSettingsViewModel? Vm => DataContext as QuickSettingsViewModel;
+
+    private async void OnScreenshot(object sender, RoutedEventArgs e) => await CaptureAsync(snip: false);
+
+    private async void OnSnip(object sender, RoutedEventArgs e) => await CaptureAsync(snip: true);
+
+    /// <summary>The notch hides itself first, so it is never in the picture.</summary>
+    private async Task CaptureAsync(bool snip)
+    {
+        if (_busy || Capture is not { } capture || Notch is not { Monitor: { } monitor } notch)
+        {
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            System.Windows.Media.Imaging.BitmapSource? image;
+            await notch.HideForCaptureAsync();
+            try
+            {
+                image = CaptureService.Capture(monitor);
+                if (snip && image is not null)
+                {
+                    image = await new SnipWindow(image, monitor).PickAsync();
+                    if (image is null)
+                    {
+                        return; // cancelled
+                    }
+                }
+            }
+            finally
+            {
+                notch.EndCapture();
+            }
+
+            var path = image is null ? null : capture.Save(image);
+            notch.ShowFlash(path is null ? "\uE7BA" : "\uE722", Loc.Get(path is null ? "Flash.ScreenshotFailed" : "Flash.ScreenshotSaved"));
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void OnRecord(object sender, RoutedEventArgs e)
+    {
+        if (Capture is not { } capture || Notch is not { } notch)
+        {
+            return;
+        }
+
+        notch.CollapseNow();
+        if (!capture.ToggleRecording())
+        {
+            notch.ShowFlash("", Loc.Get("Flash.ShareXMissing"));
+        }
+    }
 
     private NotchWindow? Notch => Window.GetWindow(this) as NotchWindow;
 

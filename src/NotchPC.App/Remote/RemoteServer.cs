@@ -11,11 +11,15 @@ using System.Windows;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using NotchPC.App.Games;
 using NotchPC.App.Infrastructure;
 using NotchPC.App.Music;
 using NotchPC.App.Notifications;
+using NotchPC.App.Clipboard;
+using NotchPC.App.Shelf;
+using NotchPC.Core.Clipboard;
 using NotchPC.Core.Localization;
 using NotchPC.Core.Remote;
 using NotchPC.Core.Settings;
@@ -32,11 +36,16 @@ internal sealed class RemoteServer : IDisposable
 {
     private static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly TimeSpan AuthTimeout = TimeSpan.FromSeconds(10);
+    private const long MaxUpload = 4L * 1024 * 1024 * 1024; // 4 GB per file
+    private const int MaxClipText = 4000; // per clipboard item sent to the phone
 
     private readonly SettingsService _settings;
     private readonly MusicViewModel _music;
     private readonly GameOverlayController _overlay;
     private readonly NotificationHub _hub;
+    private readonly ShelfViewModel _shelf;
+    private readonly ClipboardService _clipboard;
+    private readonly Lock _uploadGate = new();
     private readonly ConcurrentDictionary<Guid, Client> _clients = new();
     private readonly PairingCode _pairing = new(TimeSpan.FromMinutes(10));
     private readonly Lock _pairingGate = new();
@@ -46,12 +55,21 @@ internal sealed class RemoteServer : IDisposable
     private int _port;
     private bool _starting;
 
-    public RemoteServer(SettingsService settings, MusicViewModel music, GameOverlayController overlay, NotificationHub hub)
+    public RemoteServer(SettingsService settings, MusicViewModel music, GameOverlayController overlay, NotificationHub hub, ShelfViewModel shelf, ClipboardService clipboard)
     {
         _settings = settings;
         _music = music;
         _overlay = overlay;
         _hub = hub;
+        _shelf = shelf;
+        _clipboard = clipboard;
+        _shelf.Items.CollectionChanged += (_, _) =>
+        {
+            if (!_clients.IsEmpty)
+            {
+                Broadcast(FilesMessage(), _ => true);
+            }
+        };
         _musicDebounce = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
         _musicDebounce.Tick += (_, _) =>
         {
@@ -194,6 +212,8 @@ internal sealed class RemoteServer : IDisposable
             app.MapGet("/icon.png", ctx => Serve(ctx, "icon.png", "image/png"));
             app.MapGet("/manifest.webmanifest", ctx => Serve(ctx, "manifest.webmanifest", "application/manifest+json"));
             app.MapPost("/api/pair", PairAsync);
+            app.MapPost("/api/upload", UploadAsync);
+            app.MapGet("/api/file/{id}", DownloadAsync);
             app.Map("/ws", SocketAsync);
             await app.StartAsync().ConfigureAwait(true);
             _app = app;
@@ -459,6 +479,16 @@ internal sealed class RemoteServer : IDisposable
             case RemoteCommand.ToggleOverlay:
                 await OnUi(_overlay.ToggleForForeground).ConfigureAwait(false);
                 break;
+            case RemoteCommand.ListFiles:
+                await client.SendAsync(await OnUi(FilesMessage).ConfigureAwait(false)).ConfigureAwait(false);
+                break;
+            case RemoteCommand.ListClips:
+                await client.SendAsync(await OnUi(ClipsMessage).ConfigureAwait(false)).ConfigureAwait(false);
+                break;
+            case RemoteCommand.SetClipboard c:
+                var ok = await OnUi(() => SetClipboard(c.Value)).ConfigureAwait(false);
+                await client.SendAsync(JsonSerializer.Serialize(new { t = "clipset", ok }, Json)).ConfigureAwait(false);
+                break;
         }
     }
 
@@ -538,6 +568,213 @@ internal sealed class RemoteServer : IDisposable
         }
     }
 
+    /// <summary>A paired phone's request (token in the X-Token header) while files and clipboard are allowed.</summary>
+    private async Task<bool> AuthorizedAsync(HttpContext ctx)
+    {
+        var token = ctx.Request.Headers["X-Token"].ToString();
+        return token.Length > 0 && await OnUi(() =>
+            _settings.Current.Remote.FilesAndClipboard &&
+            _settings.Current.Remote.Devices.Any(d => RemoteSecrets.Matches(token, d.TokenHash))).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// POST a file from the phone (body = the file, X-File-Name = its name, URL-encoded). It is saved in
+    /// Downloads\NotchPC under a safe, unique name and put on the shelf.
+    /// </summary>
+    private async Task UploadAsync(HttpContext ctx)
+    {
+        if (!await AuthorizedAsync(ctx).ConfigureAwait(false))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+
+        if (ctx.Features.Get<IHttpMaxRequestBodySizeFeature>() is { IsReadOnly: false } limit)
+        {
+            limit.MaxRequestBodySize = MaxUpload;
+        }
+
+        var name = RemoteFiles.SafeName(Uri.UnescapeDataString(ctx.Request.Headers["X-File-Name"].ToString()), "file");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "NotchPC");
+        string path;
+        string part;
+        FileStream stream;
+        try
+        {
+            Directory.CreateDirectory(dir);
+            lock (_uploadGate)
+            {
+                name = RemoteFiles.Unique(name, n => File.Exists(Path.Combine(dir, n)) || File.Exists(Path.Combine(dir, n + ".part")));
+                path = Path.Combine(dir, name);
+                part = path + ".part";
+                stream = new FileStream(part, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, useAsync: true);
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            AppLog.Error("Phone remote: cannot save an incoming file", ex);
+            ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            return;
+        }
+
+        try
+        {
+            await using (stream.ConfigureAwait(false))
+            {
+                await ctx.Request.Body.CopyToAsync(stream, ctx.RequestAborted).ConfigureAwait(false);
+            }
+
+            File.Move(part, path);
+        }
+        catch (Exception ex) when (ex is IOException or OperationCanceledException or BadHttpRequestException or UnauthorizedAccessException)
+        {
+            AppLog.Info($"Phone remote: upload of a file failed ({ex.GetType().Name})");
+            TryDelete(part);
+            if (!ctx.RequestAborted.IsCancellationRequested)
+            {
+                ctx.Response.StatusCode = ex is BadHttpRequestException bad ? bad.StatusCode : StatusCodes.Status500InternalServerError;
+            }
+
+            return;
+        }
+
+        AppLog.Info("Phone remote: file received");
+        await OnUi(() =>
+        {
+            _shelf.Add([path]);
+            _hub.Post(Loc.Get("Remote.File.Title"), name, "\uE896", Loc.Get("Tab.phone"), NotchPC.Core.Notifications.NotificationTargets.Tab(TabIds.Files));
+        }).ConfigureAwait(false);
+        await ctx.Response.WriteAsJsonAsync(new { name }).ConfigureAwait(false);
+    }
+
+    /// <summary>GET a file from the shelf by its id (only shelf files can be taken, never arbitrary paths).</summary>
+    private async Task DownloadAsync(HttpContext ctx)
+    {
+        if (!await AuthorizedAsync(ctx).ConfigureAwait(false))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+
+        var id = ctx.Request.RouteValues["id"] as string;
+        var path = await OnUi(() => _shelf.Items.Select(i => i.Path).FirstOrDefault(p => RemoteFiles.IdFor(p) == id)).ConfigureAwait(false);
+        if (path is null || !File.Exists(path))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+
+        ctx.Response.ContentType = "application/octet-stream";
+        ctx.Response.Headers.ContentDisposition = "attachment; filename*=UTF-8''" + Uri.EscapeDataString(Path.GetFileName(path));
+        try
+        {
+            await ctx.Response.SendFileAsync(path, ctx.RequestAborted).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is IOException or OperationCanceledException or UnauthorizedAccessException)
+        {
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+        }
+    }
+
+    private static long SizeOf(string path)
+    {
+        try
+        {
+            return new FileInfo(path).Length;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>The shelf files (not folders) the phone may take.</summary>
+    private string FilesMessage()
+    {
+        var on = _settings.Current.Remote.FilesAndClipboard;
+        var files = _shelf.Items
+            .Where(i => on && File.Exists(i.Path))
+            .Select(i => new { id = RemoteFiles.IdFor(i.Path), name = i.Name, size = RemoteFiles.Size(SizeOf(i.Path), Loc.Culture) })
+            .ToList();
+        return JsonSerializer.Serialize(new { t = "files", on, files }, Json);
+    }
+
+    /// <summary>
+    /// Recent clipboard texts, sent only when the phone asks (opens its files tab or taps refresh). From the
+    /// clipboard history when it is on (which already skips what password managers mark), else the current text.
+    /// </summary>
+    private string ClipsMessage()
+    {
+        var on = _settings.Current.Remote.FilesAndClipboard;
+        var items = new List<string>();
+        if (on)
+        {
+            if (_clipboard.Enabled)
+            {
+                items.AddRange(_clipboard.View(null)
+                    .Where(e => e.Kind == ClipKind.Text && !string.IsNullOrWhiteSpace(e.Text))
+                    .Take(8)
+                    .Select(e => Clip(e.Text!)));
+            }
+            else if (CurrentClipboardText() is { } text)
+            {
+                items.Add(Clip(text));
+            }
+        }
+
+        return JsonSerializer.Serialize(new { t = "clips", on, items }, Json);
+    }
+
+    private static string Clip(string text) => text.Length > MaxClipText ? text[..MaxClipText] : text;
+
+    private static string? CurrentClipboardText()
+    {
+        try
+        {
+            var data = System.Windows.Clipboard.GetDataObject();
+            if (data is null || data.GetDataPresent("ExcludeClipboardContentFromMonitorProcessing"))
+            {
+                return null;
+            }
+
+            return System.Windows.Clipboard.ContainsText() ? System.Windows.Clipboard.GetText() : null;
+        }
+        catch (System.Runtime.InteropServices.COMException)
+        {
+            return null;
+        }
+    }
+
+    private bool SetClipboard(string text)
+    {
+        if (!_settings.Current.Remote.FilesAndClipboard)
+        {
+            return false;
+        }
+
+        try
+        {
+            System.Windows.Clipboard.SetText(text);
+            AppLog.Info("Phone remote: clipboard text received");
+            return true;
+        }
+        catch (System.Runtime.InteropServices.COMException ex)
+        {
+            AppLog.Error("Phone remote: clipboard is busy", ex);
+            return false;
+        }
+    }
+
     private string HelloMessage()
     {
         var apps = (_settings.Current.Apps.Shortcuts ?? []).Select(a => a.Name).ToList();
@@ -548,6 +785,7 @@ internal sealed class RemoteServer : IDisposable
             pc = Environment.MachineName,
             apps,
             powerDelay = _settings.Current.Remote.PowerDelaySeconds,
+            files = _settings.Current.Remote.FilesAndClipboard,
             music = MusicState(),
         }, Json);
     }
@@ -615,9 +853,9 @@ internal sealed class RemoteServer : IDisposable
             }
 
             ms.Write(buffer, 0, result.Count);
-            if (ms.Length > 16 * 1024)
+            if (ms.Length > 96 * 1024)
             {
-                return null; // nothing the page sends is this big
+                return null; // nothing the page sends is this big (clipboard text is the largest)
             }
 
             if (result.EndOfMessage)

@@ -9,11 +9,64 @@ using NotchPC.App.Infrastructure;
 using NotchPC.Core.Layout;
 using NotchPC.Platform.Shell;
 
+using System.Windows.Threading;
+using NotchPC.Core.Notifications;
 namespace NotchPC.App.Apps;
 
 /// <summary>Screenshots (whole monitor or a selected area), saving and copying them, and ShareX for recording.</summary>
 internal sealed class CaptureService(SettingsService settings)
 {
+    private DispatcherTimer? _recordingWatch;
+    private DateTimeOffset? _recordingSince;
+    private bool _recorderSeen;
+
+    /// <summary>
+    /// The recording shows in the pill with its length (Live Activity). ShareX records with ffmpeg: once ffmpeg has
+    /// run and is gone, the recording ended (also when stopped in ShareX itself); if it never starts within 40 s,
+    /// the area was not chosen and nothing is recorded.
+    /// </summary>
+    private void StartRecordingActivity()
+    {
+        _recordingSince = DateTimeOffset.Now;
+        _recorderSeen = false;
+        Notifications.LiveActivityHub.Current.Set(new LiveActivity(
+            LiveActivity.Recording, "\uE7C8", Core.Localization.Loc.Get("Live.Recording"), LiveActivityClock.Elapsed, _recordingSince.Value, 3, "#FF453A"));
+        _recordingWatch ??= new DispatcherTimer(DispatcherPriority.Background, System.Windows.Application.Current.Dispatcher) { Interval = TimeSpan.FromSeconds(2) };
+        _recordingWatch.Tick -= OnRecordingWatch;
+        _recordingWatch.Tick += OnRecordingWatch;
+        _recordingWatch.Start();
+    }
+
+    private void OnRecordingWatch(object? sender, EventArgs e)
+    {
+        var running = Process.GetProcessesByName("ffmpeg");
+        var any = running.Length > 0;
+        foreach (var p in running)
+        {
+            p.Dispose();
+        }
+
+        if (any && !_recorderSeen)
+        {
+            _recorderSeen = true;
+            // Count from when the recording really started (after the area was chosen).
+            _recordingSince = DateTimeOffset.Now;
+            Notifications.LiveActivityHub.Current.Set(new LiveActivity(
+                LiveActivity.Recording, "\uE7C8", Core.Localization.Loc.Get("Live.Recording"), LiveActivityClock.Elapsed, _recordingSince.Value, 3, "#FF453A"));
+        }
+        else if ((!any && _recorderSeen) || (!_recorderSeen && DateTimeOffset.Now - _recordingSince > TimeSpan.FromSeconds(40)))
+        {
+            StopRecordingActivity();
+        }
+    }
+
+    private void StopRecordingActivity()
+    {
+        _recordingWatch?.Stop();
+        _recordingSince = null;
+        Notifications.LiveActivityHub.Current.Clear(LiveActivity.Recording);
+    }
+
     public static string DefaultFolder =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Screenshots");
 
@@ -142,6 +195,15 @@ internal sealed class CaptureService(SettingsService settings)
         try
         {
             Process.Start(new ProcessStartInfo(exe, "-ScreenRecorder") { UseShellExecute = false })?.Dispose();
+            if (_recordingSince is null)
+            {
+                StartRecordingActivity();
+            }
+            else
+            {
+                StopRecordingActivity(); // the second call stops ShareX's recording
+            }
+
             return true;
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)

@@ -6,12 +6,12 @@
         xmlns:widgets="clr-namespace:NotchPC.App.Widgets"
         xmlns:clip="clr-namespace:NotchPC.App.Clipboard"
         xmlns:shelf="clr-namespace:NotchPC.App.Shelf"
-        xmlns:apps="clr-namespace:NotchPC.App.Apps"
         xmlns:qs="clr-namespace:NotchPC.App.QuickSettings"
         xmlns:notif="clr-namespace:NotchPC.App.Notifications"
         xmlns:remote="clr-namespace:NotchPC.App.Remote"
         xmlns:audio="clr-namespace:NotchPC.App.Audio"
         xmlns:web="clr-namespace:NotchPC.App.Web"
+        xmlns:search="clr-namespace:NotchPC.App.Search"
         xmlns:controls="clr-namespace:NotchPC.App.Controls"
         xmlns:loc="clr-namespace:NotchPC.App.Localization"
         Title="NotchPC"
@@ -54,6 +54,32 @@
             </Setter>
         </Style>
 
+        <!-- Tile of a tab behind "more" -->
+        <Style x:Key="MoreTile" TargetType="Button">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Foreground" Value="{StaticResource IslandForegroundMuted}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" CornerRadius="14" Background="#14FFFFFF" BorderBrush="#1FFFFFFF" BorderThickness="1" Padding="6,11">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#66FFFFFF" />
+                                <Setter Property="Foreground" Value="{StaticResource IslandForeground}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource IslandPressed}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <DataTemplate x:Key="TabTemplate" DataType="{x:Type notch:NotchTab}">
             <StackPanel Orientation="Horizontal">
                 <Border x:Name="Separator" Width="1" Height="14" Margin="6,0" Background="{StaticResource IslandSeparator}"
@@ -62,7 +88,7 @@
                     <Grid>
                         <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="15"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                        <Ellipse x:Name="Dot" Width="3" Height="3" Fill="White" Margin="0,0,0,-7"
+                        <Ellipse x:Name="Dot" Width="3" Height="3" Fill="{StaticResource NotchAccent}" Margin="0,0,0,-7"
                                  HorizontalAlignment="Center" VerticalAlignment="Bottom" Visibility="Hidden" />
                     </Grid>
                 </Button>
@@ -116,6 +142,11 @@
                             </Border.Background>
                         </Border>
                     </Border>
+                    <!-- A Live Activity next to the music: icon + clock instead of the equalizer -->
+                    <StackPanel x:Name="ActivityChip" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0" Visibility="Collapsed">
+                        <TextBlock x:Name="ChipGlyph" FontFamily="{StaticResource IconFont}" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0" />
+                        <TextBlock x:Name="ChipTime" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Typography.NumeralAlignment="Tabular" />
+                    </StackPanel>
                     <StackPanel x:Name="Equalizer" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0">
                         <Rectangle Width="3" Height="14" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" RenderTransformOrigin="0.5,0.5" Fill="White">
                             <Rectangle.RenderTransform><ScaleTransform ScaleY="0.55" /></Rectangle.RenderTransform>
@@ -130,6 +161,20 @@
                             <Rectangle.RenderTransform><ScaleTransform ScaleY="0.7" /></Rectangle.RenderTransform>
                         </Rectangle>
                     </StackPanel>
+                </Grid>
+
+                <!-- Live Activity in the closed pill (timer, meeting, recording) when no music shows -->
+                <Grid x:Name="ActivityLayer" Visibility="Collapsed" Margin="12,0,14,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="ActivityGlyph" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
+                    <TextBlock x:Name="ActivityLabel" Grid.Column="1" FontSize="12" Margin="8,0,8,0" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" Foreground="{StaticResource IslandForegroundMuted}" />
+                    <TextBlock x:Name="ActivityTime" Grid.Column="2" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"
+                               Typography.NumeralAlignment="Tabular" />
                 </Grid>
 
                 <!-- Short message in the collapsed pill ("Screenshot saved") -->
@@ -192,12 +237,31 @@
                             <widgets:WidgetsPanel x:Name="WidgetsPanel" Visibility="Collapsed" />
                             <clip:ClipboardPanel x:Name="ClipboardPanel" Visibility="Collapsed" />
                             <shelf:ShelfPanel x:Name="ShelfPanel" Visibility="Collapsed" />
-                            <apps:AppsPanel x:Name="AppsPanel" Visibility="Collapsed" />
                             <qs:QuickSettingsPanel x:Name="QuickSettingsPanel" Visibility="Collapsed" />
                             <notif:NotificationsPanel x:Name="NotificationsPanel" Visibility="Collapsed" />
                             <remote:PhonePanel x:Name="PhonePanel" Visibility="Collapsed" />
                             <audio:AudioPanel x:Name="AudioPanel" Visibility="Collapsed" />
                             <web:WebPanel x:Name="WebPanel" Visibility="Collapsed" />
+                            <search:SearchPanel x:Name="SearchPanel" Visibility="Collapsed" />
+                            <ItemsControl x:Name="MorePanel" Visibility="Collapsed" VerticalAlignment="Top" Focusable="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type notch:NotchTab}">
+                                        <Button Style="{StaticResource MoreTile}" Tag="{Binding}" Click="OnTabClick">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center"
+                                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                <TextBlock Text="{Binding Label}" FontSize="11.5" Margin="0,6,0,0" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <StackPanel x:Name="Placeholder" HorizontalAlignment="Center" VerticalAlignment="Center"
                                         DataContext="{Binding SelectedTab, RelativeSource={RelativeSource AncestorType=Window}}">
                                 <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="30"

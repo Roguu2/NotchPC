@@ -115,6 +115,28 @@
     </div>
   </section>
 
+  <section id="files" class="screen" hidden>
+    <div class="card list">
+      <b data-t="toPc"></b>
+      <label class="pick"><input id="pick" type="file" multiple><span data-t="pickFiles"></span></label>
+      <div id="uploads" class="list"></div>
+    </div>
+    <div class="card list">
+      <div class="row between"><b data-t="fromPc"></b><button id="filesRefresh" class="mini" aria-label="refresh">↻</button></div>
+      <div id="fileList" class="list"></div>
+      <p id="filesEmpty" class="muted small" data-t="filesEmpty" hidden></p>
+    </div>
+    <div class="card list">
+      <b data-t="clipboard"></b>
+      <textarea id="clipText" rows="3" data-tp="clipHint"></textarea>
+      <button id="clipSend" class="wide" data-t="clipSend"></button>
+      <div class="row between"><span class="muted small" data-t="clipFromPc"></span><button id="clipsRefresh" class="mini" aria-label="refresh">↻</button></div>
+      <div id="clipList" class="list"></div>
+      <p id="clipsEmpty" class="muted small" data-t="clipsEmpty" hidden></p>
+    </div>
+    <p id="filesOff" class="muted center-text" data-t="filesOff" hidden></p>
+  </section>
+
   <section id="power" class="screen" hidden>
     <div class="list">
       <button data-power="lock" data-t="lock"></button>
@@ -135,6 +157,7 @@
   <button data-tab="apps"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-t="tabApps"></span></button>
   <button data-tab="game"><svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6L2 15a3 3 0 0 0 5.2 2l1.6-2h6.4l1.6 2A3 3 0 0 0 22 15l-.7-6.4a4 4 0 0 0-4-3.6z"/></svg><span data-t="tabGame"></span></button>
   <button data-tab="slides"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg><span data-t="tabSlides"></span></button>
+  <button data-tab="files"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3"/></svg><span data-t="tabFiles"></span></button>
   <button data-tab="power"><svg viewBox="0 0 24 24"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg><span data-t="tabPower"></span></button>
 </nav>
 

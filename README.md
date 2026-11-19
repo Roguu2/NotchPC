@@ -34,15 +34,15 @@ and videos and uses practically no CPU while you are not looking at it.
     </td>
     <td width="50%" valign="top">
       <h3>🧩 Desktop widgets</h3>
-      Focus timer, weather, your calendar, PC stats and Twitch chat as cards on the desktop. Drag them anywhere, snap
-      them to a grid, resize them.
+      Focus timer, weather, your calendar, PC stats, disks, sticky notes, a to-do list, app shortcuts and Twitch chat as
+      cards on the desktop. Drag them anywhere, snap them to a grid, resize them.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <h3>📋 Clipboard and files</h3>
       Clipboard history you can search and paste from (stored encrypted, password managers are skipped), a shelf to
-      park files, one-click screenshots.
+      park files, one-click screenshots and snips.
     </td>
     <td width="50%" valign="top">
       <h3>🔔 Notifications</h3>
@@ -53,11 +53,12 @@ and videos and uses practically no CPU while you are not looking at it.
     <td width="50%" valign="top">
       <h3>🎮 Game overlay</h3>
       FPS, CPU and GPU load and temperature, RAM and the time in a corner while you play. Nothing is injected into the
-      game, so anti-cheats have nothing to complain about.
+      game, so anti-cheats have nothing to complain about. After a game: your play time and average FPS.
     </td>
     <td width="50%" valign="top">
       <h3>📱 Phone remote</h3>
-      Scan a QR code and your phone becomes a touchpad, keyboard, music remote and slide clicker. Home network only.
+      Scan a QR code and your phone becomes a touchpad, keyboard, music remote and slide clicker, and sends files and
+      clipboard text to the PC and back. Home network only.
     </td>
   </tr>
   <tr>
@@ -73,11 +74,24 @@ and videos and uses practically no CPU while you are not looking at it.
   <tr>
     <td width="50%" valign="top">
       <h3>↔️ Where you want it</h3>
-      Drag the notch along the top edge or onto another monitor. Dark, rounded and out of the way.
+      Drag the notch along the top edge or onto another monitor, rearrange its tabs by dragging. Dark, OLED or glass
+      themes with your accent colour.
     </td>
     <td width="50%" valign="top">
       <h3>🔄 Updates itself</h3>
       New versions download in the background and install when you restart NotchPC or close it.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🕹️ All your games</h3>
+      One widget with every installed game: Steam, Epic, GOG, Riot, Battle.net, Ubisoft, EA, Rockstar and Minecraft.
+      Favourites, your own order, play time this week.
+    </td>
+    <td width="50%" valign="top">
+      <h3>⏱️ Live activities and calculator</h3>
+      A running timer, the next meeting or a recording shows in the pill. Ctrl+Alt+Space: calculate and convert
+      currencies right in the notch.
     </td>
   </tr>
 </table>

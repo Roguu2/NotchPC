@@ -45,43 +45,73 @@
     </UserControl.Resources>
 
     <UniformGrid Columns="6" Margin="0,4,0,0" VerticalAlignment="Center">
-        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,0" IsChecked="{Binding TimerEnabled}">
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding TimerEnabled}">
             <StackPanel>
                 <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE916;" />
                 <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.Timer}" />
             </StackPanel>
         </ToggleButton>
-        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,0" IsChecked="{Binding WeatherEnabled}">
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding WeatherEnabled}">
             <StackPanel>
                 <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE706;" />
                 <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Settings.Widgets.Weather}" />
             </StackPanel>
         </ToggleButton>
-        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,0" IsChecked="{Binding CalendarEnabled}">
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding CalendarEnabled}">
             <StackPanel>
                 <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE787;" />
                 <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Settings.Widgets.Calendar}" />
             </StackPanel>
         </ToggleButton>
-        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,0" IsChecked="{Binding StatsEnabled}">
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding StatsEnabled}">
             <StackPanel>
                 <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE9D9;" />
                 <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.Stats}" />
             </StackPanel>
         </ToggleButton>
-        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,0" IsChecked="{Binding TwitchEnabled}">
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding TwitchEnabled}">
             <StackPanel>
                 <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE8BD;" />
                 <TextBlock Style="{StaticResource ChipLabel}" Text="Twitch" />
             </StackPanel>
         </ToggleButton>
-        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,0" IsChecked="{Binding GridMode}" ToolTip="{loc:Tr Settings.Widgets.Layout.Hint}">
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding StickyEnabled}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE70B;" />
+                <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.Sticky}" />
+            </StackPanel>
+        </ToggleButton>
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding TodoEnabled}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE9D5;" />
+                <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.Todo}" />
+            </StackPanel>
+        </ToggleButton>
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding SystemEnabled}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xEDA2;" />
+                <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.System}" />
+            </StackPanel>
+        </ToggleButton>
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding AppsEnabled}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE71D;" />
+                <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.Apps}" />
+            </StackPanel>
+        </ToggleButton>
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding GamesEnabled}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE7FC;" />
+                <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Tab.games}" />
+            </StackPanel>
+        </ToggleButton>
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding GridMode}" ToolTip="{loc:Tr Settings.Widgets.Layout.Hint}">
             <StackPanel>
                 <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE8A9;" />
                 <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.Grid}" />
             </StackPanel>
         </ToggleButton>
-        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,0" IsChecked="{Binding Locked}" ToolTip="{loc:Tr Settings.Widgets.Locked}">
+        <ToggleButton Style="{StaticResource WidgetChip}" Margin="3,3" IsChecked="{Binding Locked}" ToolTip="{loc:Tr Settings.Widgets.Locked}">
             <StackPanel>
                 <TextBlock Style="{StaticResource ChipGlyph}" Text="&#xE72E;" />
                 <TextBlock Style="{StaticResource ChipLabel}" Text="{loc:Tr Widget.Chip.Lock}" />

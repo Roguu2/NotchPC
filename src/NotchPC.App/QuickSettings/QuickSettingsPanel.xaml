@@ -7,6 +7,32 @@
              Foreground="{StaticResource IslandForeground}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- Wide pill button: Screenshot / Snip / Record -->
+        <Style x:Key="CaptureButton" TargetType="Button">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Margin" Value="3,0" />
+            <Setter Property="Foreground" Value="{StaticResource IslandForeground}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" CornerRadius="12" Background="#17FFFFFF" BorderBrush="#14FFFFFF" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#29FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#38FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <controls:InverseBoolToVisibility x:Key="InverseBoolToVis" />
 
         <!-- Tile: dark when off, light when on (like Windows quick settings) -->
@@ -115,6 +141,29 @@
             <TextBlock Grid.Column="2" Text="{Binding BrightnessText}" FontSize="11.5" VerticalAlignment="Center" TextAlignment="Right"
                        Foreground="{StaticResource IslandForegroundMuted}" />
         </Grid>
+
+        <!-- Screenshot / snip / record (moved here from the old Apps tab) -->
+        <UniformGrid DockPanel.Dock="Top" Columns="3" Margin="-3,0,-3,10"
+                     Visibility="{Binding ShowDevices, Converter={StaticResource InverseBoolToVis}}">
+            <Button Style="{StaticResource CaptureButton}" Click="OnScreenshot" ToolTip="{loc:Tr Apps.Screenshot.Hint}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE722;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center" />
+                    <TextBlock Text="{loc:Tr Apps.Screenshot}" FontSize="12.5" FontWeight="SemiBold" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource CaptureButton}" Click="OnSnip" ToolTip="{loc:Tr Apps.Snip.Tip}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE8C6;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center" />
+                    <TextBlock Text="{loc:Tr Apps.Snip}" FontSize="12.5" FontWeight="SemiBold" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource CaptureButton}" Click="OnRecord" ToolTip="{loc:Tr Apps.Record.Hint}">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="10" Height="10" Fill="#FFFF453A" VerticalAlignment="Center" />
+                    <TextBlock Text="{loc:Tr Apps.Record}" FontSize="12.5" FontWeight="SemiBold" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </UniformGrid>
 
         <Grid>
             <!-- Tiles -->

@@ -10,13 +10,18 @@ public static class TabIds
     public const string Clipboard = "clipboard";
     public const string Widgets = "widgets";
     public const string QuickSettings = "quick-settings";
-    public const string Apps = "apps";
     public const string Phone = "phone";
     public const string Audio = "audio";
     public const string Settings = "settings";
+    public const string Search = "search";
+
+    /// <summary>Tabs of older versions that became desktop widgets (apps, games) or were removed (notes).</summary>
+    public const string RetiredApps = "apps";
+    public const string RetiredGames = "games";
+    public const string RetiredNotes = "notes";
 
     public static IReadOnlyList<string> DefaultOrder { get; } =
     [
-        Music, Web, Notifications, Files, Clipboard, Widgets, QuickSettings, Apps, Phone, Audio, Settings,
+        Music, Search, Web, Notifications, Files, Clipboard, Widgets, QuickSettings, Phone, Audio, Settings,
     ];
 }

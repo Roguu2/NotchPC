@@ -79,20 +79,33 @@ public sealed class SettingsStoreTests : IDisposable
     {
         var input = new[]
         {
-            new TabSetting(TabIds.Apps, true),
+            new TabSetting(TabIds.Phone, true),
             new TabSetting("removed-in-old-version", true),
             new TabSetting(TabIds.Music, false),
-            new TabSetting(TabIds.Apps, false),
+            new TabSetting(TabIds.Phone, false),
         };
 
         var result = SettingsStore.NormalizeTabs(input);
 
-        Assert.Equal(TabIds.Apps, result[0].Id);
+        Assert.Equal(TabIds.Phone, result[0].Id);
         Assert.True(result[0].Enabled);
         Assert.Equal(TabIds.Music, result[1].Id);
         Assert.False(result[1].Enabled);
         Assert.Equal(TabIds.DefaultOrder.Count, result.Count);
         Assert.Equal(TabIds.DefaultOrder.Order(), result.Select(t => t.Id).Order());
+    }
+
+    [Fact]
+    public void Retired_apps_and_games_tabs_turn_on_their_widgets()
+    {
+        Directory.CreateDirectory(_dir);
+        File.WriteAllText(FilePath, """{"tabs":[{"id":"apps","enabled":true},{"id":"games","enabled":false},{"id":"notes","enabled":true}]}""");
+
+        var s = new SettingsStore(FilePath).Load();
+
+        Assert.True(s.Widgets.AppsEnabled);
+        Assert.False(s.Widgets.GamesEnabled);
+        Assert.DoesNotContain(s.Tabs, t => t.Id is TabIds.RetiredApps or TabIds.RetiredGames or TabIds.RetiredNotes);
     }
 
     [Fact]

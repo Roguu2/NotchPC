@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -48,6 +49,7 @@ internal sealed class DesktopWidgetWindow : Window
     private IntPtr _hwnd;
     private WidgetPlacement? _pending;
     private bool _onScreen;
+    private bool _keyboard;
 
     private Point? _pressAt;
     private bool _pressOnGrip;
@@ -171,6 +173,31 @@ internal sealed class DesktopWidgetWindow : Window
         }
     }
 
+    /// <summary>
+    /// Widgets never take the focus (clicking one must not steal it from the app you work in), except for a click
+    /// into a text box (sticky notes, to-do list): then the window takes the keyboard until another window is
+    /// activated. It stays on the desktop layer meanwhile (the pinner keeps its z-order).
+    /// </summary>
+    protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnPreviewMouseLeftButtonDown(e);
+        if (_hwnd != IntPtr.Zero && FindTextBox(e.OriginalSource as DependencyObject) is { } box)
+        {
+            TakeKeyboard(box);
+        }
+    }
+
+    protected override void OnDeactivated(EventArgs e)
+    {
+        base.OnDeactivated(e);
+        if (_keyboard)
+        {
+            _keyboard = false;
+            Keyboard.ClearFocus();
+            WindowHelper.MakeOverlay(_hwnd, noActivate: true);
+        }
+    }
+
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnMouseLeftButtonDown(e);
@@ -251,6 +278,35 @@ internal sealed class DesktopWidgetWindow : Window
         ViewModel.SetOnScreen(false);
         ViewModel.RecheckOnScreen = null;
         base.OnClosed(e);
+    }
+
+    private static TextBoxBase? FindTextBox(DependencyObject? d)
+    {
+        while (d is not null)
+        {
+            if (d is TextBoxBase box)
+            {
+                return box;
+            }
+
+            d = d is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(d) : LogicalTreeHelper.GetParent(d);
+        }
+
+        return null;
+    }
+
+    private void TakeKeyboard(TextBoxBase box)
+    {
+        if (!_keyboard)
+        {
+            WindowHelper.MakeOverlay(_hwnd, noActivate: false);
+            _keyboard = true;
+        }
+
+        WindowHelper.SetForeground(_hwnd);
+        Activate();
+        box.Focus();
+        Keyboard.Focus(box);
     }
 
     private static double MeasureNaturalHeight(FrameworkElement content)

@@ -8,6 +8,9 @@ namespace NotchPC.App.Notch;
 /// <summary>One icon in the notch tab bar.</summary>
 public sealed class NotchTab : INotifyPropertyChanged
 {
+    /// <summary>The "more" button: tabs that do not fit the bar are shown as tiles behind it.</summary>
+    public const string MoreId = "more";
+
     private bool _isSelected;
 
     public NotchTab(string id)
@@ -69,10 +72,11 @@ public static class TabCatalog
         TabIds.Clipboard => "",      // Paste (clipboard)
         TabIds.Widgets => "",        // Tiles
         TabIds.QuickSettings => "",  // Equalizer (sliders)
-        TabIds.Apps => "",           // ViewAll (app grid)
         TabIds.Phone => "",          // CellPhone
         TabIds.Audio => "",          // Headphone
         TabIds.Settings => "",       // Settings (gear)
+        TabIds.Search => "",        // Calculator
+        NotchTab.MoreId => "",      // More (three dots)
         _ => "",                     // Error
     };
 
@@ -80,7 +84,7 @@ public static class TabCatalog
     {
         TabIds.Music => 2,
         TabIds.Widgets => 3,
-        TabIds.Files or TabIds.Clipboard or TabIds.Apps => 4,
+        TabIds.Files or TabIds.Clipboard => 4,
         TabIds.QuickSettings => 5,
         TabIds.Notifications => 6,
         TabIds.Phone => 8,

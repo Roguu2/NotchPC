@@ -18,8 +18,13 @@ public static class WidgetIds
     public const string Calendar = "calendar";
     public const string Stats = "stats";
     public const string Twitch = "twitch";
+    public const string Sticky = "sticky";
+    public const string Todo = "todo";
+    public const string System = "system";
+    public const string Apps = "apps";
+    public const string Games = "games";
 
-    public static IReadOnlyList<string> DefaultOrder { get; } = [Timer, Weather, Calendar, Stats, Twitch];
+    public static IReadOnlyList<string> DefaultOrder { get; } = [Timer, Weather, Calendar, Stats, Twitch, Sticky, Todo, System, Apps, Games];
 }
 
 /// <summary>
@@ -41,6 +46,8 @@ internal sealed class WidgetManager : IWidgetLayoutHost, IDisposable
     private readonly SettingsService _settings;
     private readonly HttpClient _http;
     private readonly SensorsClient _sensors;
+    private readonly Games.GameLibraryService _games;
+    private readonly Games.GameHistoryStore _gameHistory;
     private readonly DesktopPinner _pinner = new();
     private readonly Dictionary<string, DesktopWidgetWindow> _windows = [];
     private readonly DispatcherTimer _recheck;
@@ -50,11 +57,13 @@ internal sealed class WidgetManager : IWidgetLayoutHost, IDisposable
     private int _followUpStep;
     private bool _sessionLocked;
 
-    public WidgetManager(SettingsService settings, HttpClient http, SensorsClient sensors)
+    public WidgetManager(SettingsService settings, HttpClient http, SensorsClient sensors, Games.GameLibraryService games, Games.GameHistoryStore gameHistory)
     {
         _settings = settings;
         _http = http;
         _sensors = sensors;
+        _games = games;
+        _gameHistory = gameHistory;
 
         // Windows animate when minimising/restoring: check a moment after the event, coalescing bursts.
         _recheck = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(350) };
@@ -214,6 +223,11 @@ internal sealed class WidgetManager : IWidgetLayoutHost, IDisposable
         WidgetIds.Calendar => w.CalendarEnabled,
         WidgetIds.Stats => w.StatsEnabled,
         WidgetIds.Twitch => w.TwitchEnabled,
+        WidgetIds.Sticky => w.StickyEnabled,
+        WidgetIds.Todo => w.TodoEnabled,
+        WidgetIds.System => w.SystemEnabled,
+        WidgetIds.Apps => w.AppsEnabled,
+        WidgetIds.Games => w.GamesEnabled,
         _ => false,
     };
 
@@ -320,6 +334,11 @@ internal sealed class WidgetManager : IWidgetLayoutHost, IDisposable
             WidgetIds.Weather => (new WeatherWidget(), new WeatherViewModel(_settings, _http)),
             WidgetIds.Calendar => (new CalendarWidget(), new CalendarViewModel(_settings, _http)),
             WidgetIds.Twitch => (new TwitchWidget(), new TwitchChatViewModel(_settings)),
+            WidgetIds.Sticky => (new StickyWidget(), new StickyNotesViewModel()),
+            WidgetIds.Todo => (new TodoWidget(), new TodoViewModel()),
+            WidgetIds.System => (new SystemWidget(), new SystemViewModel()),
+            WidgetIds.Apps => (new AppsWidget(), new Apps.AppsViewModel(_settings)),
+            WidgetIds.Games => (new GamesWidget(), new Games.GamesViewModel(_games, _gameHistory, _settings)),
             _ => (new StatsWidget(), new StatsViewModel(_sensors)),
         };
 

@@ -148,6 +148,7 @@ internal sealed class FocusTimerViewModel : WidgetViewModel
 
     public override void Dispose()
     {
+        Notifications.LiveActivityHub.Current.Clear(LiveActivity.Timer);
         _phaseEnd.Stop();
         _ui.Stop();
         _settings.Changed -= OnSettingsChanged;
@@ -254,6 +255,22 @@ internal sealed class FocusTimerViewModel : WidgetViewModel
         LengthsText = Loc.Format("Widget.Timer.Lengths", (int)_timer.FocusLength.TotalMinutes, (int)_timer.BreakLength.TotalMinutes);
         RaiseMany(nameof(TimeText), nameof(Progress), nameof(Title), nameof(LengthsText), nameof(IsRunning),
                   nameof(PlayGlyph), nameof(TodayText), nameof(NextText));
+        PublishActivity();
+    }
+
+    /// <summary>A running phase shows in the closed pill as a countdown (Live Activity).</summary>
+    private void PublishActivity()
+    {
+        if (_timer.State == FocusState.Running)
+        {
+            var focus = _timer.Phase == FocusPhase.Focus;
+            Notifications.LiveActivityHub.Current.Set(new LiveActivity(
+                LiveActivity.Timer, "\uE916", Title, LiveActivityClock.Countdown, _timer.EndsAt, 2, focus ? "#FF9F0A" : "#30D158"));
+        }
+        else
+        {
+            Notifications.LiveActivityHub.Current.Clear(LiveActivity.Timer);
+        }
     }
 }
 
@@ -604,6 +621,8 @@ internal sealed class CalendarViewModel : WidgetViewModel
 
     public override void Dispose()
     {
+        _meetingTimer?.Stop();
+        Notifications.LiveActivityHub.Current.Clear(LiveActivity.Meeting);
         _refresh.Stop();
         _minute.Stop();
         _reminder.Stop();
@@ -808,6 +827,49 @@ internal sealed class CalendarViewModel : WidgetViewModel
         Rebuild();
         RaiseMany(nameof(State), nameof(DayNumber), nameof(DayName), nameof(MonthName), nameof(WeekText), nameof(DayProgress),
                   nameof(HasEvent), nameof(EventTitle), nameof(EventTime));
+        PublishMeeting();
+    }
+
+    private DispatcherTimer? _meetingTimer;
+
+    /// <summary>
+    /// A meeting that starts within 15 minutes (until 5 minutes in) shows in the pill (Live Activity). One timer:
+    /// set to "15 minutes before" the next event, then every 30 s while one is on; works with the card hidden.
+    /// </summary>
+    private void PublishMeeting()
+    {
+        _meetingTimer ??= CreateMeetingTimer();
+        _meetingTimer.Stop();
+        var now = Now;
+        var soon = _events
+            .Where(e => !e.AllDay && LiveActivities.MeetingIsSoon(e.StartLocal, now, TimeSpan.FromMinutes(15)))
+            .OrderBy(e => e.StartLocal)
+            .FirstOrDefault();
+        if (soon is null)
+        {
+            Notifications.LiveActivityHub.Current.Clear(LiveActivity.Meeting);
+            var next = _events.Where(e => !e.AllDay && e.StartLocal > now).OrderBy(e => e.StartLocal).FirstOrDefault();
+            if (next is not null)
+            {
+                var wait = next.StartLocal - TimeSpan.FromMinutes(15) - now;
+                _meetingTimer.Interval = wait < TimeSpan.FromSeconds(1) ? TimeSpan.FromSeconds(1) : wait > TimeSpan.FromHours(12) ? TimeSpan.FromHours(12) : wait;
+                _meetingTimer.Start();
+            }
+
+            return;
+        }
+
+        Notifications.LiveActivityHub.Current.Set(new LiveActivity(
+            LiveActivity.Meeting, "\uE787", soon.Title, LiveActivityClock.Countdown, new DateTimeOffset(soon.StartLocal), 1, "#4C8DFF"));
+        _meetingTimer.Interval = TimeSpan.FromSeconds(30);
+        _meetingTimer.Start();
+    }
+
+    private DispatcherTimer CreateMeetingTimer()
+    {
+        var t = new DispatcherTimer(DispatcherPriority.Background);
+        t.Tick += (_, _) => PublishMeeting();
+        return t;
     }
 }
 

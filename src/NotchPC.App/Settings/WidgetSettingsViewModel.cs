@@ -64,6 +64,36 @@ internal sealed class WidgetSettingsViewModel : ObservableObject
         set => Update(s => s.Widgets.TwitchEnabled = value);
     }
 
+    public bool StickyEnabled
+    {
+        get => W.StickyEnabled;
+        set => Update(s => s.Widgets.StickyEnabled = value);
+    }
+
+    public bool TodoEnabled
+    {
+        get => W.TodoEnabled;
+        set => Update(s => s.Widgets.TodoEnabled = value);
+    }
+
+    public bool SystemEnabled
+    {
+        get => W.SystemEnabled;
+        set => Update(s => s.Widgets.SystemEnabled = value);
+    }
+
+    public bool AppsEnabled
+    {
+        get => W.AppsEnabled;
+        set => Update(s => s.Widgets.AppsEnabled = value);
+    }
+
+    public bool GamesEnabled
+    {
+        get => W.GamesEnabled;
+        set => Update(s => s.Widgets.GamesEnabled = value);
+    }
+
     /// <summary>Accepts a name or a twitch.tv link; saved only when valid.</summary>
     public string TwitchChannel
     {

@@ -76,6 +76,12 @@
                         <TextBlock Text="{loc:Tr Settings.Notch}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </ListBoxItem>
+                <ListBoxItem Tag="Appearance">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE790;" FontFamily="{StaticResource IconFont}" FontSize="15" Width="28" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Tr Settings.Appearance}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </ListBoxItem>
                 <ListBoxItem Tag="Music">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}" FontSize="15" Width="28" VerticalAlignment="Center" />
@@ -199,7 +205,34 @@
                                 IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding TopOffset}" VerticalAlignment="Center" />
                     </StackPanel>
                 </ui:CardControl>
+                <TextBlock Style="{StaticResource GroupHeader}" Text="{loc:Tr Settings.Group.Live}" />
+                <ui:Card Margin="0,0,0,4" Padding="16,10">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Settings.Live.Hint}" Margin="0,0,0,6" />
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Live.Timer}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding LiveTimer}" />
+                        </Grid>
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Live.Meeting}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding LiveMeeting}" />
+                        </Grid>
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Live.Recording}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding LiveRecording}" />
+                        </Grid>
+                    </StackPanel>
+                </ui:Card>
                 <TextBlock Style="{StaticResource GroupHeader}" Text="{loc:Tr Settings.Group.Behaviour}" />
+                <ui:CardControl Margin="0,0,0,4">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.SearchHotkey}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Settings.SearchHotkey.Hint}" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:ToggleSwitch IsChecked="{Binding SearchHotkey}" />
+                </ui:CardControl>
                 <ui:CardControl Margin="0,0,0,4">
                     <ui:CardControl.Header>
                         <StackPanel>
@@ -273,6 +306,59 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 </StackPanel>
+                <StackPanel x:Name="PageAppearance" Visibility="Collapsed" DataContext="{Binding Appearance}">
+                    <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr Settings.Appearance}" />
+                    <TextBlock Style="{StaticResource PageHint}" Text="{loc:Tr Settings.Page.Appearance}" />
+                <ui:CardControl Margin="0,0,0,4">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Theme.Style}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Theme.Style.Hint}" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ComboBox MinWidth="170" ItemsSource="{Binding StyleOptions}" DisplayMemberPath="Display"
+                              SelectedValuePath="Value" SelectedValue="{Binding Style}" />
+                </ui:CardControl>
+                <ui:CardControl Margin="0,0,0,4">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Theme.Accent}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Theme.Accent.Hint}" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ComboBox MinWidth="170" ItemsSource="{Binding AccentOptions}" SelectedValuePath="Value" SelectedValue="{Binding Accent}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="12" Height="12" Fill="{Binding Swatch}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Display}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </ui:CardControl>
+                <ui:CardControl Margin="0,0,0,4">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Theme.Opacity}" />
+                            <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Theme.Opacity.Hint}" />
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding OpacityText}" VerticalAlignment="Center" MinWidth="44" TextAlignment="Right" Margin="0,0,10,0" />
+                        <Slider Width="200" Minimum="60" Maximum="100" SmallChange="1" LargeChange="5" IsSnapToTickEnabled="True" TickFrequency="1"
+                                Value="{Binding Opacity}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ui:CardControl>
+                <ui:CardControl Margin="0,0,0,4">
+                    <ui:CardControl.Header>
+                        <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Theme.Corners}" />
+                    </ui:CardControl.Header>
+                    <ComboBox MinWidth="170" ItemsSource="{Binding CornerOptions}" DisplayMemberPath="Display"
+                              SelectedValuePath="Value" SelectedValue="{Binding Corners}" />
+                </ui:CardControl>
+                <ui:Button Content="{loc:Tr Theme.Reset}" Margin="0,8,0,0" Click="OnResetTheme" />
+                </StackPanel>
                 <StackPanel x:Name="PageMusic" Visibility="Collapsed">
                     <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr Settings.Music}" />
                     <TextBlock Style="{StaticResource PageHint}" Text="{loc:Tr Settings.Page.Music}" />
@@ -343,6 +429,26 @@
                         <Grid Margin="0,2">
                             <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.Stats}" VerticalAlignment="Center" />
                             <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding StatsEnabled}" />
+                        </Grid>
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.Sticky}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding StickyEnabled}" />
+                        </Grid>
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.Todo}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding TodoEnabled}" />
+                        </Grid>
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.System}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding SystemEnabled}" />
+                        </Grid>
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.Apps}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding AppsEnabled}" />
+                        </Grid>
+                        <Grid Margin="0,2">
+                            <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.Games}" VerticalAlignment="Center" />
+                            <ui:ToggleSwitch HorizontalAlignment="Right" IsChecked="{Binding GamesEnabled}" />
                         </Grid>
                         <Grid Margin="0,2">
                             <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Widgets.Twitch}" VerticalAlignment="Center" />
@@ -659,6 +765,15 @@
                         <ComboBox MinWidth="150" ItemsSource="{Binding HotkeyOptions}" DisplayMemberPath="Display"
                                   SelectedValuePath="Value" SelectedValue="{Binding Hotkey}" />
                     </ui:CardControl>
+                    <ui:CardControl Margin="0,0,0,4">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Overlay.Sessions}" />
+                                <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Settings.Overlay.Sessions.Hint}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:ToggleSwitch IsChecked="{Binding SessionStats}" />
+                    </ui:CardControl>
                     <ui:CardControl Margin="0,0,0,4" IsEnabled="{Binding Enabled}">
                         <ui:CardControl.Header>
                             <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Overlay.Position}" />
@@ -741,6 +856,15 @@
                             </StackPanel>
                         </ui:CardControl.Header>
                         <ComboBox MinWidth="90" ItemsSource="{Binding DelayOptions}" SelectedItem="{Binding PowerDelay}" />
+                    </ui:CardControl>
+                    <ui:CardControl Margin="0,0,0,4">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource RowTitle}" Text="{loc:Tr Settings.Remote.Files}" />
+                                <TextBlock Style="{StaticResource RowHint}" Text="{loc:Tr Settings.Remote.Files.Hint}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:ToggleSwitch IsChecked="{Binding FilesAndClipboard}" />
                     </ui:CardControl>
                     <ui:Card Margin="0,0,0,4" Padding="16,12">
                         <StackPanel>

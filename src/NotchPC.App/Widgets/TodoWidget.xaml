@@ -1,0 +1,136 @@
+<UserControl x:Class="NotchPC.App.Widgets.TodoWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:NotchPC.App.Localization"
+             Foreground="{StaticResource IslandForeground}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- Round tick box -->
+        <Style x:Key="TodoCheck" TargetType="CheckBox">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="Box" Width="16" Height="16" CornerRadius="8" BorderThickness="1.5"
+                                BorderBrush="#80FFFFFF" Background="Transparent">
+                            <TextBlock x:Name="Mark" Text="&#xE73E;" FontFamily="{StaticResource IconFont}" FontSize="9"
+                                       Foreground="#FF111111" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="{StaticResource NotchAccent}" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource NotchAccent}" />
+                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="BorderThickness" Value="2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- New task box: "+" and a hint -->
+        <Style x:Key="TodoBox" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{StaticResource IslandForeground}" />
+            <Setter Property="CaretBrush" Value="{StaticResource IslandForeground}" />
+            <Setter Property="SelectionBrush" Value="#668AB4FF" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bg" CornerRadius="14" Background="#14FFFFFF" BorderBrush="#1FFFFFFF" BorderThickness="1">
+                            <Grid Margin="10,0,10,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="10" VerticalAlignment="Center"
+                                           Foreground="{StaticResource IslandForegroundMuted}" Margin="0,0,7,0" />
+                                <TextBlock x:Name="Hint" Grid.Column="1" Text="{TemplateBinding Tag}" VerticalAlignment="Center"
+                                           Foreground="{StaticResource IslandForegroundDim}" Visibility="Collapsed" IsHitTestVisible="False"
+                                           TextTrimming="CharacterEllipsis" />
+                                <ScrollViewer x:Name="PART_ContentHost" Grid.Column="1" VerticalAlignment="Center" Focusable="False"
+                                              HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Hint" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#40FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#80FFFFFF" />
+                                <Setter TargetName="Bg" Property="Background" Value="#1FFFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="0,-4,0,4">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{loc:Tr Widget.Todo.Title}" FontSize="13" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding CountText}" FontSize="11" Margin="8,1,0,0" VerticalAlignment="Center"
+                           Foreground="{StaticResource IslandForegroundMuted}" />
+            </StackPanel>
+            <Button Style="{StaticResource NotchSmallIconButton}" FontSize="12" Content="&#xE8E6;" HorizontalAlignment="Right"
+                    Click="OnClearDone" ToolTip="{loc:Tr Widget.Todo.ClearDone}"
+                    Visibility="{Binding HasDone, Converter={StaticResource BoolToVis}}" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <ScrollViewer Style="{StaticResource NotchScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid x:Name="Row" Background="Transparent" Margin="0,1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Style="{StaticResource TodoCheck}" IsChecked="{Binding Done}" VerticalAlignment="Top" Margin="1,3,8,0" />
+                                <TextBlock x:Name="Label" Grid.Column="1" Text="{Binding Text}" FontSize="12.5" TextWrapping="Wrap"
+                                           VerticalAlignment="Center" Margin="0,2" />
+                                <Button x:Name="Del" Grid.Column="2" Style="{StaticResource NotchSmallIconButton}" Width="20" Height="20"
+                                        FontSize="9" Content="&#xE711;" Tag="{Binding}" Click="OnRemove" Visibility="Hidden"
+                                        VerticalAlignment="Top" ToolTip="{loc:Tr Widget.Todo.Remove}" />
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Done}" Value="True">
+                                    <Setter TargetName="Label" Property="TextDecorations" Value="Strikethrough" />
+                                    <Setter TargetName="Label" Property="Opacity" Value="0.45" />
+                                </DataTrigger>
+                                <Trigger SourceName="Row" Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Del" Property="Visibility" Value="Visible" />
+                                </Trigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <TextBlock Text="{loc:Tr Widget.Todo.Empty}" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
+                       HorizontalAlignment="Center" TextAlignment="Center" Foreground="{StaticResource IslandForegroundDim}"
+                       Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}" />
+        </Grid>
+
+        <TextBox x:Name="NewBox" Grid.Row="2" Margin="0,6,0,0" Style="{StaticResource TodoBox}" Tag="{loc:Tr Widget.Todo.Placeholder}"
+                 Text="{Binding NewText, UpdateSourceTrigger=PropertyChanged}" KeyDown="OnNewKey" />
+    </Grid>
+</UserControl>

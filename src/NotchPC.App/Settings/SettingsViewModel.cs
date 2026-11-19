@@ -29,6 +29,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         Overlay = new GameOverlaySettingsViewModel(settings, overlay);
         Remote = new RemoteSettingsViewModel(settings, remote);
         Updates = new UpdatesViewModel(settings, updates);
+        Appearance = new AppearanceViewModel(settings);
         Widgets = new WidgetSettingsViewModel(settings, http, sensors);
         Capture = new CaptureSettingsViewModel(settings, clipboard, capture);
         MoveUpCommand = new RelayCommand<TabRow>(row => Move(row, -1), row => row is not null && Tabs.IndexOf(row) > 0);
@@ -56,6 +57,9 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
 
     /// <summary>Automatic updates.</summary>
     public UpdatesViewModel Updates { get; }
+
+    /// <summary>Theme of the notch and the widgets.</summary>
+    public AppearanceViewModel Appearance { get; }
 
     public ObservableCollection<SelectOption> Languages { get; } = [];
 
@@ -164,6 +168,30 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
             _settings.Update(s => s.Notch.HideOnFullscreen = value);
             OnPropertyChanged();
         }
+    }
+
+    public bool SearchHotkey
+    {
+        get => _settings.Current.Notch.SearchHotkey;
+        set => _settings.Update(s => s.Notch.SearchHotkey = value);
+    }
+
+    public bool LiveTimer
+    {
+        get => _settings.Current.Notch.LiveTimer;
+        set => _settings.Update(s => s.Notch.LiveTimer = value);
+    }
+
+    public bool LiveMeeting
+    {
+        get => _settings.Current.Notch.LiveMeeting;
+        set => _settings.Update(s => s.Notch.LiveMeeting = value);
+    }
+
+    public bool LiveRecording
+    {
+        get => _settings.Current.Notch.LiveRecording;
+        set => _settings.Update(s => s.Notch.LiveRecording = value);
     }
 
     public bool TaskbarPill

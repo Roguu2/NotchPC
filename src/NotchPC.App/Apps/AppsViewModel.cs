@@ -8,33 +8,30 @@ using NotchPC.Core.Settings;
 
 namespace NotchPC.App.Apps;
 
-/// <summary>Apps tab: capture buttons plus a row of app shortcuts (ref/Notch2.jpg).</summary>
-internal sealed class AppsViewModel : ObservableObject
+/// <summary>App shortcuts desktop widget (also listed on the phone).</summary>
+internal sealed class AppsViewModel : NotchPC.App.Widgets.WidgetViewModel
 {
     private readonly SettingsService _settings;
 
-    public AppsViewModel(SettingsService settings, CaptureService capture)
+    public AppsViewModel(SettingsService settings)
     {
         _settings = settings;
-        Capture = capture;
+        EnsureDefaults(settings);
+        Rebuild();
+    }
+
+    /// <summary>App tiles followed by the "Add" tile.</summary>
+    public ObservableCollection<object> Tiles { get; } = [];
+
+    /// <summary>First start: a few useful shortcuts.</summary>
+    public static void EnsureDefaults(SettingsService settings)
+    {
         if (settings.Current.Apps.Shortcuts is null)
         {
             var defaults = DefaultShortcuts().ToList();
             settings.Update(s => s.Apps.Shortcuts = defaults);
         }
-
-        Rebuild();
     }
-
-    public CaptureService Capture { get; }
-
-    /// <summary>App tiles followed by the "Add" tile.</summary>
-    public ObservableCollection<object> Tiles { get; } = [];
-
-    /// <summary>Rows of tiles the panel shows without scrolling (6 per row, at most 2).</summary>
-    public int Rows => Math.Clamp((Tiles.Count + 5) / 6, 1, 2);
-
-    public event EventHandler? RowsChanged;
 
     public void Add(string target)
     {
@@ -51,6 +48,14 @@ internal sealed class AppsViewModel : ObservableObject
     public void Remove(AppTile tile)
     {
         _settings.Update(s => s.Apps.Shortcuts?.RemoveAll(a => ReferenceEquals(a, tile.Shortcut)));
+        Rebuild();
+    }
+
+    /// <summary>A shortcut dragged onto another (also the order on the phone).</summary>
+    public void Move(AppTile dragged, AppTile target, bool after)
+    {
+        _settings.Update(s => s.Apps.Shortcuts = NotchPC.Core.Layout.ListOrder.Move(
+            s.Apps.Shortcuts ?? [], dragged.Shortcut, target.Shortcut, after, ReferenceEqualityComparer.Instance as IEqualityComparer<AppShortcut>));
         Rebuild();
     }
 
@@ -103,9 +108,12 @@ internal sealed class AppsViewModel : ObservableObject
         yield return new AppShortcut { Name = Loc.Get("Apps.Default.Settings"), Target = "ms-settings:" };
     }
 
+    protected override void OnScreenChanged(bool onScreen)
+    {
+    }
+
     private void Rebuild()
     {
-        var before = Tiles.Count == 0 ? 0 : Rows;
         Tiles.Clear();
         foreach (var s in _settings.Current.Apps.Shortcuts ?? [])
         {
@@ -113,10 +121,6 @@ internal sealed class AppsViewModel : ObservableObject
         }
 
         Tiles.Add(AddTile.Instance);
-        if (before != 0 && before != Rows)
-        {
-            RowsChanged?.Invoke(this, EventArgs.Empty);
-        }
     }
 }
 

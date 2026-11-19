@@ -99,6 +99,11 @@ public sealed class SettingsStore
         s.GameOverlay.Games = NotchPC.Core.Games.GameDetection.Normalize(s.GameOverlay.Games);
         s.GameOverlay.Ignored = NotchPC.Core.Games.GameDetection.Normalize(s.GameOverlay.Ignored);
         s.Updates ??= new UpdateSettings();
+        s.Theme ??= new ThemeSettings();
+        s.Theme.Style = ThemeStyles.Normalize(s.Theme.Style);
+        s.Theme.Accent = ThemeAccents.Normalize(s.Theme.Accent);
+        s.Theme.Corners = ThemeCorners.Normalize(s.Theme.Corners);
+        s.Theme.Opacity = Math.Clamp(s.Theme.Opacity, 60, 100);
         s.Web ??= new WebSettings();
         s.Web.Width = Math.Clamp(s.Web.Width, 480, 2400);
         s.Web.Height = Math.Clamp(s.Web.Height, 360, 1600);
@@ -131,6 +136,24 @@ public sealed class SettingsStore
             s.Widgets.WeatherLongitude = null;
         }
 
+        s.Widgets.GameFavorites ??= [];
+        s.Widgets.GameHidden ??= [];
+        s.Widgets.GameOrder ??= [];
+        s.Widgets.GameSort = NotchPC.Core.Games.GameSortModes.Normalize(s.Widgets.GameSort);
+
+        // Tabs that became desktop widgets: a tab that was on becomes a widget that is on (once: the ids go away below).
+        foreach (var tab in s.Tabs ?? [])
+        {
+            if (tab is { Enabled: true, Id: TabIds.RetiredApps })
+            {
+                s.Widgets.AppsEnabled = true;
+            }
+            else if (tab is { Enabled: true, Id: TabIds.RetiredGames })
+            {
+                s.Widgets.GamesEnabled = true;
+            }
+        }
+
         s.Tabs = NormalizeTabs(s.Tabs);
         return s;
     }
@@ -153,7 +176,16 @@ public sealed class SettingsStore
         {
             if (seen.Add(id))
             {
-                result.Add(new TabSetting(id, true));
+                // A tab added in a newer version goes before the settings gear (which stays last), not after it.
+                var gear = result.FindIndex(t => t.Id == TabIds.Settings);
+                if (gear >= 0 && id != TabIds.Settings)
+                {
+                    result.Insert(gear, new TabSetting(id, true));
+                }
+                else
+                {
+                    result.Add(new TabSetting(id, true));
+                }
             }
         }
 

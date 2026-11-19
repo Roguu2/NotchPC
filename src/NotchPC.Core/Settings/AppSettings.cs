@@ -34,6 +34,8 @@ public sealed class AppSettings
 
     public UpdateSettings Updates { get; set; } = new();
 
+    public ThemeSettings Theme { get; set; } = new();
+
     /// <summary>Tabs in display order. Unknown ids are dropped and missing ones appended on load.</summary>
     public List<TabSetting> Tabs { get; set; } = TabIds.DefaultOrder.Select(id => new TabSetting(id, true)).ToList();
 }
@@ -59,6 +61,18 @@ public sealed class NotchSettings
 
     /// <summary>Where the notch sits along the top edge: DIPs from the monitor's centre (negative = left). 0 = centred.</summary>
     public double HorizontalOffset { get; set; }
+
+    /// <summary>Ctrl+Alt+Space opens the notch's search, ready to type.</summary>
+    public bool SearchHotkey { get; set; } = true;
+
+    /// <summary>Live Activities in the closed pill: a running focus timer…</summary>
+    public bool LiveTimer { get; set; } = true;
+
+    /// <summary>…a meeting from the calendar that starts within 15 minutes…</summary>
+    public bool LiveMeeting { get; set; } = true;
+
+    /// <summary>…and a screen recording started from the notch.</summary>
+    public bool LiveRecording { get; set; } = true;
 }
 
 public sealed class MusicSettings
@@ -92,6 +106,33 @@ public sealed class WidgetSettings
 
     /// <summary>Twitch chat card (off by default: it needs a channel name).</summary>
     public bool TwitchEnabled { get; set; }
+
+    /// <summary>Sticky notes card (off by default).</summary>
+    public bool StickyEnabled { get; set; }
+
+    /// <summary>To-do list card (off by default).</summary>
+    public bool TodoEnabled { get; set; }
+
+    /// <summary>Disks and system card (off by default).</summary>
+    public bool SystemEnabled { get; set; }
+
+    /// <summary>App shortcuts card (was the notch's Apps tab).</summary>
+    public bool AppsEnabled { get; set; }
+
+    /// <summary>Games pinned to the top of the games widget (GameOrder.Key, e.g. "steam:292030").</summary>
+    public List<string> GameFavorites { get; set; } = [];
+
+    /// <summary>Games left out of the games widget.</summary>
+    public List<string> GameHidden { get; set; } = [];
+
+    /// <summary>recent, name, playtime or custom (GameSortModes).</summary>
+    public string GameSort { get; set; } = "recent";
+
+    /// <summary>The user's own order of the games (keys), used by the custom sort.</summary>
+    public List<string> GameOrder { get; set; } = [];
+
+    /// <summary>Installed games and play time card (was the notch's Games tab).</summary>
+    public bool GamesEnabled { get; set; }
 
     /// <summary>Channel whose chat the card shows (login name, e.g. "some_streamer").</summary>
     public string TwitchChannel { get; set; } = "";
@@ -246,6 +287,9 @@ public sealed class RemoteSettings
     /// <summary>Shutdown / restart from the phone waits this long (and can be cancelled), seconds.</summary>
     public int PowerDelaySeconds { get; set; } = 30;
 
+    /// <summary>The phone can send files and clipboard text to the PC and take files from the shelf.</summary>
+    public bool FilesAndClipboard { get; set; } = true;
+
     public List<PairedDevice> Devices { get; set; } = [];
 }
 
@@ -278,6 +322,9 @@ public sealed class GameOverlaySettings
     public string Hotkey { get; set; } = "ctrl+alt+f";
 
     public bool ShowClock { get; set; } = true;
+
+    /// <summary>Records play time and FPS per game (also with the overlay off): Games tab and a summary after playing.</summary>
+    public bool SessionStats { get; set; } = true;
 
     /// <summary>Process names (without .exe) that always get the overlay, also windowed.</summary>
     public List<string> Games { get; set; } = [];

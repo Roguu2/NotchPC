@@ -27,7 +27,6 @@
   <data name="Tab.clipboard" xml:space="preserve"><value>Clipboard</value></data>
   <data name="Tab.widgets" xml:space="preserve"><value>Widgets</value></data>
   <data name="Tab.quick-settings" xml:space="preserve"><value>Quick settings</value></data>
-  <data name="Tab.apps" xml:space="preserve"><value>Apps &amp; capture</value></data>
   <data name="Tab.phone" xml:space="preserve"><value>Phone remote</value></data>
   <data name="Tab.audio" xml:space="preserve"><value>Audio devices</value></data>
   <data name="Tab.settings" xml:space="preserve"><value>Settings</value></data>
@@ -56,7 +55,7 @@
   <data name="Settings.HideOnFullscreen" xml:space="preserve"><value>Hide over fullscreen apps</value></data>
   <data name="Settings.HideOnFullscreen.Hint" xml:space="preserve"><value>Games, videos and F11 browser windows on the notch's monitor stay uncovered.</value></data>
   <data name="Settings.Tabs" xml:space="preserve"><value>Tabs</value></data>
-  <data name="Settings.Tabs.Hint" xml:space="preserve"><value>Choose which tabs appear in the notch. Use the arrows to change their order.</value></data>
+  <data name="Settings.Tabs.Hint" xml:space="preserve"><value>Choose which tabs appear in the notch. Change the order with the arrows or by dragging the icons in the notch. The first 9 sit in the bar, the rest behind “More”.</value></data>
   <data name="Settings.MoveUp" xml:space="preserve"><value>Move up</value></data>
   <data name="Settings.MoveDown" xml:space="preserve"><value>Move down</value></data>
   <data name="Settings.About" xml:space="preserve"><value>About</value></data>
@@ -468,4 +467,89 @@
   <data name="Settings.Widgets.CpuTemp.Result.TaskFailed" xml:space="preserve"><value>PawnIO is installed, but the sensors task could not be created. Click again.</value></data>
   <data name="Music.Volume.App" xml:space="preserve"><value>Volume of {0} (other sounds stay as they are)</value></data>
   <data name="Music.Volume.Device" xml:space="preserve"><value>Volume of the whole PC (the player's own volume could not be found)</value></data>
+  <data name="Settings.Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="Settings.Page.Appearance" xml:space="preserve"><value>Colours and shape of the notch and the desktop widgets. Changes show at once.</value></data>
+  <data name="Theme.Style" xml:space="preserve"><value>Style</value></data>
+  <data name="Theme.Style.Hint" xml:space="preserve"><value>Dark like a phone's notch, pure black (looks best on OLED screens) or see-through glass.</value></data>
+  <data name="Theme.Style.dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Theme.Style.oled" xml:space="preserve"><value>Pure black (OLED)</value></data>
+  <data name="Theme.Style.glass" xml:space="preserve"><value>Glass</value></data>
+  <data name="Theme.Accent" xml:space="preserve"><value>Accent colour</value></data>
+  <data name="Theme.Accent.Hint" xml:space="preserve"><value>Sliders, the selected tab and highlights.</value></data>
+  <data name="Theme.Accent.white" xml:space="preserve"><value>White</value></data>
+  <data name="Theme.Accent.accent" xml:space="preserve"><value>Windows accent colour</value></data>
+  <data name="Theme.Accent.5AC8FA" xml:space="preserve"><value>Blue</value></data>
+  <data name="Theme.Accent.BF5AF2" xml:space="preserve"><value>Purple</value></data>
+  <data name="Theme.Accent.FF375F" xml:space="preserve"><value>Pink</value></data>
+  <data name="Theme.Accent.FF9F0A" xml:space="preserve"><value>Orange</value></data>
+  <data name="Theme.Accent.30D158" xml:space="preserve"><value>Green</value></data>
+  <data name="Theme.Opacity" xml:space="preserve"><value>Opacity</value></data>
+  <data name="Theme.Opacity.Hint" xml:space="preserve"><value>Less = more of the desktop shows through the notch and the widgets.</value></data>
+  <data name="Theme.Corners" xml:space="preserve"><value>Corners</value></data>
+  <data name="Theme.Corners.round" xml:space="preserve"><value>Round (pill)</value></data>
+  <data name="Theme.Corners.soft" xml:space="preserve"><value>Soft</value></data>
+  <data name="Theme.Reset" xml:space="preserve"><value>Back to the default look</value></data>
+  <data name="Live.Now" xml:space="preserve"><value>now</value></data>
+  <data name="Live.Recording" xml:space="preserve"><value>Recording</value></data>
+  <data name="Settings.Group.Live" xml:space="preserve"><value>Live Activities</value></data>
+  <data name="Settings.Live.Hint" xml:space="preserve"><value>What is going on right now shows in the closed pill, like on an iPhone.</value></data>
+  <data name="Settings.Live.Timer" xml:space="preserve"><value>Focus timer countdown</value></data>
+  <data name="Settings.Live.Meeting" xml:space="preserve"><value>Meeting from the calendar within 15 minutes</value></data>
+  <data name="Settings.Live.Recording" xml:space="preserve"><value>Screen recording (started from the notch) with its length</value></data>
+  <data name="Tab.search" xml:space="preserve"><value>Calculator</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Calculate or convert currency…</value></data>
+  <data name="Search.Copy" xml:space="preserve"><value>Enter copies the result</value></data>
+  <data name="Search.Currency.Source" xml:space="preserve"><value>NBP average rate · Enter copies</value></data>
+  <data name="Search.Hint" xml:space="preserve"><value>Try: 2*19.99 · 15 usd in pln · 200*15%</value></data>
+  <data name="Settings.SearchHotkey" xml:space="preserve"><value>Ctrl+Alt+Space opens the calculator</value></data>
+  <data name="Settings.SearchHotkey.Hint" xml:space="preserve"><value>From anywhere: the notch opens on the calculator, ready to type.</value></data>
+  <data name="Widget.Chip.Sticky" xml:space="preserve"><value>Notes</value></data>
+  <data name="Widget.Chip.Todo" xml:space="preserve"><value>To-do</value></data>
+  <data name="Widget.Chip.System" xml:space="preserve"><value>System</value></data>
+  <data name="Settings.Widgets.Sticky" xml:space="preserve"><value>Sticky notes</value></data>
+  <data name="Settings.Widgets.Todo" xml:space="preserve"><value>To-do list</value></data>
+  <data name="Settings.Widgets.System" xml:space="preserve"><value>Disks and system</value></data>
+  <data name="Widget.Sticky.Placeholder" xml:space="preserve"><value>Write something…</value></data>
+  <data name="Widget.Sticky.Add" xml:space="preserve"><value>New sticky note</value></data>
+  <data name="Widget.Sticky.Delete" xml:space="preserve"><value>Delete this note</value></data>
+  <data name="Widget.Sticky.Color" xml:space="preserve"><value>Change colour</value></data>
+  <data name="Widget.Todo.Title" xml:space="preserve"><value>To-do</value></data>
+  <data name="Widget.Todo.Count" xml:space="preserve"><value>{0} of {1} left</value></data>
+  <data name="Widget.Todo.Placeholder" xml:space="preserve"><value>Add a task and press Enter</value></data>
+  <data name="Widget.Todo.ClearDone" xml:space="preserve"><value>Remove done tasks</value></data>
+  <data name="Widget.Todo.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Widget.Todo.Empty" xml:space="preserve"><value>Nothing to do. Add a task below.</value></data>
+  <data name="Widget.System.Free" xml:space="preserve"><value>{0} free of {1}</value></data>
+  <data name="Widget.System.Uptime" xml:space="preserve"><value>Up for {0}</value></data>
+  <data name="Tab.games" xml:space="preserve"><value>Games</value></data>
+  <data name="Games.Week" xml:space="preserve"><value>This week: {0}</value></data>
+  <data name="Games.Week.None" xml:space="preserve"><value>No play time this week</value></data>
+  <data name="Games.Game.Week" xml:space="preserve"><value>{0} this week</value></data>
+  <data name="Games.Last" xml:space="preserve"><value>Last session</value></data>
+  <data name="Games.Fps" xml:space="preserve"><value>avg {0} FPS · low {1}</value></data>
+  <data name="Games.Empty" xml:space="preserve"><value>No games found (Steam, Epic Games, GOG).</value></data>
+  <data name="Games.Loading" xml:space="preserve"><value>Looking for games…</value></data>
+  <data name="Games.Refresh" xml:space="preserve"><value>Look for games again</value></data>
+  <data name="Games.Flash" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="Games.Flash.Fps" xml:space="preserve"><value>{0} · {1} · {2} FPS</value></data>
+  <data name="Settings.Overlay.Sessions" xml:space="preserve"><value>Session stats</value></data>
+  <data name="Settings.Overlay.Sessions.Hint" xml:space="preserve"><value>Records how long you play and the FPS (also with the overlay off). A summary shows in the notch after the game and in the Games tab.</value></data>
+  <data name="Remote.File.Title" xml:space="preserve"><value>File from your phone</value></data>
+  <data name="Settings.Remote.Files" xml:space="preserve"><value>Files and clipboard</value></data>
+  <data name="Settings.Remote.Files.Hint" xml:space="preserve"><value>The phone can send files (to Downloads\NotchPC and the shelf) and clipboard text, take files from the shelf and see your recent clipboard texts when you open its Files tab.</value></data>
+  <data name="Tab.more" xml:space="preserve"><value>More</value></data>
+  <data name="Widget.Chip.Apps" xml:space="preserve"><value>Apps</value></data>
+  <data name="Widget.Apps.Title" xml:space="preserve"><value>Apps</value></data>
+  <data name="Settings.Widgets.Apps" xml:space="preserve"><value>App shortcuts</value></data>
+  <data name="Settings.Widgets.Games" xml:space="preserve"><value>Games and play time</value></data>
+  <data name="Quick.Capture" xml:space="preserve"><value>Screenshots</value></data>
+  <data name="Games.Sort.recent" xml:space="preserve"><value>Sorted by: recently played (click to change)</value></data>
+  <data name="Games.Sort.name" xml:space="preserve"><value>Sorted by: name (click to change)</value></data>
+  <data name="Games.Sort.playtime" xml:space="preserve"><value>Sorted by: most played (click to change)</value></data>
+  <data name="Games.Favorite" xml:space="preserve"><value>Add to favourites (stays on top)</value></data>
+  <data name="Games.Unfavorite" xml:space="preserve"><value>Remove from favourites</value></data>
+  <data name="Games.Hide" xml:space="preserve"><value>Hide from the list</value></data>
+  <data name="Games.Restore" xml:space="preserve"><value>Show on the list again</value></data>
+  <data name="Games.ShowHidden" xml:space="preserve"><value>Show hidden games (to restore them)</value></data>
+  <data name="Games.Sort.custom" xml:space="preserve"><value>Sorted by: your own order – drag the tiles (click to change)</value></data>
 </root>

@@ -197,3 +197,208 @@ public partial class TwitchWidget : UserControl
         }
     }
 }
+
+/// <summary>Fixed compact height for cards whose lists would otherwise grow the card when it is first measured.</summary>
+internal static class CompactMeasure
+{
+    public static Size Limit(Size constraint, double compactHeight) =>
+        double.IsInfinity(constraint.Height) ? constraint with { Height = compactHeight } : constraint;
+}
+
+public partial class StickyWidget : UserControl
+{
+    private const double CompactHeight = 140;
+
+    public StickyWidget() => InitializeComponent();
+
+    private StickyNotesViewModel? ViewModel => DataContext as StickyNotesViewModel;
+
+    protected override Size MeasureOverride(Size constraint)
+    {
+        var size = base.MeasureOverride(CompactMeasure.Limit(constraint, CompactHeight));
+        return double.IsInfinity(constraint.Height) ? size with { Height = CompactHeight } : size;
+    }
+
+    private void OnColor(object sender, RoutedEventArgs e) => ViewModel?.CycleColor();
+
+    private void OnPrev(object sender, RoutedEventArgs e) => ViewModel?.Next(-1);
+
+    private void OnNext(object sender, RoutedEventArgs e) => ViewModel?.Next(+1);
+
+    private void OnAdd(object sender, RoutedEventArgs e)
+    {
+        ViewModel?.Add();
+        Editor.Focus();
+    }
+
+    private void OnDelete(object sender, RoutedEventArgs e) => ViewModel?.Delete();
+}
+
+public partial class TodoWidget : UserControl
+{
+    private const double CompactHeight = 170;
+
+    public TodoWidget() => InitializeComponent();
+
+    private TodoViewModel? ViewModel => DataContext as TodoViewModel;
+
+    protected override Size MeasureOverride(Size constraint)
+    {
+        var size = base.MeasureOverride(CompactMeasure.Limit(constraint, CompactHeight));
+        return double.IsInfinity(constraint.Height) ? size with { Height = CompactHeight } : size;
+    }
+
+    private void OnNewKey(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            ViewModel?.Add();
+            e.Handled = true;
+        }
+    }
+
+    private void OnRemove(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is TodoItem item)
+        {
+            ViewModel?.Remove(item);
+        }
+    }
+
+    private void OnClearDone(object sender, RoutedEventArgs e) => ViewModel?.ClearDone();
+}
+
+public partial class SystemWidget : UserControl
+{
+    public SystemWidget() => InitializeComponent();
+}
+
+public partial class AppsWidget : UserControl
+{
+    private const double CompactHeight = 176;
+
+    public AppsWidget()
+    {
+        InitializeComponent();
+        _ = new Controls.DragReorder<Apps.AppTile>(List, _ => true, (d, t, after) => ViewModel?.Move(d, t, after));
+    }
+
+    private Apps.AppsViewModel? ViewModel => DataContext as Apps.AppsViewModel;
+
+    protected override Size MeasureOverride(Size constraint)
+    {
+        var size = base.MeasureOverride(CompactMeasure.Limit(constraint, CompactHeight));
+        return double.IsInfinity(constraint.Height) ? size with { Height = CompactHeight } : size;
+    }
+
+    private void OnLaunch(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is Apps.AppTile tile)
+        {
+            Apps.AppsViewModel.Launch(tile);
+        }
+    }
+
+    private void OnRemove(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is Apps.AppTile tile)
+        {
+            ViewModel?.Remove(tile);
+        }
+    }
+
+    private void OnAdd(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel is not { } vm)
+        {
+            return;
+        }
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = NotchPC.Core.Localization.Loc.Get("Apps.Add.Title"),
+            Filter = $"{NotchPC.Core.Localization.Loc.Get("Apps.Add.Filter")}|*.exe;*.lnk;*.url;*.appref-ms|{NotchPC.Core.Localization.Loc.Get("Apps.Add.AllFiles")}|*.*",
+            DereferenceLinks = false,
+            InitialDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu), "Programs"),
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            vm.Add(dialog.FileName);
+        }
+    }
+}
+
+public partial class GamesWidget : UserControl
+{
+    private const double CompactHeight = 250;
+    private const double TileWidth = 100;
+
+    public GamesWidget()
+    {
+        InitializeComponent();
+        SizeChanged += (_, _) => Fit();
+        _ = new Controls.DragReorder<Games.GameTile>(List, _ => true, (d, t, after) => ViewModel?.Move(d, t, after));
+    }
+
+    private Games.GamesViewModel? ViewModel => DataContext as Games.GamesViewModel;
+
+    protected override Size MeasureOverride(Size constraint)
+    {
+        var size = base.MeasureOverride(CompactMeasure.Limit(constraint, CompactHeight));
+        return double.IsInfinity(constraint.Height) ? size with { Height = CompactHeight } : size;
+    }
+
+    public static readonly DependencyProperty ColumnsProperty =
+        DependencyProperty.Register(nameof(Columns), typeof(int), typeof(GamesWidget), new PropertyMetadata(2));
+
+    /// <summary>Columns of game tiles: wider cards get more.</summary>
+    public int Columns
+    {
+        get => (int)GetValue(ColumnsProperty);
+        set => SetValue(ColumnsProperty, value);
+    }
+
+    private void Fit()
+    {
+        if (ActualWidth > 0)
+        {
+            Columns = Math.Max(2, (int)(ActualWidth / TileWidth));
+        }
+    }
+
+    private void OnLaunch(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is Games.GameTile tile)
+        {
+            Games.GamesViewModel.Launch(tile);
+        }
+    }
+
+    private void OnRefresh(object sender, RoutedEventArgs e) => _ = ViewModel?.RefreshAsync(fresh: true);
+
+    private void OnSort(object sender, RoutedEventArgs e) => ViewModel?.CycleSort();
+
+    private void OnShowHidden(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel is { } vm)
+        {
+            vm.ShowHidden = !vm.ShowHidden;
+        }
+    }
+
+    private void OnFavorite(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is Games.GameTile tile)
+        {
+            ViewModel?.ToggleFavorite(tile);
+        }
+    }
+
+    private void OnHide(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is Games.GameTile tile)
+        {
+            ViewModel?.ToggleHidden(tile);
+        }
+    }
+}
