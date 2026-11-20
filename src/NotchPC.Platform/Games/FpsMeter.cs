@@ -31,6 +31,7 @@ public sealed unsafe partial class FpsMeter : IDisposable
     private ulong _session;
     private ulong _trace = InvalidHandle;
     private Thread? _thread;
+    private Task _stopping = Task.CompletedTask;
 
     /// <summary>Why the meter could not start (Win32 error), or null when it runs / never tried.</summary>
     public uint? LastError { get; private set; }
@@ -49,6 +50,9 @@ public sealed unsafe partial class FpsMeter : IDisposable
         {
             throw new InvalidOperationException("Only one FpsMeter can run.");
         }
+
+        // A stop that is still closing the previous session (rare: the owner waits a while before stopping).
+        _stopping.Wait(2000);
 
         var rc = StartSession(out _session);
         if (rc == ErrorAlreadyExists)
@@ -109,6 +113,7 @@ public sealed unsafe partial class FpsMeter : IDisposable
     /// <summary>Blocks on the ETW thread until the trace is closed.</summary>
     private static void Pump(ulong trace) => _ = ProcessTrace(&trace, 1, IntPtr.Zero, IntPtr.Zero);
 
+    /// <summary>Stops counting at once; the session is closed on a worker thread (it can take up to a second).</summary>
     public void Stop()
     {
         if (!IsRunning)
@@ -116,15 +121,20 @@ public sealed unsafe partial class FpsMeter : IDisposable
             return;
         }
 
-        StopSession(_session);
-        _ = CloseTrace(_trace);
-        _thread?.Join(1000);
+        var (session, trace, thread) = (_session, _trace, _thread);
         _thread = null;
         _trace = InvalidHandle;
         if (ReferenceEquals(_active, this))
         {
             _active = null;
         }
+
+        _stopping = Task.Run(() =>
+        {
+            StopSession(session);
+            _ = CloseTrace(trace);
+            thread?.Join(1000);
+        });
     }
 
     /// <summary>
@@ -146,7 +156,11 @@ public sealed unsafe partial class FpsMeter : IDisposable
         return counts.ToDictionary(c => c.Key, c => c.Value.Frames / seconds);
     }
 
-    public void Dispose() => Stop();
+    public void Dispose()
+    {
+        Stop();
+        _stopping.Wait(2000); // on exit: do not leave the ETW session behind
+    }
 
     private static uint StartSession(out ulong session)
     {

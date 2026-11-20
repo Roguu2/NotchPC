@@ -33,7 +33,7 @@ public sealed class FocusTimerTests
     }
 
     [Fact]
-    public void Focus_end_switches_to_break_and_keeps_running()
+    public void Focus_end_starts_the_break_and_the_break_end_stops()
     {
         var t = new FocusTimer(TimeSpan.FromMinutes(25), TimeSpan.FromMinutes(5));
         t.Start(T0);
@@ -45,6 +45,8 @@ public sealed class FocusTimerTests
         Assert.Equal(T0.AddMinutes(30), t.EndsAt);
         Assert.Equal(FocusPhase.Break, t.CompleteIfDue(T0.AddMinutes(30)));
         Assert.Equal(FocusPhase.Focus, t.Phase);
+        Assert.Equal(FocusState.Idle, t.State);
+        Assert.Equal(TimeSpan.FromMinutes(25), t.Remaining(T0.AddMinutes(31)));
     }
 
     [Fact]

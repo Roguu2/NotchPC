@@ -4,6 +4,9 @@
              xmlns:loc="clr-namespace:NotchPC.App.Localization"
              xmlns:controls="clr-namespace:NotchPC.App.Controls"
              Foreground="{StaticResource IslandForeground}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -33,9 +36,12 @@
                 <StackPanel Orientation="Horizontal">
                     <Button Style="{StaticResource WidgetPlayButton}" Content="{Binding PlayGlyph}"
                             ToolTip="{loc:Tr Widget.Timer.StartPause}" Click="OnToggle" />
-                    <Button Style="{StaticResource WidgetRoundButton}" Content="&#xE738;" Margin="6,0,0,0"
+                    <Button Style="{StaticResource WidgetRoundButton}" Content="&#xE71A;" Margin="5,0,0,0"
+                            ToolTip="{loc:Tr Widget.Timer.Stop}" Click="OnStop"
+                            Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                    <Button Style="{StaticResource WidgetRoundButton}" Content="&#xE738;" Margin="5,0,0,0"
                             ToolTip="{loc:Tr Widget.Timer.Minus}" Click="OnMinus" />
-                    <Button Style="{StaticResource WidgetRoundButton}" Content="&#xE710;" Margin="6,0,0,0"
+                    <Button Style="{StaticResource WidgetRoundButton}" Content="&#xE710;" Margin="5,0,0,0"
                             ToolTip="{loc:Tr Widget.Timer.Plus}" Click="OnPlus" />
                 </StackPanel>
             </StackPanel>

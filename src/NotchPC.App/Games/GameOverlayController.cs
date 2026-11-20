@@ -21,6 +21,12 @@ internal sealed class GameOverlayController : IDisposable
     private static readonly TimeSpan MessageTime = TimeSpan.FromSeconds(2.5);
     private static readonly TimeSpan PreviewTime = TimeSpan.FromSeconds(8);
 
+    /// <summary>
+    /// After the game leaves the front the meters keep running this long: alt-tabbing out and back does not restart
+    /// the FPS session and the sensors helper every time (each restart costs a short hitch).
+    /// </summary>
+    private static readonly TimeSpan StopDelay = TimeSpan.FromSeconds(20);
+
     private readonly SettingsService _settings;
     private readonly SensorsClient _sensors;
     private readonly FullscreenWatcher _watcher;
@@ -28,6 +34,7 @@ internal sealed class GameOverlayController : IDisposable
     private readonly FpsMeter _fps = new();
     private readonly DispatcherTimer _tick;
     private readonly DispatcherTimer _messageTimer;
+    private readonly DispatcherTimer _stopLater;
     private readonly HwndSource _messages;
     private GameOverlayWindow? _window;
     private ForegroundApp? _app;
@@ -36,6 +43,7 @@ internal sealed class GameOverlayController : IDisposable
     private bool _visible;
     private bool _preview;
     private bool _fpsTried;
+    private bool _measuring;
     private readonly HashSet<object> _remote = [];
     private IReadOnlyDictionary<uint, double> _rates = new Dictionary<uint, double>();
 
@@ -47,6 +55,15 @@ internal sealed class GameOverlayController : IDisposable
         _sessions = sessions;
         _tick = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
         _tick.Tick += (_, _) => Update();
+        _stopLater = new DispatcherTimer(DispatcherPriority.Background) { Interval = StopDelay };
+        _stopLater.Tick += (_, _) =>
+        {
+            _stopLater.Stop();
+            if (!_visible && _remote.Count == 0)
+            {
+                StopMeasuring();
+            }
+        };
         _messageTimer = new DispatcherTimer { Interval = MessageTime };
         _messageTimer.Tick += (_, _) =>
         {
@@ -133,6 +150,8 @@ internal sealed class GameOverlayController : IDisposable
         }
 
         Hide();
+        _stopLater.Stop();
+        StopMeasuring();
         _fps.Dispose();
         _window?.Close();
         _messages.Dispose();
@@ -207,10 +226,9 @@ internal sealed class GameOverlayController : IDisposable
         _window.SetClockVisible(_settings.Current.GameOverlay.ShowClock);
         if (!_visible)
         {
-            if (_remote.Count == 0)
-            {
-                StartMeasuring();
-            }
+            _stopLater.Stop();
+            StartMeasuring(); // still running when the game was in front a moment ago
+            _fps.TakeRates(); // count from now, not the time spent elsewhere
 
             _visible = true;
             AppLog.Info($"Game overlay on for {app.ProcessName}");
@@ -245,7 +263,8 @@ internal sealed class GameOverlayController : IDisposable
         _sessions.Away();
         if (_remote.Count == 0)
         {
-            StopMeasuring();
+            _stopLater.Stop();
+            _stopLater.Start();
         }
 
         AppLog.Info("Game overlay off");
@@ -254,6 +273,12 @@ internal sealed class GameOverlayController : IDisposable
     /// <summary>Sensors helper + FPS session + the 1 s tick: only while the overlay or a phone needs them.</summary>
     private void StartMeasuring()
     {
+        if (_measuring)
+        {
+            return;
+        }
+
+        _measuring = true;
         _sensors.Acquire(this);
         if (!_fps.Start())
         {
@@ -267,6 +292,12 @@ internal sealed class GameOverlayController : IDisposable
 
     private void StopMeasuring()
     {
+        if (!_measuring)
+        {
+            return;
+        }
+
+        _measuring = false;
         _tick.Stop();
         _sensors.Release(this);
         _fps.Stop();

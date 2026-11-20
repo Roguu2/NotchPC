@@ -57,6 +57,19 @@ public static class WindowHelper
         NativeMethods.SetWindowLongPtr(hwnd, NativeMethods.GWL_EXSTYLE, new IntPtr(ex | 0x00000020L));
     }
 
+    /// <summary>
+    /// A normal app window that is maximised (it has a title bar or a resize frame), e.g. Discord on a monitor
+    /// without a taskbar: it fills the monitor but it is not a fullscreen game or video.
+    /// </summary>
+    public static bool IsMaximizedAppWindow(IntPtr hwnd)
+    {
+        const long WsMaximize = 0x01000000;
+        const long WsCaption = 0x00C00000;
+        const long WsThickFrame = 0x00040000;
+        var style = (long)NativeMethods.GetWindowLongPtr(hwnd, -16 /* GWL_STYLE */);
+        return (style & WsMaximize) != 0 && ((style & WsCaption) == WsCaption || (style & WsThickFrame) != 0);
+    }
+
     public static ScreenRect? GetBounds(IntPtr hwnd) =>
         NativeMethods.GetWindowRect(hwnd, out var r) ? new ScreenRect(r.Left, r.Top, r.Right, r.Bottom) : null;
 }

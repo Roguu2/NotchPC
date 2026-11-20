@@ -153,7 +153,8 @@ public sealed unsafe class FullscreenWatcher : IDisposable
         var rect = MonitorService.ToRect(r);
         if (NotchLayout.CoversMonitor(rect, target))
         {
-            return true;
+            // A maximised app on a monitor with an auto-hidden (or no) taskbar also covers it: not fullscreen.
+            return !WindowHelper.IsMaximizedAppWindow(fg);
         }
 
         // Exclusive-fullscreen games can report odd window rects; trust the shell if the

@@ -9,105 +9,182 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <controls:InverseBoolToVisibility x:Key="InverseBoolToVis" />
         <Style x:Key="RowIcon" TargetType="Button" BasedOn="{StaticResource NotchIconButton}">
-            <Setter Property="Width" Value="28" />
-            <Setter Property="Height" Value="28" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+
+        <!-- A flat clickable surface (device selector, device rows, the app icon that mutes). -->
+        <Style x:Key="FlatButton" TargetType="Button">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{StaticResource IslandForeground}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" CornerRadius="10" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource IslandHover}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
 
     <DockPanel>
-        <!-- Output devices -->
-        <TextBlock DockPanel.Dock="Top" Text="{loc:Tr Audio.Output}" FontSize="12.5" FontWeight="SemiBold" Margin="4,0,0,4" />
-        <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Devices}" Focusable="False">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type a:OutputDeviceRow}">
-                    <Button Tag="{Binding}" Click="OnSelectDevice" Focusable="False" Cursor="Hand" Margin="0,1">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" CornerRadius="10" Background="Transparent" Padding="8,5">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="22" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock x:Name="Check" Text="&#xE73E;" FontFamily="{StaticResource IconFont}" FontSize="12"
-                                                   VerticalAlignment="Center" Visibility="Hidden" Foreground="{StaticResource IslandForeground}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12.5" TextTrimming="CharacterEllipsis"
-                                                   Foreground="{StaticResource IslandForeground}" VerticalAlignment="Center" />
-                                    </Grid>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="{StaticResource IslandHover}" />
-                                    </Trigger>
-                                    <DataTrigger Binding="{Binding IsDefault}" Value="True">
-                                        <Setter TargetName="Check" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <!-- Where the sound goes: one line; the list opens in place of the mixer. -->
+        <Button DockPanel.Dock="Top" Style="{StaticResource FlatButton}" Background="#14FFFFFF" Padding="10,7"
+                Click="OnToggleDevices" ToolTip="{loc:Tr Audio.Output}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="&#xE7F5;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding CurrentDevice}" FontSize="12.5" FontWeight="SemiBold" Margin="10,0,8,0"
+                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" FontFamily="{StaticResource IconFont}" FontSize="10"
+                           VerticalAlignment="Center" Foreground="{StaticResource IslandForegroundMuted}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="&#xE70D;" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DevicesOpen}" Value="True">
+                                    <Setter Property="Text" Value="&#xE70E;" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </Button>
 
-        <!-- Device volume -->
-        <Grid DockPanel.Dock="Top" Height="32" Margin="0,4,0,6">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="40" />
-            </Grid.ColumnDefinitions>
-            <Button Style="{StaticResource RowIcon}" Content="{Binding VolumeGlyph}" Click="OnToggleMute" ToolTip="{loc:Tr Quick.Mute}" />
-            <Slider Grid.Column="1" Style="{StaticResource NotchSlider}" Margin="6,0,6,0" VerticalAlignment="Center"
-                    Value="{Binding Volume}" IsEnabled="{Binding HasOutput}" />
-            <TextBlock Grid.Column="2" Text="{Binding VolumeText}" FontSize="11.5" VerticalAlignment="Center" TextAlignment="Right"
-                       Foreground="{StaticResource IslandForegroundMuted}" />
-        </Grid>
+        <Grid Margin="0,6,0,0">
+            <!-- Mixer: device volume, then the apps in two columns. -->
+            <DockPanel Visibility="{Binding DevicesOpen, Converter={StaticResource InverseBoolToVis}}">
+                <Grid DockPanel.Dock="Top" Height="34" Margin="2,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="44" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource RowIcon}" Content="{Binding VolumeGlyph}" Click="OnToggleMute" ToolTip="{loc:Tr Quick.Mute}" />
+                    <Slider Grid.Column="1" Style="{StaticResource NotchSlider}" Margin="8,0,8,0" VerticalAlignment="Center"
+                            Value="{Binding Volume}" IsEnabled="{Binding HasOutput}" />
+                    <TextBlock Grid.Column="2" Text="{Binding VolumeText}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                               TextAlignment="Right" Margin="0,0,6,0" />
+                </Grid>
 
-        <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource IslandSeparator}" Margin="4,0,4,6" />
-        <TextBlock DockPanel.Dock="Top" Text="{loc:Tr Audio.Apps}" FontSize="12.5" FontWeight="SemiBold" Margin="4,0,0,4" />
+                <TextBlock DockPanel.Dock="Top" Text="{loc:Tr Audio.Apps}" FontSize="11.5" FontWeight="SemiBold" Margin="4,0,0,6"
+                           Foreground="{StaticResource IslandForegroundMuted}" />
 
-        <!-- Per-app mixer -->
-        <Grid>
-            <ScrollViewer Style="{StaticResource NotchScrollViewer}">
-                <ItemsControl ItemsSource="{Binding Apps}" Focusable="False">
+                <Grid>
+                    <ScrollViewer Style="{StaticResource NotchScrollViewer}">
+                        <ItemsControl ItemsSource="{Binding Apps}" Focusable="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" VerticalAlignment="Top" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type a:MixerApp}">
+                                    <Border x:Name="Card" CornerRadius="12" Background="#12FFFFFF" Padding="6,6,10,6" Margin="0,0,6,6" Opacity="0.72">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="34" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <!-- The app's icon mutes it (a red badge shows it is muted). -->
+                                            <Button Grid.RowSpan="2" Style="{StaticResource FlatButton}" Width="34" Height="34" Tag="{Binding}"
+                                                    Click="OnToggleAppMute" ToolTip="{loc:Tr Quick.Mute}">
+                                                <Grid Width="34" Height="34">
+                                                    <TextBlock x:Name="Glyph" Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Visibility="{Binding HasIcon, Converter={StaticResource InverseBoolToVis}}" />
+                                                    <Image x:Name="AppIcon" Source="{Binding Icon}" Width="24" Height="24" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                    <Border x:Name="MutedBadge" Width="15" Height="15" CornerRadius="7.5" Background="#E5484D"
+                                                            HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,1,1" Visibility="Collapsed">
+                                                        <TextBlock Text="&#xE74F;" FontFamily="{StaticResource IconFont}" FontSize="8" Foreground="White"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </Grid>
+                                            </Button>
+
+                                            <DockPanel Grid.Column="1" Margin="6,1,0,0">
+                                                <TextBlock DockPanel.Dock="Right" Text="{Binding VolumeText}" FontSize="11" Margin="6,0,0,0"
+                                                           VerticalAlignment="Center" Foreground="{StaticResource IslandForegroundMuted}" />
+                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center" ToolTip="{Binding Name}" />
+                                            </DockPanel>
+                                            <Slider x:Name="AppSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource NotchSlider}" Margin="6,3,0,0"
+                                                    Value="{Binding Volume}" />
+                                        </Grid>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                            <Setter TargetName="Card" Property="Opacity" Value="1" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Muted}" Value="True">
+                                            <Setter TargetName="MutedBadge" Property="Visibility" Value="Visible" />
+                                            <Setter TargetName="AppSlider" Property="Opacity" Value="0.4" />
+                                            <Setter TargetName="AppIcon" Property="Opacity" Value="0.55" />
+                                            <Setter TargetName="Glyph" Property="Opacity" Value="0.55" />
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Card" Property="Background" Value="#1CFFFFFF" />
+                                            <Setter TargetName="Card" Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock Text="{loc:Tr Audio.NoApps}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{StaticResource IslandForegroundMuted}"
+                               Visibility="{Binding HasApps, Converter={StaticResource InverseBoolToVis}}" />
+                </Grid>
+            </DockPanel>
+
+            <!-- Device list (open from the selector above). -->
+            <ScrollViewer Style="{StaticResource NotchScrollViewer}" Visibility="{Binding DevicesOpen, Converter={StaticResource BoolToVis}}">
+                <ItemsControl ItemsSource="{Binding Devices}" Focusable="False">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type a:MixerApp}">
-                            <Grid x:Name="Row" Height="34" Margin="0,0,4,0" Opacity="0.62">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="26" />
-                                    <ColumnDefinition Width="118" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="38" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Grid Width="20" Height="20" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="14" HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" Visibility="{Binding HasIcon, Converter={StaticResource InverseBoolToVis}}" />
-                                    <Image Source="{Binding Icon}" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <DataTemplate DataType="{x:Type a:OutputDeviceRow}">
+                            <Button Style="{StaticResource FlatButton}" Tag="{Binding}" Click="OnSelectDevice" Padding="10,8" Margin="0,0,4,2">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="26" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="Check" Text="&#xE73E;" FontFamily="{StaticResource IconFont}" FontSize="12"
+                                               VerticalAlignment="Center" Visibility="Hidden" Foreground="{StaticResource NotchAccent}" />
+                                    <TextBlock x:Name="DeviceName" Grid.Column="1" Text="{Binding Name}" FontSize="12.5" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
                                 </Grid>
-                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12" TextTrimming="CharacterEllipsis"
-                                           VerticalAlignment="Center" Margin="6,0,6,0" ToolTip="{Binding Name}" />
-                                <Slider Grid.Column="2" Style="{StaticResource NotchSlider}" VerticalAlignment="Center"
-                                        Value="{Binding Volume}" />
-                                <TextBlock Grid.Column="3" Text="{Binding VolumeText}" FontSize="11" VerticalAlignment="Center" TextAlignment="Right"
-                                           Foreground="{StaticResource IslandForegroundMuted}" />
-                                <Button Grid.Column="4" Style="{StaticResource RowIcon}" Content="{Binding MuteGlyph}" Tag="{Binding}"
-                                        Click="OnToggleAppMute" ToolTip="{loc:Tr Quick.Mute}" Margin="4,0,0,0" />
-                            </Grid>
+                            </Button>
                             <DataTemplate.Triggers>
-                                <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                    <Setter TargetName="Row" Property="Opacity" Value="1" />
+                                <DataTrigger Binding="{Binding IsDefault}" Value="True">
+                                    <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="DeviceName" Property="FontWeight" Value="SemiBold" />
                                 </DataTrigger>
                             </DataTemplate.Triggers>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-            <TextBlock Text="{loc:Tr Audio.NoApps}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Foreground="{StaticResource IslandForegroundMuted}"
-                       Visibility="{Binding HasApps, Converter={StaticResource InverseBoolToVis}}" />
         </Grid>
     </DockPanel>
 </UserControl>

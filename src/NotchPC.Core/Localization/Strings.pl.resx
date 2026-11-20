@@ -95,7 +95,7 @@
   <data name="Widget.Timer.StartPause" xml:space="preserve"><value>Start / pauza</value></data>
   <data name="Widget.Timer.Minus" xml:space="preserve"><value>5 minut mniej</value></data>
   <data name="Widget.Timer.Plus" xml:space="preserve"><value>5 minut więcej</value></data>
-  <data name="Widget.Timer.ResetHint" xml:space="preserve"><value>Kliknij dwukrotnie tarczę, aby wyzerować</value></data>
+  <data name="Widget.Timer.ResetHint" xml:space="preserve"><value>Kliknij dwukrotnie tarczę (albo ■), aby wyzerować</value></data>
   <data name="Widget.Weather.NotSet" xml:space="preserve"><value>Ustaw miasto w ustawieniach NotchPC</value></data>
   <data name="Widget.Weather.Error" xml:space="preserve"><value>Brak danych pogodowych</value></data>
   <data name="Widget.Weather.Loading" xml:space="preserve"><value>Wczytuję…</value></data>
@@ -284,7 +284,7 @@
   <data name="Notify.Timer.FocusDone" xml:space="preserve"><value>Koniec sesji skupienia</value></data>
   <data name="Notify.Timer.FocusDone.Body" xml:space="preserve"><value>Czas na przerwę.</value></data>
   <data name="Notify.Timer.BreakDone" xml:space="preserve"><value>Koniec przerwy</value></data>
-  <data name="Notify.Timer.BreakDone.Body" xml:space="preserve"><value>Gotowy na kolejną sesję?</value></data>
+  <data name="Notify.Timer.BreakDone.Body" xml:space="preserve"><value>Timer się zatrzymał. Naciśnij start, gdy będziesz gotowy na kolejną sesję.</value></data>
   <data name="Notify.Calendar.Body" xml:space="preserve"><value>O {0} (za {1} min)</value></data>
   <data name="Settings.Notify" xml:space="preserve"><value>Powiadomienia</value></data>
   <data name="Settings.Notify.App" xml:space="preserve"><value>Powiadomienia NotchPC</value></data>
@@ -552,4 +552,5 @@
   <data name="Games.Restore" xml:space="preserve"><value>Przywróć na listę</value></data>
   <data name="Games.ShowHidden" xml:space="preserve"><value>Pokaż ukryte gry (żeby je przywrócić)</value></data>
   <data name="Games.Sort.custom" xml:space="preserve"><value>Sortowanie: własna kolejność – przeciągaj kafelki (kliknij, aby zmienić)</value></data>
+  <data name="Widget.Timer.Stop" xml:space="preserve"><value>Zatrzymaj i wyzeruj</value></data>
 </root>

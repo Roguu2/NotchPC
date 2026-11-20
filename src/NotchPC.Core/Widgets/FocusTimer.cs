@@ -145,7 +145,8 @@ public sealed class FocusTimer
     }
 
     /// <summary>
-    /// Call when the end time has passed: switches focus ↔ break and keeps running.
+    /// Call when the end time has passed: the end of a focus starts the break; the end of the break stops the timer
+    /// (ready for the next focus, started by the user, so it does not cycle forever).
     /// Returns the phase that just finished, or null if nothing finished.
     /// </summary>
     public FocusPhase? CompleteIfDue(DateTimeOffset now)
@@ -156,6 +157,12 @@ public sealed class FocusTimer
         }
 
         var finished = Phase;
+        if (finished == FocusPhase.Break)
+        {
+            Reset();
+            return finished;
+        }
+
         Phase = Phase == FocusPhase.Focus ? FocusPhase.Break : FocusPhase.Focus;
         _endsAt = _endsAt + PhaseLength;
         if (_endsAt <= now)

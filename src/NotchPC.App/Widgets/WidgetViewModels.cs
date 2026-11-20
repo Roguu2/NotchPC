@@ -99,6 +99,9 @@ internal sealed class FocusTimerViewModel : WidgetViewModel
 
     public bool IsRunning => _timer.State == FocusState.Running;
 
+    /// <summary>Running or paused: the stop button shows.</summary>
+    public bool IsActive => _timer.State != FocusState.Idle;
+
     public string PlayGlyph => IsRunning ? "" : "";
 
     /// <summary>"Today: 3 × focus · 1 h 15 min".</summary>
@@ -217,6 +220,7 @@ internal sealed class FocusTimerViewModel : WidgetViewModel
         }
 
         ScheduleEnd();
+        UpdateUiTimer(); // the break end stops the timer
         Refresh();
     }
 
@@ -253,7 +257,7 @@ internal sealed class FocusTimerViewModel : WidgetViewModel
         Progress = _timer.State == FocusState.Idle ? 0 : _timer.Progress(now);
         Title = Loc.Get(_timer.Phase == FocusPhase.Focus ? "Widget.Timer.Focus" : "Widget.Timer.Break");
         LengthsText = Loc.Format("Widget.Timer.Lengths", (int)_timer.FocusLength.TotalMinutes, (int)_timer.BreakLength.TotalMinutes);
-        RaiseMany(nameof(TimeText), nameof(Progress), nameof(Title), nameof(LengthsText), nameof(IsRunning),
+        RaiseMany(nameof(TimeText), nameof(Progress), nameof(Title), nameof(LengthsText), nameof(IsRunning), nameof(IsActive),
                   nameof(PlayGlyph), nameof(TodayText), nameof(NextText));
         PublishActivity();
     }

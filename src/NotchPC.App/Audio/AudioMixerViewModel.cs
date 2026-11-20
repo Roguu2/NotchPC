@@ -19,6 +19,7 @@ internal sealed class AudioMixerViewModel : ObservableObject, IDisposable
     private readonly Dictionary<string, DateTime> _changedAt = new(StringComparer.OrdinalIgnoreCase);
     private DefaultAudioEndpoint? _output;
     private bool _reading;
+    private bool _devicesOpen;
 
     public AudioMixerViewModel()
     {
@@ -53,6 +54,25 @@ internal sealed class AudioMixerViewModel : ObservableObject, IDisposable
 
     public bool HasApps => Apps.Count > 0;
 
+    /// <summary>The device list is open (it takes the place of the mixer until a device is picked).</summary>
+    public bool DevicesOpen
+    {
+        get => _devicesOpen;
+        set
+        {
+            if (Set(ref _devicesOpen, value))
+            {
+                if (value)
+                {
+                    RefreshDevices();
+                }
+            }
+        }
+    }
+
+    /// <summary>Name of the device sound goes to now (the selector button).</summary>
+    public string CurrentDevice => Devices.FirstOrDefault(d => d.IsDefault)?.Name ?? Loc.Get("Audio.Output");
+
     /// <summary>The tab was opened or closed.</summary>
     public void SetVisible(bool visible)
     {
@@ -78,6 +98,7 @@ internal sealed class AudioMixerViewModel : ObservableObject, IDisposable
         }
         else
         {
+            DevicesOpen = false;
             _poll.Stop();
             _output?.Dispose(); // no device callbacks while the tab is closed
             _output = null;
@@ -93,6 +114,7 @@ internal sealed class AudioMixerViewModel : ObservableObject, IDisposable
             AppLog.Info("Switching the output device failed");
         }
 
+        DevicesOpen = false;
         RefreshDevices();
         _ = RefreshAppsAsync();
     }
@@ -145,6 +167,8 @@ internal sealed class AudioMixerViewModel : ObservableObject, IDisposable
         {
             Devices.Add(new OutputDeviceRow(d.Id, d.Name, d.IsDefault));
         }
+
+        Raise(nameof(CurrentDevice));
     }
 
     private async Task RefreshAppsAsync()
@@ -166,7 +190,10 @@ internal sealed class AudioMixerViewModel : ObservableObject, IDisposable
         }
     }
 
-    /// <summary>Updates rows in place (a slider being dragged keeps its row and value).</summary>
+    /// <summary>
+    /// Updates rows in place (a slider being dragged keeps its row and value). The order is fixed (by name, system
+    /// sounds last) so rows do not jump around when an app starts or stops playing.
+    /// </summary>
     private void Merge(IReadOnlyList<AudioApp> list)
     {
         var now = DateTime.UtcNow;
@@ -179,32 +206,36 @@ internal sealed class AudioMixerViewModel : ObservableObject, IDisposable
             }
         }
 
-        for (var i = 0; i < list.Count; i++)
+        foreach (var a in list)
         {
-            var a = list[i];
             var row = Apps.FirstOrDefault(r => string.Equals(r.Key, a.Key, StringComparison.OrdinalIgnoreCase));
             if (row is null)
             {
                 row = new MixerApp(this, a);
-                Apps.Insert(Math.Min(i, Apps.Count), row);
+                var at = 0;
+                while (at < Apps.Count && Compare(Apps[at], row) <= 0)
+                {
+                    at++;
+                }
+
+                Apps.Insert(at, row);
                 continue;
             }
 
-            var held = _changedAt.TryGetValue(a.Key, out var at) && now - at < HoldAfterChange;
+            var held = _changedAt.TryGetValue(a.Key, out var changed) && now - changed < HoldAfterChange;
             if (!held)
             {
                 row.Update(a.Volume * 100, a.Muted, a.IsActive);
-            }
-
-            var index = Apps.IndexOf(row);
-            if (index != i && i < Apps.Count)
-            {
-                Apps.Move(index, i);
             }
         }
 
         Raise(nameof(HasApps));
     }
+
+    private static int Compare(MixerApp a, MixerApp b) =>
+        a.IsSystemSounds != b.IsSystemSounds
+            ? a.IsSystemSounds ? 1 : -1
+            : string.Compare(a.AppName, b.AppName, StringComparison.OrdinalIgnoreCase);
 }
 
 /// <summary>One output device in the list.</summary>

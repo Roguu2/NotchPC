@@ -43,7 +43,8 @@ public sealed partial record ForegroundApp(IntPtr Hwnd, uint ProcessId, string P
         }
 
         var rect = MonitorService.ToRect(r);
-        return new ForegroundApp(hwnd, pid, name, monitor, NotchLayout.CoversMonitor(rect, monitor.Bounds));
+        var covers = NotchLayout.CoversMonitor(rect, monitor.Bounds) && !Shell.WindowHelper.IsMaximizedAppWindow(hwnd);
+        return new ForegroundApp(hwnd, pid, name, monitor, covers);
     }
 
     /// <summary>"Overwatch" for …\Overwatch.exe; null when the process cannot be opened (e.g. protected).</summary>

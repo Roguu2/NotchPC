@@ -16,6 +16,15 @@ public sealed class GameOverlayTests
     }
 
     [Fact]
+    public void Lock_screen_and_chat_apps_are_not_games()
+    {
+        Assert.False(GameDetection.IsGame("LockApp", coversMonitor: true, autoFullscreen: true, [], []));
+        Assert.False(GameDetection.IsGame("LockApp", coversMonitor: true, autoFullscreen: true, ["LockApp"], []));
+        Assert.False(GameDetection.IsGame("Discord", coversMonitor: true, autoFullscreen: true, [], []));
+        Assert.True(GameDetection.IsGame("Discord", coversMonitor: false, autoFullscreen: true, ["discord"], []));
+    }
+
+    [Fact]
     public void Listed_game_shows_also_windowed_and_ignored_wins()
     {
         Assert.True(GameDetection.IsGame("Minecraft.exe", coversMonitor: false, autoFullscreen: false, ["minecraft"], []));

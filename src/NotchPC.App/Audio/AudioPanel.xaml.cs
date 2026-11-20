@@ -24,6 +24,14 @@ public partial class AudioPanel : UserControl
 
     private void OnToggleMute(object sender, RoutedEventArgs e) => Vm?.ToggleMute();
 
+    private void OnToggleDevices(object sender, RoutedEventArgs e)
+    {
+        if (Vm is { } vm)
+        {
+            vm.DevicesOpen = !vm.DevicesOpen;
+        }
+    }
+
     private void OnToggleAppMute(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.Tag is MixerApp app)

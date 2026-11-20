@@ -14,6 +14,20 @@ public static class GameDetection
         "POWERPNT", "mstsc", "msrdc", "explorer", "ApplicationFrameHost", "SnippingTool", "ShareX",
     ];
 
+    /// <summary>Windows' own screens (lock screen, sign-in, Start, search …): never a game, whatever the lists say.</summary>
+    private static readonly HashSet<string> SystemApps = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "LockApp", "LogonUI", "explorer", "ShellExperienceHost", "StartMenuExperienceHost", "SearchHost", "SearchApp",
+        "ApplicationFrameHost", "TextInputHost", "ScreenClippingHost", "SystemSettings", "dwm", "consent",
+    };
+
+    /// <summary>Everyday apps that are sometimes fullscreen but are not games: only when the user listed them.</summary>
+    private static readonly HashSet<string> NotAutoDetected = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Discord", "claude", "Spotify", "ms-teams", "Teams", "Zoom", "slack", "WhatsApp", "Telegram", "Code",
+        "devenv", "rider64", "Notion", "obs64", "steamwebhelper", "EpicGamesLauncher", "Battle.net", "RiotClientUx",
+    };
+
     public static string Clean(string? name)
     {
         var n = (name ?? "").Trim();
@@ -27,12 +41,12 @@ public static class GameDetection
     public static bool IsGame(string process, bool coversMonitor, bool autoFullscreen, IEnumerable<string> games, IEnumerable<string> ignored)
     {
         var name = Clean(process);
-        if (name.Length == 0 || Contains(ignored, name))
+        if (name.Length == 0 || SystemApps.Contains(name) || Contains(ignored, name))
         {
             return false;
         }
 
-        return Contains(games, name) || (autoFullscreen && coversMonitor);
+        return Contains(games, name) || (autoFullscreen && coversMonitor && !NotAutoDetected.Contains(name));
     }
 
     /// <summary>

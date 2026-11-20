@@ -34,6 +34,8 @@ public partial class TimerWidget : UserControl
 
     private void OnToggle(object sender, RoutedEventArgs e) => ViewModel?.Toggle();
 
+    private void OnStop(object sender, RoutedEventArgs e) => ViewModel?.Reset();
+
     private void OnMinus(object sender, RoutedEventArgs e) => ViewModel?.Adjust(-1);
 
     private void OnPlus(object sender, RoutedEventArgs e) => ViewModel?.Adjust(+1);
